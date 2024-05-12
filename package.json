@@ -1,13 +1,16 @@
 {
   "name": "gofer-app",
-  "description": "gofer-app",
+  "productName": "gofer-app",
+  "description": "My Electron application description",
   "version": "1.0.0",
-  "main": "src/main.mjs",
+  "main": ".vite/build/main.js",
   "license": "MIT",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "eslint --ext .ts,.tsx ."
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
@@ -17,12 +20,33 @@
     "@electron-forge/maker-zip": "^7.4.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron-forge/plugin-vite": "^7.4.0",
     "@electron/fuses": "^1.8.0",
-    "electron": "^30.0.2"
+    "@types/node": "^20.12.11",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "autoprefixer": "^10.4.19",
+    "electron": "30.0.3",
+    "eslint": "^8.0.1",
+    "eslint-plugin-import": "^2.25.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "ts-node": "^10.0.0",
+    "typescript": "~4.5.4",
+    "vite": "^5.0.12"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "electron-squirrel-startup": "^1.0.0",
-    "sqlite": "^5.1.1",
+    "lucide-react": "^0.378.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7",
     "sqlite3": "^5.1.7"
   }
 }
