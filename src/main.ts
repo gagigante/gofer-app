@@ -1,5 +1,5 @@
 import path from 'path'
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
 
 import './data/db'
 
@@ -52,3 +52,5 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+import('./view-model/handlers/login-handlers')
