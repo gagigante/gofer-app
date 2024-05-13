@@ -1,15 +1,15 @@
-import path from "path"
-import type { ConfigEnv, UserConfig } from 'vite';
-import { defineConfig } from 'vite';
-import { pluginExposeRenderer } from './vite.base.config';
+import type { ConfigEnv, UserConfig } from 'vite'
+import { defineConfig } from 'vite'
+
+import { getAliases, pluginExposeRenderer } from './vite.base.config'
 
 // https://vitejs.dev/config
 export default defineConfig((env) => {
-  const forgeEnv = env as ConfigEnv<'renderer'>;
-  const { root, mode, forgeConfigSelf } = forgeEnv;
-  const name = forgeConfigSelf.name ?? '';
+  const forgeEnv = env as ConfigEnv<'renderer'>
+  const { root, mode, forgeConfigSelf } = forgeEnv
+  const name = forgeConfigSelf.name ?? ''
 
-  return {
+  const config: UserConfig = {
     root,
     mode,
     base: './',
@@ -19,10 +19,10 @@ export default defineConfig((env) => {
     plugins: [pluginExposeRenderer(name)],
     resolve: {
       preserveSymlinks: true,
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+      alias: getAliases(),
     },
     clearScreen: false,
-  } as UserConfig;
-});
+  }
+
+  return config
+})
