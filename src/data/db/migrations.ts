@@ -1,10 +1,6 @@
-import sqlite3 from 'sqlite3'
+import { type Database } from 'sqlite3'
 
-/**
- * TODO
- * @param {sqlite3.Database} db 
- */
-export function migrate(db) {
+export function migrate(db: Database) {
   db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
@@ -13,5 +9,5 @@ export function migrate(db) {
     )`)
 
     db.run("INSERT INTO users VALUES ('admin', 'admin', 'admin')")
-  });
+  })
 }
