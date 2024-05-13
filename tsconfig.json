@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strictNullChecks": true,
     "jsx": "react",
     "target": "ESNext",
     "module": "commonjs",
