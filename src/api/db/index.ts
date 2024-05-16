@@ -1,7 +1,7 @@
 import sqlite3 from 'sqlite3'
 import path from 'node:path'
 
-import { migrate } from '@/data/db/migrations'
+import { migrate } from '@/api/db/migrations'
 
 const db = new sqlite3.Database(`${path.resolve()}/tmp/db.sqlite`)
 

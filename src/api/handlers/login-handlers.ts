@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 
-import { LoginController } from '@/view-model/controllers/login-controller'
+import { LoginController } from '@/api/controllers/login-controller'
 
 const loginController = new LoginController()
 

@@ -1,6 +1,6 @@
 import { type Database } from 'sqlite3'
 
-import { User } from '@/data/models/User'
+import { User } from '@/api/models/User'
 
 export class UsersRepository {
   constructor(private readonly db: Database) {}

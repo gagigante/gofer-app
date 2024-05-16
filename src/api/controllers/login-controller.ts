@@ -1,9 +1,9 @@
 import { compare } from 'bcryptjs'
 
-import { db } from '@/data/db'
-import { UsersRepository } from '@/data/repositories/users-repository'
+import { db } from '@/api/db'
+import { UsersRepository } from '@/api/repositories/users-repository'
 
-import { IncorrectCredentialsError } from '@/view-model/errors/IncorrectCredentialsError'
+import { IncorrectCredentialsError } from '@/api/errors/IncorrectCredentialsError'
 
 export class LoginController {
   private readonly usersRepository: UsersRepository

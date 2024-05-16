@@ -1,7 +1,7 @@
 import path from 'path'
 import { app, BrowserWindow } from 'electron'
 
-import './data/db'
+import '@/api/db'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -53,4 +53,4 @@ app.on('activate', () => {
   }
 })
 
-import('./view-model/handlers/login-handlers')
+import('@/api/handlers/login-handlers')

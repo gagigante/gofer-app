@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-import { type LoginData } from '@/view-model/handlers/login-handlers'
+import { type LoginData } from '@/api/handlers/login-handlers'
 
 export function loginApi() {
   contextBridge.exposeInMainWorld('loginApi', {
