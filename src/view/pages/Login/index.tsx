@@ -1,17 +1,15 @@
 import React, { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/view/components/ui/card'
 import { Input } from '@/view/components/ui/input'
 import { Button } from '@/view/components/ui/button'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 
-// import { useAuth } from '@/view/hooks/useAuth'
-
 export function Login() {
-  const { user, login, logout } = useAuth()
-  // const { toast } = useToast()
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
@@ -19,21 +17,18 @@ export function Login() {
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    await login(name, password)
-  }
+    const user = await login(name, password)
 
-  function handleLogout() {
-    logout()
+    if (user) {
+      navigate('/home')
+    }
   }
 
   return (
     <div className="flex justify-center items-center w-svw h-svh">
-      {JSON.stringify(user)}
-
-      <button onClick={handleLogout}>logout</button>
       <Card className="max-w-[360px] w-full gap-2">
         <CardHeader>
-          <CardTitle>Gofer Madeiras</CardTitle>
+          <CardTitle>Gofer</CardTitle>
         </CardHeader>
 
         <form

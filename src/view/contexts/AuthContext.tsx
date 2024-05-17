@@ -7,7 +7,7 @@ interface AuthProviderProps {
 }
 
 interface AuthContextProps {
-  login: (name: string, password: string) => Promise<void>
+  login: (name: string, password: string) => Promise<User | undefined>
   logout: () => Promise<void>
   user: { id: string; name: string } | undefined
 }
@@ -55,9 +55,13 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactNode => {
       setTimeout(() => {
         dismiss()
       }, 3000)
+
+      return
     }
 
     setUser({ id: data!.name, name: data!.name })
+
+    return data!
   }
 
   async function logout() {
