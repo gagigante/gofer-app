@@ -25,7 +25,7 @@ export function Login() {
   }
 
   return (
-    <div className="flex justify-center items-center w-svw h-svh">
+    <div className="flex justify-center items-center w-svw h-svh overflow-y-hidden">
       <Card className="max-w-[360px] w-full gap-2">
         <CardHeader>
           <CardTitle>Gofer</CardTitle>
