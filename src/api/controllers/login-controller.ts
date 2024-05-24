@@ -30,6 +30,7 @@ export class LoginController {
     const user = {
       id: response.id,
       name: response.name,
+      role: response.role,
     }
 
     return { data: user, err: null }

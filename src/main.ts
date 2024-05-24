@@ -54,3 +54,4 @@ app.on('activate', () => {
 })
 
 import('@/api/handlers/login-handlers')
+import('@/api/handlers/users-handler')

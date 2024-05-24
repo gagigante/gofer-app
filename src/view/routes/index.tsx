@@ -5,7 +5,8 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { Login } from '@/view/pages/Login'
 import { Home } from '@/view/pages/Home'
 import { Users } from '@/view/pages/Users'
-import { Layout } from '../components/Layout'
+import { CreateUser } from '@/view/pages/CreateUser'
+import { Layout } from '@/view/components/Layout'
 
 export const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
       {
         path: 'users',
         element: <Users />,
+      },
+      {
+        path: 'users/new',
+        element: <CreateUser />,
       },
     ],
   },

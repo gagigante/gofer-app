@@ -6,20 +6,24 @@ export async function migrate(db: Database) {
   const id = randomUUID()
   const name = 'admin'
   const hashedPassword = await hash('admin', 8)
+  const role = 'super-admin'
 
   db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
+      password TEXT NOT NULL,
+      role TEXT CHECK(role IN ('super-admin','admin','operator')) NOT NULL,
+      is_deleted BOOLEAN DEFAULT(FALSE) NOT NULL
     )`)
 
     db.get('SELECT id FROM users WHERE name = $name', { $name: name }, (_err, row) => {
       if (!row) {
-        db.run('INSERT INTO users VALUES ($id, $name, $password)', {
+        db.run('INSERT INTO users VALUES ($id, $name, $password, $role, FALSE)', {
           $id: id,
           $name: name,
           $password: hashedPassword,
+          $role: role,
         })
       }
     })

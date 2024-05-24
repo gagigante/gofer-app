@@ -2,6 +2,14 @@ import React, { type ReactNode, createContext, useMemo, useState } from 'react'
 
 import { useToast } from '@/view/components/ui/use-toast'
 
+import { type UserRole } from '@/api/types/user-role'
+
+interface User {
+  id: string
+  name: string
+  role: UserRole
+}
+
 interface AuthProviderProps {
   children: ReactNode
 }
@@ -9,17 +17,12 @@ interface AuthProviderProps {
 interface AuthContextProps {
   login: (name: string, password: string) => Promise<User | undefined>
   logout: () => Promise<void>
-  user: { id: string; name: string } | undefined
+  user: User | undefined
 }
 
 interface LoginParam {
   name: string
   password: string
-}
-
-interface User {
-  id: string
-  name: string
 }
 
 interface LoginReturn {
@@ -38,7 +41,7 @@ export const AuthContext = createContext<AuthContextProps>({} satisfies AuthCont
 export const AuthProvider = ({ children }: AuthProviderProps): ReactNode => {
   const { toast } = useToast()
 
-  const [user, setUser] = useState<{ id: string; name: string }>()
+  const [user, setUser] = useState<User>()
 
   async function login(name: string, password: string) {
     // TODO: ipc main type safety
@@ -48,18 +51,15 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactNode => {
     })
 
     if (err?.message === 'IncorrectCredentialsError') {
-      const { dismiss } = toast({
+      toast({
         title: 'Usuário ou senha incorretos.',
+        duration: 3000,
       })
-
-      setTimeout(() => {
-        dismiss()
-      }, 3000)
 
       return
     }
 
-    setUser({ id: data!.name, name: data!.name })
+    setUser({ id: data!.id, name: data!.name, role: data!.role })
 
     return data!
   }
