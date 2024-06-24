@@ -13,6 +13,15 @@ import { User } from '@/api/models/User'
 import { type UserRole } from '@/api/types/user-role'
 import { type Response } from '@/api/types/response'
 
+export type ListUsersResponse = Response<{
+  users: User[]
+  page: number
+  itemsPerPage: number
+  total: number
+}>
+
+export type CreateUserResponse = Response<User>
+
 export class UsersController {
   private readonly usersRepository: UsersRepository
 
@@ -20,15 +29,32 @@ export class UsersController {
     this.usersRepository = new UsersRepository(db)
   }
 
+  public async listUsers(loggedUserName: string, name = '', page = 1, itemsPerPage = 15): Promise<ListUsersResponse> {
+    const loggedUser = await this.usersRepository.getUserByName(loggedUserName)
+
+    if (!loggedUser || loggedUser.role === 'operator' || loggedUser.is_deleted) {
+      const err = new WithoutPermissionError()
+
+      return { data: null, err }
+    }
+
+    const total = await this.usersRepository.countUsers()
+    const users = await this.usersRepository.getUsers(name, page, itemsPerPage)
+
+    const data = { users, total, page, itemsPerPage }
+
+    return { data, err: null }
+  }
+
   public async createUser(
     loggedUserName: string,
     name: string,
     password: string,
     role: UserRole,
-  ): Promise<Response<User>> {
+  ): Promise<CreateUserResponse> {
     const loggedUser = await this.usersRepository.getUserByName(loggedUserName)
 
-    if (!loggedUser || loggedUser.role === 'operator') {
+    if (!loggedUser || loggedUser.role === 'operator' || loggedUser.is_deleted) {
       const err = new WithoutPermissionError()
 
       return { data: null, err }

@@ -2,12 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 import { type DeleteUsersData, type CreateUserData, type ListUsersData } from '@/api/handlers/users-handler'
 
-import { type User } from '../models/User'
 import { type Response } from '../types/response'
+import { type CreateUserResponse, type ListUsersResponse } from '../controllers/users-controller'
 
 export interface UsersApi {
-  list: (data: ListUsersData) => Promise<Response<User[]>>
-  create: (data: CreateUserData) => Promise<Response<User>>
+  list: (data: ListUsersData) => Promise<ListUsersResponse>
+  create: (data: CreateUserData) => Promise<CreateUserResponse>
   delete: (data: DeleteUsersData) => Promise<Response<null>>
 }
 

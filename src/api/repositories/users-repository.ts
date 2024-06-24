@@ -43,9 +43,61 @@ export class UsersRepository {
                   name: data.name,
                   password: data.password,
                   role: data.role,
+                  is_deleted: Boolean(data.is_deleted),
                 })
               : null,
           )
+        }
+      })
+    })
+  }
+
+  public async getUsers(name = '', page = 1, itemsPerPage = 15): Promise<User[]> {
+    const sql = `SELECT * FROM users WHERE name LIKE $name
+      ORDER BY is_deleted, name
+      LIMIT $itemsPerPage
+      OFFSET $offset;
+    `
+
+    return await new Promise((resolve, reject) => {
+      this.db.all<User>(
+        sql,
+        {
+          $name: `%${name}%`,
+          $itemsPerPage: itemsPerPage,
+          $offset: page === 1 ? 0 : itemsPerPage * page - itemsPerPage,
+        },
+        (err, data) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(
+              data.map(
+                (user) =>
+                  new User({
+                    id: user.id,
+                    name: user.name,
+                    password: user.password,
+                    role: user.role,
+                    is_deleted: !!user.is_deleted,
+                  }),
+              ),
+            )
+          }
+        },
+      )
+    })
+  }
+
+  public async countUsers(): Promise<number> {
+    const sql = 'SELECT COUNT(id) as count FROM users'
+
+    return await new Promise<number>((resolve, reject) => {
+      this.db.get<{ count: number }>(sql, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data.count)
         }
       })
     })

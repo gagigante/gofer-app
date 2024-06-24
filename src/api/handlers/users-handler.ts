@@ -4,7 +4,12 @@ import { UsersController } from '@/api/controllers/users-controller'
 
 import { type UserRole } from '../types/user-role'
 
-const usersController = new UsersController()
+export interface ListUsersData {
+  loggedUserName: string
+  name?: string
+  page?: number
+  itemsPerPage?: number
+}
 
 export interface CreateUserData {
   loggedUserName: string
@@ -19,6 +24,12 @@ export interface DeleteUsersData {
 }
 
 const usersController = new UsersController()
+
+ipcMain.handle(
+  'users:list',
+  async (_event, { loggedUserName, name, page, itemsPerPage }: ListUsersData) =>
+    await usersController.listUsers(loggedUserName, name, page, itemsPerPage),
+)
 
 ipcMain.handle(
   'users:create',
