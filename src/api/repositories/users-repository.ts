@@ -89,11 +89,11 @@ export class UsersRepository {
     })
   }
 
-  public async countUsers(): Promise<number> {
-    const sql = 'SELECT COUNT(id) as count FROM users'
+  public async countUsers(name = ''): Promise<number> {
+    const sql = 'SELECT COUNT(id) as count FROM users WHERE name LIKE $name;'
 
     return await new Promise<number>((resolve, reject) => {
-      this.db.get<{ count: number }>(sql, (err, data) => {
+      this.db.get<{ count: number }>(sql, { $name: `%${name}%` }, (err, data) => {
         if (err) {
           reject(err)
         } else {

@@ -12,21 +12,23 @@ import {
 
 interface DialogProps {
   title: string
-  description: string
-  children: ReactNode
+  description?: string
+  trigger: ReactNode
+  children?: ReactNode
   cancelButton: ReactNode
   proceedButton: ReactNode
 }
 
-export function Dialog({ children, title, description, cancelButton, proceedButton }: DialogProps) {
+export function Dialog({ children, title, trigger, description, cancelButton, proceedButton }: DialogProps) {
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
+        {children && <div>{children}</div>}
         <AlertDialogFooter>
           <AlertDialogCancel asChild>{cancelButton}</AlertDialogCancel>
           {proceedButton}

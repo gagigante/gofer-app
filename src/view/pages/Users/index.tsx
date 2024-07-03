@@ -6,8 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
+import { Dialog } from '@/view/components/Dialog'
 import { Pagination } from '@/view/components/Pagination'
 
+import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 
 import { ROLES } from '@/view/constants/ROLES'
@@ -18,31 +20,55 @@ import { type apiName, type UsersApi } from '@/api/exposes/users-api'
 
 export function Users() {
   const { user } = useAuth()
+  const { toast } = useToast()
 
   const [users, setUsers] = useState<User[]>([])
   const [total, setTotal] = useState(0)
   const [nameFilter, setNameFilter] = useState('')
   const [pagination, setPagination] = useState(1)
 
-  useEffect(() => {
-    async function loadUsers(name = '', page = 1) {
-      if (!user) return
+  async function loadUsers(name = '', page = 1) {
+    if (!user) return
 
-      const { data, err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.list({
-        loggedUserName: user.name,
-        name,
-        page,
-        itemsPerPage: ITEMS_PER_PAGE,
-      })
+    const { data, err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.list({
+      loggedUserName: user.name,
+      name,
+      page,
+      itemsPerPage: ITEMS_PER_PAGE,
+    })
 
-      if (!err) {
-        setUsers(data.users)
-        setTotal(data.total)
-      }
+    if (!err) {
+      setUsers(data.users)
+      setTotal(data.total)
     }
+  }
 
+  useEffect(() => {
     loadUsers(nameFilter, pagination)
   }, [nameFilter, pagination])
+
+  async function handleDeleteUser(userId: string) {
+    if (!user) return
+
+    const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.delete({
+      loggedUserName: user.name,
+      userId,
+    })
+
+    if (err) {
+      toast({
+        title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+        duration: 3000,
+      })
+    } else {
+      toast({
+        title: 'Usuário removido com sucesso.',
+        duration: 3000,
+      })
+
+      loadUsers()
+    }
+  }
 
   return (
     <div className="h-full flex flex-col">

@@ -38,7 +38,7 @@ export class UsersController {
       return { data: null, err }
     }
 
-    const total = await this.usersRepository.countUsers()
+    const total = await this.usersRepository.countUsers(name)
     const users = await this.usersRepository.getUsers(name, page, itemsPerPage)
 
     const data = { users, total, page, itemsPerPage }
@@ -108,12 +108,6 @@ export class UsersController {
 
     if (userToDelete.role === 'super-admin' || loggedUser.id === userToDelete.id) {
       const err = new NotAllowedOperationError()
-
-      return { data: null, err }
-    }
-
-    if (loggedUser.role === userToDelete.role) {
-      const err = new WithoutPermissionError()
 
       return { data: null, err }
     }
