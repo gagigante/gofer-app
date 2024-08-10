@@ -1,12 +1,12 @@
 import React from 'react'
 import { createBrowserRouter } from 'react-router-dom'
 
-import { ProtectedRoute } from './ProtectedRoute'
 import { Login } from '@/view/pages/Login'
 import { Home } from '@/view/pages/Home'
 import { Users } from '@/view/pages/Users'
 import { CreateUser } from '@/view/pages/CreateUser'
 import { Layout } from '@/view/components/Layout'
+import { ProtectedRoute } from './ProtectedRoute'
 
 export const router = createBrowserRouter([
   {

@@ -1,4 +1,4 @@
-import { hash } from 'bcryptjs'
+import { compare, hash } from 'bcryptjs'
 
 import { db } from '@/api/db'
 import { UsersRepository } from '@/api/repositories/users-repository'
@@ -8,6 +8,7 @@ import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotAllowedOperationError } from '@/api/errors/NotAllowedOperationError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { InvalidParamsError } from '@/api/errors/InvalidParamsError'
+import { IncorrectCredentialsError } from '@/api/errors/IncorrectCredentialsError'
 
 import { User } from '@/api/models/User'
 import { type UserRole } from '@/api/types/user-role'
@@ -22,6 +23,8 @@ export type ListUsersResponse = Response<{
 
 export type CreateUserResponse = Response<User>
 
+export type UpdateUserResponse = Response<User>
+
 export class UsersController {
   private readonly usersRepository: UsersRepository
 
@@ -29,8 +32,8 @@ export class UsersController {
     this.usersRepository = new UsersRepository(db)
   }
 
-  public async listUsers(loggedUserName: string, name = '', page = 1, itemsPerPage = 15): Promise<ListUsersResponse> {
-    const loggedUser = await this.usersRepository.getUserByName(loggedUserName)
+  public async listUsers(loggedUserId: string, name = '', page = 1, itemsPerPage = 15): Promise<ListUsersResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator' || loggedUser.is_deleted) {
       const err = new WithoutPermissionError()
@@ -47,12 +50,12 @@ export class UsersController {
   }
 
   public async createUser(
-    loggedUserName: string,
+    loggedUserId: string,
     name: string,
     password: string,
     role: UserRole,
   ): Promise<CreateUserResponse> {
-    const loggedUser = await this.usersRepository.getUserByName(loggedUserName)
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator' || loggedUser.is_deleted) {
       const err = new WithoutPermissionError()
@@ -89,8 +92,8 @@ export class UsersController {
     return { data: createdUser, err: null }
   }
 
-  public async deleteUser(loggedUserName: string, userId: string): Promise<Response<null>> {
-    const loggedUser = await this.usersRepository.getUserByName(loggedUserName)
+  public async deleteUser(loggedUserId: string, userId: string): Promise<Response<null>> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator') {
       const err = new WithoutPermissionError()
@@ -115,5 +118,55 @@ export class UsersController {
     await this.usersRepository.deleteUser(userId)
 
     return { data: null, err: null }
+  }
+
+  public async updateUser(
+    loggedUserId: string,
+    updatedName: string,
+    currentPassword?: string,
+    newPassword?: string,
+    newPasswordConfirmation?: string,
+  ): Promise<UpdateUserResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+
+      return { data: null, err }
+    }
+
+    const userWithUpdatedName = await this.usersRepository.getUserByName(updatedName)
+
+    if (userWithUpdatedName && userWithUpdatedName.id !== loggedUser.id) {
+      const err = new UserAlreadyExistsError()
+
+      return { data: null, err }
+    }
+
+    if (!currentPassword) {
+      const response = await this.usersRepository.updateUser(loggedUser.id, updatedName)
+
+      return { data: response!, err: null }
+    }
+
+    const doesPasswordMatch = await compare(currentPassword, loggedUser.password)
+
+    if (!doesPasswordMatch) {
+      return { data: null, err: new IncorrectCredentialsError() }
+    }
+
+    if (!newPassword || !newPasswordConfirmation) {
+      return { data: null, err: new InvalidParamsError() }
+    }
+
+    if (newPassword !== newPasswordConfirmation) {
+      return { data: null, err: new InvalidParamsError() }
+    }
+
+    const hashedNewPassword = await hash(newPassword, 8)
+
+    const response = await this.usersRepository.updateUser(loggedUser.id, updatedName, hashedNewPassword)
+
+    return { data: response!, err: null }
   }
 }

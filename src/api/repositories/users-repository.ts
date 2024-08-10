@@ -53,7 +53,7 @@ export class UsersRepository {
   }
 
   public async getUsers(name = '', page = 1, itemsPerPage = 15): Promise<User[]> {
-    const sql = `SELECT * FROM users WHERE name LIKE $name
+    const sql = `SELECT * FROM users WHERE name LIKE $name AND is_deleted = false
       ORDER BY is_deleted, name
       LIMIT $itemsPerPage
       OFFSET $offset;
@@ -90,7 +90,7 @@ export class UsersRepository {
   }
 
   public async countUsers(name = ''): Promise<number> {
-    const sql = 'SELECT COUNT(id) as count FROM users WHERE name LIKE $name;'
+    const sql = 'SELECT COUNT(id) as count FROM users WHERE name LIKE $name AND is_deleted = false;'
 
     return await new Promise<number>((resolve, reject) => {
       this.db.get<{ count: number }>(sql, { $name: `%${name}%` }, (err, data) => {
@@ -136,6 +136,42 @@ export class UsersRepository {
         } else {
           resolve(undefined)
         }
+      })
+    })
+  }
+
+  public async updateUser(userId: string, name: string, newPassword?: string): Promise<User | null> {
+    let sql = 'UPDATE users set name = $name WHERE id = $id'
+
+    if (newPassword) {
+      sql = 'UPDATE users set name = $name, password = $password WHERE id = $id'
+    }
+
+    return await new Promise((resolve, reject) => {
+      this.db.serialize(() => {
+        this.db.run(sql, { $id: userId, $name: name, $password: newPassword }, (err) => {
+          if (err) {
+            reject(err)
+          }
+        })
+
+        this.db.get<User | null>('SELECT * FROM users WHERE id = $id', { $id: userId }, (err, data) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(
+              data
+                ? new User({
+                    id: data.id,
+                    name: data.name,
+                    password: data.password,
+                    role: data.role,
+                    is_deleted: Boolean(data.is_deleted),
+                  })
+                : null,
+            )
+          }
+        })
       })
     })
   }
