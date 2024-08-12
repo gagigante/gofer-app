@@ -2,10 +2,11 @@ import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FiHome, FiUser, FiLogOut } from 'react-icons/fi'
 
+import { Separator } from '@/view/components/ui/separator'
 import { ScrollArea } from '@/view/components/ui/scroll-area'
 import { Button } from '@/view/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
-import { Dialog } from './Dialog'
+import { Alert } from './Alert'
 
 import { useTheme } from '../hooks/useTheme'
 import { useAuth } from '../hooks/useAuth'
@@ -35,7 +36,7 @@ export function Sidebar() {
               </Link>
             </Button>
 
-            <Dialog
+            <Alert
               title="Sair"
               description="Deseja mesmo sair?"
               cancelButton={<Button variant="outline">Cancelar</Button>}
@@ -44,12 +45,13 @@ export function Sidebar() {
                   Sair
                 </Button>
               }
-            >
-              <Button variant="outline" className="w-full justify-start">
-                <FiLogOut className="w-4 h-4 mr-3" />
-                Sair
-              </Button>
-            </Dialog>
+              trigger={
+                <Button variant="outline" className="w-full justify-start">
+                  <FiLogOut className="w-4 h-4 mr-3" />
+                  Sair
+                </Button>
+              }
+            />
           </div>
         </div>
       </ScrollArea>

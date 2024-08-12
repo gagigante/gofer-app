@@ -7,6 +7,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogAction,
   AlertDialogTrigger,
 } from '@/view/components/ui/alert-dialog'
 
@@ -14,12 +15,11 @@ interface DialogProps {
   title: string
   description?: string
   trigger: ReactNode
-  children?: ReactNode
   cancelButton: ReactNode
   proceedButton: ReactNode
 }
 
-export function Dialog({ children, title, trigger, description, cancelButton, proceedButton }: DialogProps) {
+export function Alert({ title, trigger, description, cancelButton, proceedButton }: DialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
@@ -28,10 +28,9 @@ export function Dialog({ children, title, trigger, description, cancelButton, pr
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description && <AlertDialogDescription>{description}</AlertDialogDescription>}
         </AlertDialogHeader>
-        {children && <div>{children}</div>}
         <AlertDialogFooter>
           <AlertDialogCancel asChild>{cancelButton}</AlertDialogCancel>
-          {proceedButton}
+          <AlertDialogAction asChild>{proceedButton}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

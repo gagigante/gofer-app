@@ -43,7 +43,7 @@ export function CreateUser() {
     if (!user) return
 
     const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.create({
-      loggedUserName: user.name,
+      loggedUserId: user.id,
       name,
       password,
       role,
