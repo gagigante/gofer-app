@@ -7,7 +7,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogAction,
   AlertDialogTrigger,
 } from '@/view/components/ui/alert-dialog'
 
@@ -30,7 +29,7 @@ export function Alert({ title, trigger, description, cancelButton, proceedButton
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel asChild>{cancelButton}</AlertDialogCancel>
-          <AlertDialogAction asChild>{proceedButton}</AlertDialogAction>
+          {proceedButton}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

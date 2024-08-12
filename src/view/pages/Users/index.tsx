@@ -31,7 +31,7 @@ export function Users() {
     if (!user) return
 
     const { data, err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.list({
-      loggedUserName: user.name,
+      loggedUserId: user.id,
       name,
       page,
       itemsPerPage: ITEMS_PER_PAGE,
@@ -51,7 +51,7 @@ export function Users() {
     if (!user) return
 
     const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.delete({
-      loggedUserName: user.name,
+      loggedUserId: user.id,
       userId,
     })
 
@@ -89,12 +89,7 @@ export function Users() {
       <footer className="flex px-3 py-4 border-t border-border">
         <Pagination currentPage={pagination} total={total} onChangePage={setPagination} />
 
-        {user && user.role !== 'operator' && (
-          <Button asChild>
-            <Link to="new">Adicionar usuário</Link>
-          </Button>
-        )}
-      </footer>
+      <Footer role={user?.role} page={pagination} total={total} onChange={setPagination} />
     </div>
   )
 }
