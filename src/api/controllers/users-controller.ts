@@ -35,7 +35,7 @@ export class UsersController {
   public async listUsers(loggedUserId: string, name = '', page = 1, itemsPerPage = 15): Promise<ListUsersResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
-    if (!loggedUser || loggedUser.role === 'operator' || loggedUser.is_deleted) {
+    if (!loggedUser || loggedUser.role === 'operator') {
       const err = new WithoutPermissionError()
 
       return { data: null, err }
@@ -57,7 +57,7 @@ export class UsersController {
   ): Promise<CreateUserResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
-    if (!loggedUser || loggedUser.role === 'operator' || loggedUser.is_deleted) {
+    if (!loggedUser || loggedUser.role === 'operator') {
       const err = new WithoutPermissionError()
 
       return { data: null, err }

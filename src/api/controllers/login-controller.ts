@@ -27,10 +27,6 @@ export class LoginController {
       return { data: null, err: new IncorrectCredentialsError() }
     }
 
-    if (response.is_deleted) {
-      return { data: null, err: new IncorrectCredentialsError() }
-    }
-
     const user = {
       id: response.id,
       name: response.name,

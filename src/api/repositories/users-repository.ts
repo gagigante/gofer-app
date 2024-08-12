@@ -43,7 +43,6 @@ export class UsersRepository {
                   name: data.name,
                   password: data.password,
                   role: data.role,
-                  is_deleted: Boolean(data.is_deleted),
                 })
               : null,
           )
@@ -53,8 +52,8 @@ export class UsersRepository {
   }
 
   public async getUsers(name = '', page = 1, itemsPerPage = 15): Promise<User[]> {
-    const sql = `SELECT * FROM users WHERE name LIKE $name AND is_deleted = false
-      ORDER BY is_deleted, name
+    const sql = `SELECT * FROM users WHERE name LIKE $name
+      ORDER BY name
       LIMIT $itemsPerPage
       OFFSET $offset;
     `
@@ -79,7 +78,6 @@ export class UsersRepository {
                     name: user.name,
                     password: user.password,
                     role: user.role,
-                    is_deleted: !!user.is_deleted,
                   }),
               ),
             )
@@ -90,7 +88,7 @@ export class UsersRepository {
   }
 
   public async countUsers(name = ''): Promise<number> {
-    const sql = 'SELECT COUNT(id) as count FROM users WHERE name LIKE $name AND is_deleted = false;'
+    const sql = 'SELECT COUNT(id) as count FROM users WHERE name LIKE $name;'
 
     return await new Promise<number>((resolve, reject) => {
       this.db.get<{ count: number }>(sql, { $name: `%${name}%` }, (err, data) => {
@@ -103,8 +101,8 @@ export class UsersRepository {
     })
   }
 
-  public async createUser({ id, name, password, role, is_deleted }: User) {
-    const sql = 'INSERT INTO users VALUES ($id, $name, $password, $role, FALSE)'
+  public async createUser({ id, name, password, role }: User) {
+    const sql = 'INSERT INTO users VALUES ($id, $name, $password, $role)'
 
     return await new Promise<User>((resolve, reject) => {
       this.db.run(
@@ -119,7 +117,7 @@ export class UsersRepository {
           if (err) {
             reject(err)
           } else {
-            resolve({ id, name, password, role, is_deleted })
+            resolve({ id, name, password, role })
           }
         },
       )
@@ -127,7 +125,7 @@ export class UsersRepository {
   }
 
   public async deleteUser(userId: string): Promise<void> {
-    const sql = 'UPDATE users SET is_deleted = TRUE WHERE id = $id'
+    const sql = 'DELETE FROM users WHERE id = $id'
 
     await new Promise((resolve, reject) => {
       this.db.run(sql, { $id: userId }, (err) => {
@@ -166,7 +164,6 @@ export class UsersRepository {
                     name: data.name,
                     password: data.password,
                     role: data.role,
-                    is_deleted: Boolean(data.is_deleted),
                   })
                 : null,
             )

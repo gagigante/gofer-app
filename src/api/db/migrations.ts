@@ -13,13 +13,12 @@ export async function migrate(db: Database) {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL UNIQUE,
       password TEXT NOT NULL,
-      role TEXT CHECK(role IN ('super-admin','admin','operator')) NOT NULL,
-      is_deleted BOOLEAN DEFAULT(FALSE) NOT NULL
+      role TEXT CHECK(role IN ('super-admin','admin','operator')) NOT NULL
     )`)
 
     db.get('SELECT id FROM users WHERE name = $name', { $name: name }, (_err, row) => {
       if (!row) {
-        db.run('INSERT INTO users VALUES ($id, $name, $password, $role, FALSE)', {
+        db.run('INSERT INTO users VALUES ($id, $name, $password, $role)', {
           $id: id,
           $name: name,
           $password: hashedPassword,
