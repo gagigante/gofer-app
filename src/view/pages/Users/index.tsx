@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import type * as z from 'zod'
-import { FaPencilAlt } from 'react-icons/fa'
+import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
@@ -30,6 +30,7 @@ export function Users() {
   const [pagination, setPagination] = useState(1)
   const [selectedUser, setSelectedUser] = useState<User>()
   const [isUpdateUserDialogOpen, setIsUpdateUserDialogOpen] = useState(false)
+  const [isDeleteUserAlertOpen, setIsDeleteUserAlertOpen] = useState(false)
 
   async function loadUsers(name = '', page = 1) {
     if (!user) return
@@ -54,6 +55,11 @@ export function Users() {
   function handleRequestUserEdition(user: User) {
     setSelectedUser(user)
     setIsUpdateUserDialogOpen(true)
+  }
+
+  function handleRequestUserDeletion(user: User) {
+    setSelectedUser(user)
+    setIsDeleteUserAlertOpen(true)
   }
 
   async function handleUpdateUser(formData: z.infer<typeof updateUserSchema>) {
@@ -100,6 +106,7 @@ export function Users() {
       })
 
       loadUsers()
+      setIsUpdateUserDialogOpen(false)
     }
   }
 
@@ -117,10 +124,76 @@ export function Users() {
             setPagination(1)
           }}
         />
-      </div>
 
-      <footer className="flex px-3 py-4 border-t border-border">
-        <Pagination currentPage={pagination} total={total} onChangePage={setPagination} />
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Usuário</TableHead>
+              <TableHead>Nível de permissão</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {users.map(({ id, name, role }) => {
+              const isDeletable = user?.id !== id && role !== 'super-admin'
+              const isEditable = user?.id === id
+
+              return (
+                <TableRow key={id}>
+                  <TableCell>
+                    <div className="flex">
+                      <p className="font-medium">{name}</p>
+                      {user?.id === id && (
+                        <Badge className="ml-2" variant="outline">
+                          Eu
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <Badge variant="default">{ROLES[role]}</Badge>
+                  </TableCell>
+
+                  <TableCell className="text-right space-x-1.5">
+                    {isEditable && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const user = users.find((item) => item.id === id)
+
+                          if (user) {
+                            handleRequestUserEdition(user)
+                          }
+                        }}
+                      >
+                        <FaPencilAlt className="w-3 h-3" />
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      disabled={!isDeletable}
+                      onClick={() => {
+                        const user = users.find((item) => item.id === id)
+
+                        if (user) {
+                          handleRequestUserDeletion(user)
+                        }
+                      }}
+                    >
+                      <FaTrash className="w-3 h-3" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
 
       <Footer role={user?.role} page={pagination} total={total} onChange={setPagination} />
 
@@ -130,6 +203,18 @@ export function Users() {
         onUpdateUser={handleUpdateUser}
         onClose={() => {
           setIsUpdateUserDialogOpen(false)
+        }}
+      />
+
+      <DeleteUserAction
+        isOpen={isDeleteUserAlertOpen}
+        onDelete={async () => {
+          if (!selectedUser) return
+
+          await handleDeleteUser(selectedUser.id)
+        }}
+        onClose={() => {
+          setIsDeleteUserAlertOpen(false)
         }}
       />
     </div>

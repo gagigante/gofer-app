@@ -1,17 +1,18 @@
 import React from 'react'
-import { FaTrash } from 'react-icons/fa'
 
 import { Button } from '@/view/components/ui/button'
 import { Alert } from '@/view/components/Alert'
 
 interface DeleteUserActionProps {
-  isDeletable: boolean
+  isOpen: boolean
   onDelete: () => Promise<void>
+  onClose: () => void
 }
 
-export const DeleteUserAction = ({ isDeletable, onDelete }: DeleteUserActionProps) => {
+export const DeleteUserAction = ({ isOpen, onDelete, onClose }: DeleteUserActionProps) => {
   return (
     <Alert
+      isOpen={isOpen}
       title="Apagar usuário"
       description="Deseja mesmo apagar o usuário?"
       cancelButton={<Button variant="outline">Cancelar</Button>}
@@ -25,11 +26,7 @@ export const DeleteUserAction = ({ isDeletable, onDelete }: DeleteUserActionProp
           Apagar
         </Button>
       }
-      trigger={
-        <Button variant="destructive" size="sm" disabled={!isDeletable}>
-          <FaTrash className="w-3 h-3" />
-        </Button>
-      }
+      onClose={onClose}
     />
   )
 }

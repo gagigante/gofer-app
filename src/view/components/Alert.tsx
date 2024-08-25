@@ -7,21 +7,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/view/components/ui/alert-dialog'
 
 interface DialogProps {
+  isOpen: boolean
   title: string
   description?: string
-  trigger: ReactNode
   cancelButton: ReactNode
   proceedButton: ReactNode
+  onClose: () => void
 }
 
-export function Alert({ title, trigger, description, cancelButton, proceedButton }: DialogProps) {
+export function Alert({ title, description, cancelButton, proceedButton, isOpen, onClose }: DialogProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+        }
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
