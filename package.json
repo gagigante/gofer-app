@@ -2,14 +2,14 @@
   "name": "gofer-app",
   "productName": "gofer-app",
   "description": "My Electron application description",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "main": ".vite/build/main.js",
   "license": "MIT",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "publish": "electron-forge publish",
+    "publish": "electron-forge publish --target=github --non-interactive",
     "lint": "eslint . --ext js,jsx,ts,tsx --fix"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron-forge/plugin-vite": "^7.4.0",
+    "@electron-forge/publisher-github": "^7.4.0",
     "@electron/fuses": "^1.8.0",
     "@eslint/js": "^9.2.0",
     "@types/bcryptjs": "^2.4.6",
