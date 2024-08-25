@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { FaTrash, FaPencilAlt } from 'react-icons/fa'
+import type * as z from 'zod'
+import { FaPencilAlt } from 'react-icons/fa'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
-import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
-import { Dialog } from '@/view/components/Dialog'
-import { Pagination } from '@/view/components/Pagination'
+import { Button } from '@/view/components/ui/button'
+import { Footer } from './Footer'
+import { DeleteUserAction } from './DeleteUserAction'
+import { UpdateUserAction } from './UpdateUserAction'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -17,6 +18,7 @@ import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 import { type User } from '@/api/models/User'
 import { type apiName, type UsersApi } from '@/api/exposes/users-api'
+import { type updateUserSchema } from './UpdateUserAction/schema'
 
 export function Users() {
   const { user } = useAuth()
@@ -26,6 +28,8 @@ export function Users() {
   const [total, setTotal] = useState(0)
   const [nameFilter, setNameFilter] = useState('')
   const [pagination, setPagination] = useState(1)
+  const [selectedUser, setSelectedUser] = useState<User>()
+  const [isUpdateUserDialogOpen, setIsUpdateUserDialogOpen] = useState(false)
 
   async function loadUsers(name = '', page = 1) {
     if (!user) return
@@ -46,6 +50,35 @@ export function Users() {
   useEffect(() => {
     loadUsers(nameFilter, pagination)
   }, [nameFilter, pagination])
+
+  function handleRequestUserEdition(user: User) {
+    setSelectedUser(user)
+    setIsUpdateUserDialogOpen(true)
+  }
+
+  async function handleUpdateUser(formData: z.infer<typeof updateUserSchema>) {
+    if (!user) return
+
+    const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.update({
+      loggedUserId: user.id,
+      updatedName: formData.name,
+      currentPassword: formData.password,
+      newPassword: formData.newPassword,
+      newPasswordConfirmation: formData.newPasswordConfirmation,
+    })
+
+    if (err?.message === 'IncorrectCredentialsError') {
+      toast({
+        title: 'Senha incorreta.',
+        duration: 3000,
+      })
+
+      return
+    }
+
+    await loadUsers()
+    setIsUpdateUserDialogOpen(false)
+  }
 
   async function handleDeleteUser(userId: string) {
     if (!user) return
@@ -90,6 +123,15 @@ export function Users() {
         <Pagination currentPage={pagination} total={total} onChangePage={setPagination} />
 
       <Footer role={user?.role} page={pagination} total={total} onChange={setPagination} />
+
+      <UpdateUserAction
+        isOpen={isUpdateUserDialogOpen}
+        selectedUserName={selectedUser?.name ?? ''}
+        onUpdateUser={handleUpdateUser}
+        onClose={() => {
+          setIsUpdateUserDialogOpen(false)
+        }}
+      />
     </div>
   )
 }
