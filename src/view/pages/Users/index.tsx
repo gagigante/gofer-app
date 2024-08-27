@@ -106,8 +106,9 @@ export function Users() {
       })
 
       loadUsers()
-      setIsUpdateUserDialogOpen(false)
     }
+
+    setIsDeleteUserAlertOpen(false)
   }
 
   return (
