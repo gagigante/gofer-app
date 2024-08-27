@@ -1,7 +1,7 @@
 {
   "name": "gofer-app",
   "productName": "gofer-app",
-  "description": "My Electron application description",
+  "description": "Gofer app",
   "author": "Gabriel Henrique Gigante da Silva",
   "version": "1.0.12",
   "repository": {
