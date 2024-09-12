@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { FiHome, FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiShoppingCart } from 'react-icons/fi'
+import { FiHome, FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiShoppingCart, FiBox, FiArchive } from 'react-icons/fi'
 
 import { Separator } from '@/view/components/ui/separator'
 import { ScrollArea } from '@/view/components/ui/scroll-area'
@@ -32,7 +32,7 @@ export function Sidebar() {
             </Button>
 
             <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/">
+              <Link to="/home/reports">
                 <FiClipboard className="w-4 h-4 mr-3" />
                 Relatórios
               </Link>
@@ -41,14 +41,14 @@ export function Sidebar() {
             <Separator className="my-4" />
 
             <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/">
+              <Link to="/home/orders">
                 <FiDollarSign className="w-4 h-4 mr-3" />
                 Pedidos
               </Link>
             </Button>
 
             <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/">
+              <Link to="/home/budgets">
                 <FiShoppingCart className="w-4 h-4 mr-3" />
                 Orçamentos
               </Link>
@@ -57,16 +57,23 @@ export function Sidebar() {
             <Separator className="my-4" />
 
             <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/">
+              <Link to="/home/customers">
                 <FiUsers className="w-4 h-4 mr-3" />
                 Clientes
               </Link>
             </Button>
 
             <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/">
-                <FiHome className="w-4 h-4 mr-3" />
+              <Link to="/home/products">
+                <FiBox className="w-4 h-4 mr-3" />
                 Produtos
+              </Link>
+            </Button>
+
+            <Button asChild variant="ghost" className="w-full justify-start">
+              <Link to="/home/stock">
+                <FiArchive className="w-4 h-4 mr-3" />
+                Estoque
               </Link>
             </Button>
 

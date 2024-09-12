@@ -1,6 +1,5 @@
 import { compare } from 'bcryptjs'
 
-import { db } from '@/api/db'
 import { UsersRepository } from '@/api/repositories/users-repository'
 
 import { IncorrectCredentialsError } from '@/api/errors/IncorrectCredentialsError'
@@ -9,7 +8,7 @@ export class LoginController {
   private readonly usersRepository: UsersRepository
 
   constructor() {
-    this.usersRepository = new UsersRepository(db)
+    this.usersRepository = new UsersRepository()
   }
 
   async login(name: string, password: string) {

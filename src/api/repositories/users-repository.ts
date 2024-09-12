@@ -1,175 +1,83 @@
-import { type Database } from 'sqlite3'
-
-import { User } from '@/api/models/User'
+import { PrismaClient, type User } from '@prisma/client'
+import { type UserRole } from '../types/user-role'
 
 export class UsersRepository {
-  constructor(private readonly db: Database) {}
+  private readonly prisma = new PrismaClient()
 
   public async getUserById(userId: string): Promise<User | null> {
-    const sql = 'SELECT * FROM users WHERE id = $id'
-
-    return await new Promise((resolve, reject) => {
-      this.db.get<User | null>(sql, { $id: userId }, (err, data) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(
-            data
-              ? new User({
-                  id: data.id,
-                  name: data.name,
-                  password: data.password,
-                  role: data.role,
-                })
-              : null,
-          )
-        }
-      })
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
     })
+
+    return user
   }
 
   public async getUserByName(name: string): Promise<User | null> {
-    const sql = 'SELECT * FROM users WHERE name = $name'
-
-    return await new Promise((resolve, reject) => {
-      this.db.get<User | null>(sql, { $name: name }, (err, data) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(
-            data
-              ? new User({
-                  id: data.id,
-                  name: data.name,
-                  password: data.password,
-                  role: data.role,
-                })
-              : null,
-          )
-        }
-      })
+    const user = await this.prisma.user.findUnique({
+      where: { name },
     })
+
+    return user
   }
 
   public async getUsers(name = '', page = 1, itemsPerPage = 15): Promise<User[]> {
-    const sql = `SELECT * FROM users WHERE name LIKE $name
-      ORDER BY name
-      LIMIT $itemsPerPage
-      OFFSET $offset;
-    `
-
-    return await new Promise((resolve, reject) => {
-      this.db.all<User>(
-        sql,
-        {
-          $name: `%${name}%`,
-          $itemsPerPage: itemsPerPage,
-          $offset: page === 1 ? 0 : itemsPerPage * page - itemsPerPage,
+    const users = await this.prisma.user.findMany({
+      where: {
+        name: {
+          contains: name,
         },
-        (err, data) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(
-              data.map(
-                (user) =>
-                  new User({
-                    id: user.id,
-                    name: user.name,
-                    password: user.password,
-                    role: user.role,
-                  }),
-              ),
-            )
-          }
-        },
-      )
+      },
+      take: itemsPerPage,
+      skip: page === 1 ? 0 : page,
     })
+
+    return users
   }
 
   public async countUsers(name = ''): Promise<number> {
-    const sql = 'SELECT COUNT(id) as count FROM users WHERE name LIKE $name;'
-
-    return await new Promise<number>((resolve, reject) => {
-      this.db.get<{ count: number }>(sql, { $name: `%${name}%` }, (err, data) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(data.count)
-        }
-      })
+    const usersCount = await this.prisma.user.count({
+      where: {
+        name: {
+          contains: name,
+        },
+      },
     })
+
+    return usersCount
   }
 
-  public async createUser({ id, name, password, role }: User) {
-    const sql = 'INSERT INTO users VALUES ($id, $name, $password, $role)'
-
-    return await new Promise<User>((resolve, reject) => {
-      this.db.run(
-        sql,
-        {
-          $id: id,
-          $name: name,
-          $password: password,
-          $role: role,
-        },
-        (err) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({ id, name, password, role })
-          }
-        },
-      )
+  public async createUser({ id, name, password, role }: User & { role: UserRole }): Promise<User> {
+    const user = await this.prisma.user.create({
+      data: {
+        id,
+        name,
+        password,
+        role,
+      },
     })
+
+    return user
   }
 
   public async deleteUser(userId: string): Promise<void> {
-    const sql = 'DELETE FROM users WHERE id = $id'
-
-    await new Promise((resolve, reject) => {
-      this.db.run(sql, { $id: userId }, (err) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(undefined)
-        }
-      })
+    await this.prisma.user.delete({
+      where: {
+        id: userId,
+      },
     })
   }
 
-  public async updateUser(userId: string, name: string, newPassword?: string): Promise<User | null> {
-    let sql = 'UPDATE users set name = $name WHERE id = $id'
-
-    if (newPassword) {
-      sql = 'UPDATE users set name = $name, password = $password WHERE id = $id'
-    }
-
-    return await new Promise((resolve, reject) => {
-      this.db.serialize(() => {
-        this.db.run(sql, { $id: userId, $name: name, $password: newPassword }, (err) => {
-          if (err) {
-            reject(err)
-          }
-        })
-
-        this.db.get<User | null>('SELECT * FROM users WHERE id = $id', { $id: userId }, (err, data) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(
-              data
-                ? new User({
-                    id: data.id,
-                    name: data.name,
-                    password: data.password,
-                    role: data.role,
-                  })
-                : null,
-            )
-          }
-        })
-      })
+  public async updateUser(userId: string, name: string, newPassword?: string): Promise<User> {
+    const user = await this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        name,
+        password: newPassword,
+      },
     })
+
+    return user
   }
 }
