@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id
+  name     String @unique
+  password String
+  role     String // 'super-admin','admin','operator'
+
+  @@map("users")
+}
+
+model Product {
+  id                String    @id
+  barCode           String    @unique @map("bar_code")
+  name              String
+  description       String?
+  brand             String
+  price             BigInt
+  costPrice         BigInt    @map("cost_price")
+  availableQuantity Int       @default(0) @map("available_quantity")
+  minimumQuantity   Int       @default(0) @map("minimum_quantity")
+  categoryId        String?   @map("category_id")
+  category          Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("products")
+}
+
+model Category {
+  id          String    @id
+  name        String
+  description String
+  productis   Product[]
+
+  @@map("categories")
+}

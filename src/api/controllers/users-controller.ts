@@ -1,6 +1,7 @@
+import { randomUUID } from 'node:crypto'
 import { compare, hash } from 'bcryptjs'
+import { type User } from '@prisma/client'
 
-import { db } from '@/api/db'
 import { UsersRepository } from '@/api/repositories/users-repository'
 
 import { UserAlreadyExistsError } from '@/api/errors/UserAlreadyExistsError'
@@ -10,7 +11,6 @@ import { NotFoundError } from '@/api/errors/NotFoundError'
 import { InvalidParamsError } from '@/api/errors/InvalidParamsError'
 import { IncorrectCredentialsError } from '@/api/errors/IncorrectCredentialsError'
 
-import { User } from '@/api/models/User'
 import { type UserRole } from '@/api/types/user-role'
 import { type Response } from '@/api/types/response'
 
@@ -29,7 +29,7 @@ export class UsersController {
   private readonly usersRepository: UsersRepository
 
   constructor() {
-    this.usersRepository = new UsersRepository(db)
+    this.usersRepository = new UsersRepository()
   }
 
   public async listUsers(loggedUserId: string, name = '', page = 1, itemsPerPage = 15): Promise<ListUsersResponse> {
@@ -85,9 +85,12 @@ export class UsersController {
 
     const hashedPassword = await hash(password, 8)
 
-    const newUser = new User({ name, password: hashedPassword, role })
-
-    const createdUser = await this.usersRepository.createUser(newUser)
+    const createdUser = await this.usersRepository.createUser({
+      id: randomUUID(),
+      name,
+      password: hashedPassword,
+      role,
+    })
 
     return { data: createdUser, err: null }
   }
@@ -146,7 +149,7 @@ export class UsersController {
     if (!currentPassword) {
       const response = await this.usersRepository.updateUser(loggedUser.id, updatedName)
 
-      return { data: response!, err: null }
+      return { data: response, err: null }
     }
 
     const doesPasswordMatch = await compare(currentPassword, loggedUser.password)
@@ -167,6 +170,6 @@ export class UsersController {
 
     const response = await this.usersRepository.updateUser(loggedUser.id, updatedName, hashedNewPassword)
 
-    return { data: response!, err: null }
+    return { data: response, err: null }
   }
 }
