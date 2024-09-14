@@ -34,15 +34,20 @@ model Product {
   minimumQuantity   Int       @default(0) @map("minimum_quantity")
   categoryId        String?   @map("category_id")
   category          Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  icms              Int
+  ncm               String
+  cest              String
+  cestSegment       String?
+  cestDescription   String?
 
   @@map("products")
 }
 
 model Category {
   id          String    @id
-  name        String
-  description String
-  productis   Product[]
+  name        String    @unique
+  description String?
+  products   Product[]
 
   @@map("categories")
 }
