@@ -31,18 +31,18 @@ export interface DeleteCategoryData {
 const categoryController = new CategoriesController()
 
 ipcMain.handle(
-  'users:list',
+  'categories:list',
   async (_event, { loggedUserId, name, page, itemsPerPage }: ListCategoriesData) =>
     await categoryController.listCategories(loggedUserId, name, page, itemsPerPage),
 )
 
 ipcMain.handle(
-  'users:create',
+  'categories:create',
   async (_event, data: CreateCategoryData) =>
     await categoryController.createCategory(data.loggedUserId, data.name, data.description, data.productsIds),
 )
 
-ipcMain.handle('users:update', async (_event, data: UpdateCategoryData) => {
+ipcMain.handle('categories:update', async (_event, data: UpdateCategoryData) => {
   const response = await categoryController.updateCategory(
     data.loggedUserId,
     data.categoryId,
@@ -54,7 +54,7 @@ ipcMain.handle('users:update', async (_event, data: UpdateCategoryData) => {
 })
 
 ipcMain.handle(
-  'users:delete',
+  'categories:delete',
   async (_event, data: DeleteCategoryData) =>
     await categoryController.deleteCategory(data.loggedUserId, data.categoryId),
 )

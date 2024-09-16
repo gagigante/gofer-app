@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { type User } from '@prisma/client'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
@@ -16,9 +17,9 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { ROLES } from '@/view/constants/ROLES'
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
-import { type User } from '@/api/models/User'
 import { type apiName, type UsersApi } from '@/api/exposes/users-api'
 import { type updateUserSchema } from './UpdateUserAction/schema'
+import { type UserRole } from '@/api/types/user-role'
 
 export function Users() {
   const { user } = useAuth()
@@ -154,7 +155,7 @@ export function Users() {
                   </TableCell>
 
                   <TableCell>
-                    <Badge variant="default">{ROLES[role]}</Badge>
+                    <Badge variant="default">{ROLES[role as UserRole]}</Badge>
                   </TableCell>
 
                   <TableCell className="text-right space-x-1.5">
