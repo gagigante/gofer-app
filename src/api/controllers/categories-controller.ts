@@ -124,6 +124,14 @@ export class CategoriesController {
       return { data: null, err }
     }
 
+    categoryToBeUpdated = await this.categoriesRepository.getCategoryByName(updatedName)
+
+    if (categoryToBeUpdated) {
+      const err = new CategoryAlreadyExistsError()
+
+      return { data: null, err }
+    }
+
     const response = await this.categoriesRepository.updateCategory({
       id: categoryId,
       name: updatedName,
