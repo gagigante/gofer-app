@@ -7,10 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
 import { Button } from '@/view/components/ui/button'
-import { Footer } from './Footer'
-import { DeleteUserAction } from './DeleteUserAction'
-import { UpdateUserAction } from './UpdateUserAction'
-import { CreateUserAction } from './CreateUserAction'
+import { Footer } from './components/Footer'
+import { DeleteUserAction } from './components/DeleteUserAction'
+import { UpdateUserAction } from './components/UpdateUserAction'
+import { CreateUserAction } from './components/CreateUserAction'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -20,8 +20,8 @@ import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 import { type UserRole } from '@/api/types/user-role'
 import { type apiName, type UsersApi } from '@/api/exposes/users-api'
-import { type createUserSchema } from './CreateUserAction/schema'
-import { type updateUserSchema } from './UpdateUserAction/schema'
+import { type createUserSchema } from './components/CreateUserAction/schema'
+import { type updateUserSchema } from './components/UpdateUserAction/schema'
 
 export function Users() {
   const { user } = useAuth()
