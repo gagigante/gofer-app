@@ -10,6 +10,7 @@ import { Button } from '@/view/components/ui/button'
 import { Footer } from './Footer'
 import { DeleteUserAction } from './DeleteUserAction'
 import { UpdateUserAction } from './UpdateUserAction'
+import { CreateUserAction } from './CreateUserAction'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -17,9 +18,10 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { ROLES } from '@/view/constants/ROLES'
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
-import { type apiName, type UsersApi } from '@/api/exposes/users-api'
-import { type updateUserSchema } from './UpdateUserAction/schema'
 import { type UserRole } from '@/api/types/user-role'
+import { type apiName, type UsersApi } from '@/api/exposes/users-api'
+import { type createUserSchema } from './CreateUserAction/schema'
+import { type updateUserSchema } from './UpdateUserAction/schema'
 
 export function Users() {
   const { user } = useAuth()
@@ -30,6 +32,7 @@ export function Users() {
   const [nameFilter, setNameFilter] = useState('')
   const [pagination, setPagination] = useState(1)
   const [selectedUser, setSelectedUser] = useState<User>()
+  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false)
   const [isUpdateUserDialogOpen, setIsUpdateUserDialogOpen] = useState(false)
   const [isDeleteUserAlertOpen, setIsDeleteUserAlertOpen] = useState(false)
 
@@ -61,6 +64,41 @@ export function Users() {
   function handleRequestUserDeletion(user: User) {
     setSelectedUser(user)
     setIsDeleteUserAlertOpen(true)
+  }
+
+  async function handleCreateUser(formData: z.infer<typeof createUserSchema>) {
+    if (!user) return
+
+    const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.create({
+      loggedUserId: user.id,
+      name: formData.name,
+      password: formData.password,
+      role: formData.role,
+    })
+
+    if (!err) {
+      toast({
+        title: 'Usuário criado com sucesso',
+        duration: 3000,
+      })
+
+      await loadUsers()
+      setIsCreateUserDialogOpen(false)
+    }
+
+    if (err) {
+      if (err.message === 'UserAlreadyExistsError') {
+        toast({
+          title: 'Já existe um usuário com esse nome.',
+          duration: 3000,
+        })
+      } else {
+        toast({
+          title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
+          duration: 3000,
+        })
+      }
+    }
   }
 
   async function handleUpdateUser(formData: z.infer<typeof updateUserSchema>) {
@@ -197,7 +235,23 @@ export function Users() {
         </Table>
       </div>
 
-      <Footer role={user?.role} page={pagination} total={total} onChange={setPagination} />
+      <Footer
+        role={user?.role}
+        page={pagination}
+        total={total}
+        onChange={setPagination}
+        onRequestCreateUser={() => {
+          setIsCreateUserDialogOpen(true)
+        }}
+      />
+
+      <CreateUserAction
+        isOpen={isCreateUserDialogOpen}
+        onCreateUser={handleCreateUser}
+        onClose={() => {
+          setIsCreateUserDialogOpen(false)
+        }}
+      />
 
       <UpdateUserAction
         isOpen={isUpdateUserDialogOpen}

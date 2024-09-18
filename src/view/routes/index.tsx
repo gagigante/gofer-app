@@ -4,7 +4,6 @@ import { createHashRouter } from 'react-router-dom'
 import { Login } from '@/view/pages/Login'
 import { Home } from '@/view/pages/Home'
 import { Users } from '@/view/pages/Users'
-import { CreateUser } from '@/view/pages/CreateUser'
 import { NotFound } from '@/view/pages/404'
 import { Layout } from '@/view/components/Layout'
 import { ProtectedRoute } from './ProtectedRoute'
@@ -29,10 +28,6 @@ export const router = createHashRouter([
       {
         path: 'users',
         element: <Users />,
-      },
-      {
-        path: 'users/new',
-        element: <CreateUser />,
       },
       {
         path: '*',
