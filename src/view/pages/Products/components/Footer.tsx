@@ -17,7 +17,9 @@ export const Footer = ({ page, total, onChange, onRequestCreateProduct, onReques
       <Pagination currentPage={page} total={total} onChangePage={onChange} />
 
       <div className="flex gap-2">
-        <Button onClick={onRequestCreateProduct}>Adicionar produto</Button>
+        <Button onClick={onRequestCreateProduct} asChild>
+          <Link to="new">Adicionar produto</Link>
+        </Button>
 
         <Button variant="outline" onClick={onRequestCreateCategory}>
           Adicionar categoria
