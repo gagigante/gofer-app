@@ -63,7 +63,11 @@ export function Sidebar() {
               </Link>
             </Button>
 
-            <Button asChild variant="ghost" className="w-full justify-start">
+            <Button
+              asChild
+              variant={pathname.includes('/home/products') ? 'default' : 'ghost'}
+              className="w-full justify-start"
+            >
               <Link to="/home/products">
                 <FiBox className="w-4 h-4 mr-3" />
                 Produtos

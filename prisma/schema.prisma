@@ -25,7 +25,7 @@ model User {
 model Product {
   id                String    @id
   barCode           String    @unique @map("bar_code")
-  name              String
+  name              String    @unique
   description       String?
   brand             String
   price             BigInt
@@ -47,7 +47,7 @@ model Category {
   id          String    @id
   name        String    @unique
   description String?
-  products   Product[]
+  products    Product[]
 
   @@map("categories")
 }

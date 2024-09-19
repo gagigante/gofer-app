@@ -1,6 +1,7 @@
 import path from 'path'
 import { app, BrowserWindow } from 'electron'
 import { updateElectronApp } from 'update-electron-app'
+
 import '@/api/db'
 
 updateElectronApp()
@@ -58,3 +59,4 @@ app.on('activate', () => {
 import('@/api/handlers/login-handlers')
 import('@/api/handlers/users-handler')
 import('@/api/handlers/categories-handler')
+import('@/api/handlers/products-handler')
