@@ -99,7 +99,6 @@ export function CreateCategoryAction({ isOpen, onCreateCategory, onClose }: Crea
             placeholder="Descrição opcional da categoria"
             className="col-span-3"
             rows={5}
-            required
             {...register('description')}
           />
         </div>
