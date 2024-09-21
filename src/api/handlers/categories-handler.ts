@@ -1,6 +1,10 @@
 import { ipcMain } from 'electron'
 
-import { CategoriesController, type CreateCategoryRequest } from '@/api/controllers/categories-controller'
+import {
+  CategoriesController,
+  type CreateCategoryRequest,
+  type DeleteCategoryRequest,
+} from '@/api/controllers/categories-controller'
 
 export interface ListCategoriesData {
   loggedUserId: string
@@ -14,11 +18,6 @@ export interface UpdateCategoryData {
   categoryId: string
   updatedName: string
   updatedDescription?: string
-}
-
-export interface DeleteCategoryData {
-  loggedUserId: string
-  categoryId: string
 }
 
 const categoryController = new CategoriesController()
@@ -47,8 +46,7 @@ ipcMain.handle('categories:update', async (_event, data: UpdateCategoryData) => 
 
 ipcMain.handle(
   'categories:delete',
-  async (_event, data: DeleteCategoryData) =>
-    await categoryController.deleteCategory(data.loggedUserId, data.categoryId),
+  async (_event, data: DeleteCategoryRequest) => await categoryController.deleteCategory(data),
 )
 
 export {}

@@ -15,7 +15,7 @@ export const DeleteCategoryAction = ({ isOpen, onDelete, onClose }: DeleteCatego
       isOpen={isOpen}
       title="Apagar categoria"
       description={`
-        Deseja mesmo apagar o usuário?
+        Deseja mesmo apagar esta categoria?
         Ao remover a categoria, os produtos associados a ela deixarão de ter uma categoria associada.
       `}
       cancelButton={<Button variant="outline">Cancelar</Button>}

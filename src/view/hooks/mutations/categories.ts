@@ -3,9 +3,14 @@ import { useMutation } from '@tanstack/react-query'
 import { queryClient } from '@/view/contexts/ReactQueryContext'
 
 import { type CategoriesApi, type apiName } from '@/api/exposes/categories-api'
-import { type CreateCategoryRequest, type CreateCategoryResponse } from '@/api/controllers/categories-controller'
+import {
+  type CreateCategoryRequest,
+  type CreateCategoryResponse,
+  type DeleteCategoryRequest,
+  type DeleteCategoryResponse,
+} from '@/api/controllers/categories-controller'
 
-export const useMutateOnCreateCategory = () => {
+export function useMutateOnCreateCategory() {
   return useMutation<CreateCategoryResponse['data'], Error, CreateCategoryRequest>({
     mutationFn: async ({ loggedUserId, name, description = '' }) => {
       const { data, err } = await (window as unknown as Record<typeof apiName, CategoriesApi>).categoriesApi.create({
@@ -21,7 +26,7 @@ export const useMutateOnCreateCategory = () => {
       return data
     },
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['categories'] })
 
       return response
     },
@@ -42,14 +47,24 @@ export const useMutateOnCreateCategory = () => {
 //   })
 // }
 
-// export const useMutateOnDeleteCategory = () => {
-//   const { apiClient } = useApi()
+export const useMutateOnDeleteCategory = () => {
+  return useMutation<DeleteCategoryResponse['data'], Error, DeleteCategoryRequest>({
+    mutationFn: async ({ loggedUserId, categoryId }) => {
+      const { data, err } = await (window as unknown as Record<typeof apiName, CategoriesApi>).categoriesApi.delete({
+        loggedUserId,
+        categoryId,
+      })
 
-//   const service = productsService(apiClient.privateApi)
+      if (err) {
+        throw err
+      }
 
-//   return useMutation(service.deleteProduct, {
-//     onSuccess: async () => {
-//       await queryClient.invalidateQueries(['categories'])
-//     },
-//   })
-// }
+      return data
+    },
+    onSuccess: async (response) => {
+      await queryClient.invalidateQueries({ queryKey: ['categories'] })
+
+      return response
+    },
+  })
+}

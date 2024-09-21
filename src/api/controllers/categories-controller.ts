@@ -25,6 +25,13 @@ export interface CreateCategoryRequest {
 
 export type CreateCategoryResponse = Response<Category>
 
+export interface DeleteCategoryRequest {
+  loggedUserId: string
+  categoryId: string
+}
+
+export type DeleteCategoryResponse = Response<null>
+
 export type UpdateCategoryResponse = Response<Category>
 
 export class CategoriesController {
@@ -86,7 +93,7 @@ export class CategoriesController {
     return { data: createdCategory, err: null }
   }
 
-  public async deleteCategory(loggedUserId: string, categoryId: string): Promise<Response<null>> {
+  public async deleteCategory({ loggedUserId, categoryId }: DeleteCategoryRequest): Promise<DeleteCategoryResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {

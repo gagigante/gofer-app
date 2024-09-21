@@ -1,16 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-import {
-  type ListCategoriesData,
-  type UpdateCategoryData,
-  type DeleteCategoryData,
-} from '../handlers/categories-handler'
+import { type ListCategoriesData, type UpdateCategoryData } from '../handlers/categories-handler'
 
-import { type Response } from '../types/response'
 import {
   type ListCategoriesResponse,
   type CreateCategoryRequest,
   type CreateCategoryResponse,
+  type DeleteCategoryRequest,
+  type DeleteCategoryResponse,
   type UpdateCategoryResponse,
 } from '../controllers/categories-controller'
 
@@ -18,7 +15,7 @@ export interface CategoriesApi {
   list: (data: ListCategoriesData) => Promise<ListCategoriesResponse>
   create: (data: CreateCategoryRequest) => Promise<CreateCategoryResponse>
   update: (data: UpdateCategoryData) => Promise<UpdateCategoryResponse>
-  delete: (data: DeleteCategoryData) => Promise<Response<null>>
+  delete: (data: DeleteCategoryRequest) => Promise<DeleteCategoryResponse>
 }
 
 export const apiName = 'categoriesApi'
