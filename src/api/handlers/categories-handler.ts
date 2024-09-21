@@ -2,17 +2,11 @@ import { ipcMain } from 'electron'
 
 import {
   CategoriesController,
+  type ListCategoriesRequest,
   type CreateCategoryRequest,
   type UpdateCategoryRequest,
   type DeleteCategoryRequest,
 } from '@/api/controllers/categories-controller'
-
-export interface ListCategoriesData {
-  loggedUserId: string
-  name?: string
-  page?: number
-  itemsPerPage?: number
-}
 
 export interface UpdateCategoryData {
   loggedUserId: string
@@ -25,8 +19,7 @@ const categoryController = new CategoriesController()
 
 ipcMain.handle(
   'categories:list',
-  async (_event, { loggedUserId, name, page, itemsPerPage }: ListCategoriesData) =>
-    await categoryController.listCategories(loggedUserId, name, page, itemsPerPage),
+  async (_event, data: ListCategoriesRequest) => await categoryController.listCategories(data),
 )
 
 ipcMain.handle(

@@ -3,15 +3,22 @@ import { PrismaClient, type Category } from '@prisma/client'
 export class CategoriesRepository {
   private readonly prisma = new PrismaClient()
 
-  public async getCategories(name = '', page = 1, itemsPerPage = 15): Promise<Category[]> {
+  public async getCategories(
+    name = '',
+    page = 1,
+    itemsPerPage = 15,
+  ): Promise<Array<Category & { _count: { products: number } }>> {
     const categories = await this.prisma.category.findMany({
       where: {
         name: {
           contains: name,
         },
       },
+      include: {
+        _count: { select: { products: true } },
+      },
       take: itemsPerPage,
-      skip: page === 1 ? 0 : page,
+      skip: page === 1 ? 0 : (page - 1) * itemsPerPage,
     })
 
     return categories

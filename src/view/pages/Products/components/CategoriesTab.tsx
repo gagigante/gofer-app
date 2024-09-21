@@ -18,9 +18,10 @@ import { type createCategorySchema } from './CreateCategoryAction/schema'
 
 interface CategoriesTabProps {
   categories: CategoryWithProductsQuantity[]
+  onDelete: () => void
 }
 
-export function CategoriesTab({ categories }: CategoriesTabProps) {
+export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -93,6 +94,7 @@ export function CategoriesTab({ categories }: CategoriesTabProps) {
             title: 'Categoria removida com sucesso.',
             duration: 3000,
           })
+          onDelete()
         },
         onError: () => {
           toast({

@@ -10,8 +10,15 @@ import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsEr
 
 import { type Response } from '@/api/types/response'
 
+export interface ListCategoriesRequest {
+  loggedUserId: string
+  name?: string
+  page?: number
+  itemsPerPage?: number
+}
+
 export type ListCategoriesResponse = Response<{
-  categories: Category[]
+  categories: Array<Category & { productsQuantity: number }>
   page: number
   itemsPerPage: number
   total: number
@@ -50,12 +57,12 @@ export class CategoriesController {
     this.categoriesRepository = new CategoriesRepository()
   }
 
-  public async listCategories(
-    loggedUserId: string,
+  public async listCategories({
+    loggedUserId,
     name = '',
     page = 1,
     itemsPerPage = 15,
-  ): Promise<ListCategoriesResponse> {
+  }: ListCategoriesRequest): Promise<ListCategoriesResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -66,7 +73,12 @@ export class CategoriesController {
     const total = await this.categoriesRepository.countCategories(name)
     const categories = await this.categoriesRepository.getCategories(name, page, itemsPerPage)
 
-    const data = { categories, total, page, itemsPerPage }
+    const formattedCategories = categories.map((category) => ({
+      ...category,
+      productsQuantity: category._count.products,
+    }))
+
+    const data = { categories: formattedCategories, total, page, itemsPerPage }
 
     return { data, err: null }
   }
