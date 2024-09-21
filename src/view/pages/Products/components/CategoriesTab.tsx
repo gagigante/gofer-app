@@ -1,33 +1,83 @@
 import React, { useState } from 'react'
+import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 
+import { UpdateCategoryAction } from './UpdateCategoryAction'
 import { DeleteCategoryAction } from './DeleteCategoryAction'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
-import { useMutateOnDeleteCategory } from '@/view/hooks/mutations/categories'
+import { useMutateOnDeleteCategory, useMutateOnUpdateCategory } from '@/view/hooks/mutations/categories'
 
 import { type CategoryWithProductsQuantity } from '..'
+import { type createCategorySchema } from './CreateCategoryAction/schema'
 
 interface CategoriesTabProps {
   categories: CategoryWithProductsQuantity[]
-  onRequestUpdateCategory: (category: CategoryWithProductsQuantity) => void
 }
 
-export function CategoriesTab({ categories, onRequestUpdateCategory }: CategoriesTabProps) {
+export function CategoriesTab({ categories }: CategoriesTabProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync } = useMutateOnDeleteCategory()
+  const { mutateAsync: mutateOnUpdate } = useMutateOnUpdateCategory()
+  const { mutateAsync: mutateOnDelete } = useMutateOnDeleteCategory()
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryWithProductsQuantity>()
+  const [isUpdateCategoryDialogOpen, setIsUpdateCategoryDialogOpen] = useState(false)
   const [isDeleteCategoryAlertOpen, setIsDeleteCategoryAlertOpen] = useState(false)
 
-  function handleRequestUserDeletion(category: CategoryWithProductsQuantity) {
+  function handleRequestCategoryUpdate(category: CategoryWithProductsQuantity) {
+    setSelectedCategory(category)
+    setIsUpdateCategoryDialogOpen(true)
+  }
+
+  async function handleUpdateCategory(data: z.infer<typeof createCategorySchema> & { categoryId: string }) {
+    if (!user) return
+
+    await mutateOnUpdate(
+      {
+        loggedUserId: user.id,
+        categoryId: data.categoryId,
+        updatedName: data.name,
+        updatedDescription: data.description,
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: 'Categoria atualizada com sucesso.',
+            duration: 3000,
+          })
+
+          setIsUpdateCategoryDialogOpen(false)
+          setSelectedCategory(undefined)
+        },
+        onError: (err) => {
+          if (err.message === 'CategoryAlreadyExistsError') {
+            toast({
+              title: 'Ja existe uma categoria com este nome.',
+              duration: 3000,
+            })
+            return
+          }
+
+          toast({
+            title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+            duration: 3000,
+          })
+
+          setIsUpdateCategoryDialogOpen(false)
+          setSelectedCategory(undefined)
+        },
+      },
+    )
+  }
+
+  function handleRequestCategoryDeletion(category: CategoryWithProductsQuantity) {
     setSelectedCategory(category)
     setIsDeleteCategoryAlertOpen(true)
   }
@@ -35,12 +85,12 @@ export function CategoriesTab({ categories, onRequestUpdateCategory }: Categorie
   async function handleDeleteCategory(categoryId: string) {
     if (!user) return
 
-    await mutateAsync(
+    await mutateOnDelete(
       { loggedUserId: user.id, categoryId },
       {
         onSuccess: () => {
           toast({
-            title: 'Categoria removido com sucesso.',
+            title: 'Categoria removida com sucesso.',
             duration: 3000,
           })
         },
@@ -52,6 +102,7 @@ export function CategoriesTab({ categories, onRequestUpdateCategory }: Categorie
         },
         onSettled: () => {
           setIsDeleteCategoryAlertOpen(false)
+          setSelectedCategory(undefined)
         },
       },
     )
@@ -92,7 +143,7 @@ export function CategoriesTab({ categories, onRequestUpdateCategory }: Categorie
                     const category = categories.find((item) => item.id === id)
 
                     if (category) {
-                      onRequestUpdateCategory(category)
+                      handleRequestCategoryUpdate(category)
                     }
                   }}
                 >
@@ -106,7 +157,7 @@ export function CategoriesTab({ categories, onRequestUpdateCategory }: Categorie
                     const category = categories.find((item) => item.id === id)
 
                     if (category) {
-                      handleRequestUserDeletion(category)
+                      handleRequestCategoryDeletion(category)
                     }
                   }}
                 >
@@ -117,6 +168,22 @@ export function CategoriesTab({ categories, onRequestUpdateCategory }: Categorie
           ))}
         </TableBody>
       </Table>
+
+      <UpdateCategoryAction
+        selectedCategory={selectedCategory}
+        isOpen={isUpdateCategoryDialogOpen}
+        onUpdateCategory={async (updatedCategory) => {
+          if (!selectedCategory) return
+
+          await handleUpdateCategory({
+            categoryId: selectedCategory.id,
+            ...updatedCategory,
+          })
+        }}
+        onClose={() => {
+          setIsUpdateCategoryDialogOpen(false)
+        }}
+      />
 
       <DeleteCategoryAction
         isOpen={isDeleteCategoryAlertOpen}

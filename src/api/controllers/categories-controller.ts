@@ -32,6 +32,13 @@ export interface DeleteCategoryRequest {
 
 export type DeleteCategoryResponse = Response<null>
 
+export interface UpdateCategoryRequest {
+  loggedUserId: string
+  categoryId: string
+  updatedName: string
+  updatedDescription?: string
+}
+
 export type UpdateCategoryResponse = Response<Category>
 
 export class CategoriesController {
@@ -114,12 +121,12 @@ export class CategoriesController {
     return { data: null, err: null }
   }
 
-  public async updateCategory(
-    loggedUserId: string,
-    categoryId: string,
-    updatedName: string,
+  public async updateCategory({
+    loggedUserId,
+    categoryId,
+    updatedName,
     updatedDescription = '',
-  ): Promise<UpdateCategoryResponse> {
+  }: UpdateCategoryRequest): Promise<UpdateCategoryResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -127,17 +134,17 @@ export class CategoriesController {
       return { data: null, err }
     }
 
-    const categoryToBeUpdated = await this.categoriesRepository.getCategoryById(categoryId)
+    let categoryWithUpdatedName = await this.categoriesRepository.getCategoryById(categoryId)
 
-    if (!categoryToBeUpdated) {
+    if (!categoryWithUpdatedName) {
       const err = new NotFoundError()
 
       return { data: null, err }
     }
 
-    categoryToBeUpdated = await this.categoriesRepository.getCategoryByName(updatedName)
+    categoryWithUpdatedName = await this.categoriesRepository.getCategoryByName(updatedName)
 
-    if (categoryToBeUpdated) {
+    if (categoryWithUpdatedName && categoryWithUpdatedName.id !== categoryId) {
       const err = new CategoryAlreadyExistsError()
 
       return { data: null, err }

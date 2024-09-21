@@ -14,12 +14,10 @@ import { useToast } from '@/view/components/ui/use-toast'
 
 import { createCategorySchema } from './CreateCategoryAction/schema'
 
-import { type apiName, type CategoriesApi } from '@/api/exposes/categories-api'
-
 interface UpdateCategoryActionProps {
   isOpen: boolean
   selectedCategory?: Category
-  onUpdateCategory: (data: Category) => Promise<void>
+  onUpdateCategory: (data: z.infer<typeof createCategorySchema>) => Promise<void>
   onClose: () => void
 }
 
@@ -43,39 +41,12 @@ export function UpdateCategoryAction({
   useEffect(() => {
     setValue('name', selectedCategory?.name ?? '')
     setValue('description', selectedCategory?.description ?? '')
-  }, [selectedCategory])
+  }, [isOpen])
 
   async function onSubmit(data: z.infer<typeof createCategorySchema>) {
     if (!user || !selectedCategory) return
 
-    const { data: response, err } = await (
-      window as unknown as Record<typeof apiName, CategoriesApi>
-    ).categoriesApi.update({
-      loggedUserId: user.id,
-      categoryId: selectedCategory.id,
-      updatedName: data.name,
-      updatedDescription: data.description,
-    })
-
-    if (err) {
-      if (err.message === 'CategoryAlreadyExistsError') {
-        toast({
-          title: 'Ja existe uma categoria com este nome.',
-          duration: 3000,
-        })
-        return
-      }
-
-      toast({
-        title: 'Houve um erro ao apagar o usuário. Tente novamente.',
-        duration: 3000,
-      })
-      return
-    }
-
-    onUpdateCategory(response)
-    onClose()
-    reset()
+    onUpdateCategory(data)
   }
 
   const onSubmitInvalid: SubmitErrorHandler<FieldValues> = (errors) => {

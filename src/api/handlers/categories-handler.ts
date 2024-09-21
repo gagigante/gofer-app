@@ -3,6 +3,7 @@ import { ipcMain } from 'electron'
 import {
   CategoriesController,
   type CreateCategoryRequest,
+  type UpdateCategoryRequest,
   type DeleteCategoryRequest,
 } from '@/api/controllers/categories-controller'
 
@@ -33,13 +34,8 @@ ipcMain.handle(
   async (_event, data: CreateCategoryRequest) => await categoryController.createCategory(data),
 )
 
-ipcMain.handle('categories:update', async (_event, data: UpdateCategoryData) => {
-  const response = await categoryController.updateCategory(
-    data.loggedUserId,
-    data.categoryId,
-    data.updatedName,
-    data.updatedDescription,
-  )
+ipcMain.handle('categories:update', async (_event, data: UpdateCategoryRequest) => {
+  const response = await categoryController.updateCategory(data)
 
   return response
 })
