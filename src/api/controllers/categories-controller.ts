@@ -17,6 +17,12 @@ export type ListCategoriesResponse = Response<{
   total: number
 }>
 
+export interface CreateCategoryRequest {
+  loggedUserId: string
+  name: string
+  description?: string
+}
+
 export type CreateCategoryResponse = Response<Category>
 
 export type UpdateCategoryResponse = Response<Category>
@@ -51,12 +57,11 @@ export class CategoriesController {
     return { data, err: null }
   }
 
-  public async createCategory(
-    loggedUserId: string,
-    name: string,
-    description: string,
-    productsIds: string[] = [],
-  ): Promise<CreateCategoryResponse> {
+  public async createCategory({
+    loggedUserId,
+    name,
+    description = '',
+  }: CreateCategoryRequest): Promise<CreateCategoryResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -76,7 +81,6 @@ export class CategoriesController {
       id: randomUUID(),
       name,
       description,
-      productsIds,
     })
 
     return { data: createdCategory, err: null }

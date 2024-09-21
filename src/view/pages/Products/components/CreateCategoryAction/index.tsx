@@ -1,5 +1,4 @@
 import React from 'react'
-import { type Category } from '@prisma/client'
 import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type * as z from 'zod'
@@ -9,22 +8,22 @@ import { Input } from '@/view/components/ui/input'
 import { Textarea } from '@/view/components/ui/textarea'
 import { Dialog } from '@/view/components/Dialog'
 
-import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
+import { useAuth } from '@/view/hooks/useAuth'
+import { useMutateOnCreateCategory } from '@/view/hooks/mutations/categories'
 
 import { createCategorySchema } from './schema'
 
-import { type apiName, type CategoriesApi } from '@/api/exposes/categories-api'
-
 interface CreateCategoryActionProps {
   isOpen: boolean
-  onCreateCategory: (data: Category) => Promise<void>
   onClose: () => void
 }
 
-export function CreateCategoryAction({ isOpen, onCreateCategory, onClose }: CreateCategoryActionProps) {
+export function CreateCategoryAction({ isOpen, onClose }: CreateCategoryActionProps) {
   const { user } = useAuth()
   const { toast } = useToast()
+
+  const { mutateAsync } = useMutateOnCreateCategory()
 
   const { register, handleSubmit, reset } = useForm<z.infer<typeof createCategorySchema>>({
     resolver: zodResolver(createCategorySchema),
@@ -37,27 +36,27 @@ export function CreateCategoryAction({ isOpen, onCreateCategory, onClose }: Crea
   async function onSubmit(data: z.infer<typeof createCategorySchema>) {
     if (!user) return
 
-    const { data: response, err } = await (
-      window as unknown as Record<typeof apiName, CategoriesApi>
-    ).categoriesApi.create({
-      loggedUserId: user.id,
-      name: data.name,
-      description: data.description,
-    })
-
-    if (!err) {
-      onCreateCategory(response)
-      onClose()
-      reset()
-      return
-    }
-
-    if (err.message === 'CategoryAlreadyExistsError') {
-      toast({
-        title: 'Ja existe uma categoria com este nome.',
-        duration: 3000,
-      })
-    }
+    await mutateAsync(
+      {
+        loggedUserId: user.id,
+        name: data.name,
+        description: data.description,
+      },
+      {
+        onError: (err) => {
+          if (err.message === 'CategoryAlreadyExistsError') {
+            toast({
+              title: 'Ja existe uma categoria com este nome.',
+              duration: 3000,
+            })
+          }
+        },
+        onSuccess: () => {
+          onClose()
+          reset()
+        },
+      },
+    )
   }
 
   const onSubmitInvalid: SubmitErrorHandler<FieldValues> = (errors) => {

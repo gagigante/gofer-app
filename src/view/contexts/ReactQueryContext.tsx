@@ -5,7 +5,7 @@ interface ReactQueryContextProps {
   children: ReactNode
 }
 
-const queryClient = new QueryClient()
+export const queryClient = new QueryClient()
 
 export function ReactQueryContext({ children }: ReactQueryContextProps) {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

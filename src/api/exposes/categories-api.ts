@@ -3,20 +3,20 @@ import { contextBridge, ipcRenderer } from 'electron'
 import {
   type ListCategoriesData,
   type UpdateCategoryData,
-  type CreateCategoryData,
   type DeleteCategoryData,
 } from '../handlers/categories-handler'
 
 import { type Response } from '../types/response'
 import {
   type ListCategoriesResponse,
+  type CreateCategoryRequest,
   type CreateCategoryResponse,
   type UpdateCategoryResponse,
 } from '../controllers/categories-controller'
 
 export interface CategoriesApi {
   list: (data: ListCategoriesData) => Promise<ListCategoriesResponse>
-  create: (data: CreateCategoryData) => Promise<CreateCategoryResponse>
+  create: (data: CreateCategoryRequest) => Promise<CreateCategoryResponse>
   update: (data: UpdateCategoryData) => Promise<UpdateCategoryResponse>
   delete: (data: DeleteCategoryData) => Promise<Response<null>>
 }
