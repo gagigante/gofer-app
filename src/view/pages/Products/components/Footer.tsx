@@ -1,28 +1,30 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
 
 import { Pagination } from '@/view/components/Pagination'
 import { Button } from '@/view/components/ui/button'
-
-import type { UserRole } from '@/api/types/user-role'
+import { Link } from 'react-router-dom'
 
 interface FooterProps {
-  role?: UserRole
   page: number
   total: number
   onChange: (page: number) => void
+  onRequestCreateCategory: () => void
 }
 
-export const Footer = ({ role, page, total, onChange }: FooterProps) => {
+export const Footer = ({ page, total, onChange, onRequestCreateCategory }: FooterProps) => {
   return (
     <footer className="flex px-3 py-4 border-t border-border">
       <Pagination currentPage={page} total={total} onChangePage={onChange} />
 
-      {role !== 'operator' && (
+      <div className="flex gap-2">
         <Button asChild>
-          <Link to="new">Adicionar usuário</Link>
+          <Link to="new">Adicionar produto</Link>
         </Button>
-      )}
+
+        <Button variant="outline" onClick={onRequestCreateCategory}>
+          Adicionar categoria
+        </Button>
+      </div>
     </footer>
   )
 }

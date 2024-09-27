@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -24,25 +25,30 @@ model User {
 
 model Product {
   id                String    @id
-  barCode           String    @unique @map("bar_code")
-  name              String
+  barCode           String?   @unique @map("bar_code")
+  name              String    @unique
   description       String?
-  brand             String
-  price             BigInt
-  costPrice         BigInt    @map("cost_price")
-  availableQuantity Int       @default(0) @map("available_quantity")
-  minimumQuantity   Int       @default(0) @map("minimum_quantity")
+  brand             String?
+  price             Int
+  costPrice         Int       @map("cost_price")
+  availableQuantity Int?      @default(0) @map("available_quantity")
+  minimumQuantity   Int?      @default(0) @map("minimum_quantity")
   categoryId        String?   @map("category_id")
   category          Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  icms              Int
+  ncm               String
+  cest              String
+  cestSegment       String?
+  cestDescription   String?
 
   @@map("products")
 }
 
 model Category {
   id          String    @id
-  name        String
-  description String
-  productis   Product[]
+  name        String    @unique
+  description String?
+  products    Product[]
 
   @@map("categories")
 }
