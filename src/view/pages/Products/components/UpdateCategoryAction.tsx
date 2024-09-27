@@ -74,7 +74,7 @@ export function UpdateCategoryAction({
       <div className="flex flex-col gap-4 py-4">
         <div className="grid grid-cols-4 items-center gap-4">
           <Label htmlFor="name" className="text-right">
-            Nome
+            Nome *
           </Label>
           <Input id="name" placeholder="Nome do produto" className="col-span-3" required {...register('name')} />
         </div>
