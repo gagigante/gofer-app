@@ -1,14 +1,14 @@
-import { PrismaClient, type Category } from '@prisma/client'
+import { type Category } from '@prisma/client'
+
+import { prisma } from '../db/client'
 
 export class CategoriesRepository {
-  private readonly prisma = new PrismaClient()
-
   public async getCategories(
     name = '',
     page = 1,
     itemsPerPage = 15,
   ): Promise<Array<Category & { _count: { products: number } }>> {
-    const categories = await this.prisma.category.findMany({
+    const categories = await prisma.category.findMany({
       where: {
         name: {
           contains: name,
@@ -25,7 +25,7 @@ export class CategoriesRepository {
   }
 
   public async countCategories(name = ''): Promise<number> {
-    const categoriesCount = await this.prisma.category.count({
+    const categoriesCount = await prisma.category.count({
       where: {
         name: {
           contains: name,
@@ -37,7 +37,7 @@ export class CategoriesRepository {
   }
 
   public async getCategoryById(categoryId: string): Promise<Category | null> {
-    const category = await this.prisma.category.findUnique({
+    const category = await prisma.category.findUnique({
       where: {
         id: categoryId,
       },
@@ -47,7 +47,7 @@ export class CategoriesRepository {
   }
 
   public async getCategoryByName(categoryName: string): Promise<Category | null> {
-    const category = await this.prisma.category.findUnique({
+    const category = await prisma.category.findUnique({
       where: {
         name: categoryName,
       },
@@ -64,7 +64,7 @@ export class CategoriesRepository {
   }: Omit<Category, 'products'> & { productsIds?: string[] }): Promise<Category> {
     const categoryProductsIds = productsIds.map((id) => ({ id }))
 
-    const category = await this.prisma.category.create({
+    const category = await prisma.category.create({
       data: {
         id,
         name,
@@ -79,7 +79,7 @@ export class CategoriesRepository {
   }
 
   public async updateCategory({ id, name, description }: Category): Promise<Category> {
-    const category = await this.prisma.category.update({
+    const category = await prisma.category.update({
       where: { id },
       data: {
         name,
@@ -91,7 +91,7 @@ export class CategoriesRepository {
   }
 
   public async deleteCategory(categoryId: string): Promise<void> {
-    await this.prisma.category.delete({
+    await prisma.category.delete({
       where: { id: categoryId },
     })
   }
