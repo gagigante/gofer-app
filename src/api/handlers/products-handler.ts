@@ -1,8 +1,16 @@
 import { ipcMain } from 'electron'
 
-import { type CreateProductRequest, ProductsController } from '../controllers/products-controller'
+import {
+  type CreateProductRequest,
+  type ListProductsRequest,
+  ProductsController,
+} from '../controllers/products-controller'
 
 const productsController = new ProductsController()
+
+ipcMain.handle('products:list', async (_event, data: ListProductsRequest) => {
+  return await productsController.listProducts(data)
+})
 
 ipcMain.handle(
   'products:create',

@@ -53,6 +53,27 @@ export class ProductsController {
     this.productsRepository = new ProductsRepository()
   }
 
+  public async listProducts({
+    loggedUserId,
+    name = '',
+    page = 1,
+    itemsPerPage = 15,
+  }: ListProductsRequest): Promise<ListProductsResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const total = await this.productsRepository.countProducts(name)
+    const products = await this.productsRepository.getProducts(name, page, itemsPerPage)
+
+    const data = { products, total, page, itemsPerPage }
+
+    return { data, err: null }
+  }
+
   public async createProduct({
     loggedUserId,
     barCode,

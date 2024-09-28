@@ -1,8 +1,7 @@
 import { randomUUID } from 'crypto'
 import { hash } from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
+import { prisma } from './client'
 
 export async function seed() {
   const id = randomUUID()

@@ -1,11 +1,11 @@
-import { PrismaClient, type User } from '@prisma/client'
+import { type User } from '@prisma/client'
 import { type UserRole } from '../types/user-role'
 
-export class UsersRepository {
-  private readonly prisma = new PrismaClient()
+import { prisma } from '../db/client'
 
+export class UsersRepository {
   public async getUserById(userId: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: userId },
     })
 
@@ -13,7 +13,7 @@ export class UsersRepository {
   }
 
   public async getUserByName(name: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { name },
     })
 
@@ -21,7 +21,7 @@ export class UsersRepository {
   }
 
   public async getUsers(name = '', page = 1, itemsPerPage = 15): Promise<User[]> {
-    const users = await this.prisma.user.findMany({
+    const users = await prisma.user.findMany({
       where: {
         name: {
           contains: name,
@@ -35,7 +35,7 @@ export class UsersRepository {
   }
 
   public async countUsers(name = ''): Promise<number> {
-    const usersCount = await this.prisma.user.count({
+    const usersCount = await prisma.user.count({
       where: {
         name: {
           contains: name,
@@ -47,7 +47,7 @@ export class UsersRepository {
   }
 
   public async createUser({ id, name, password, role }: User & { role: UserRole }): Promise<User> {
-    const user = await this.prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         id,
         name,
@@ -60,7 +60,7 @@ export class UsersRepository {
   }
 
   public async deleteUser(userId: string): Promise<void> {
-    await this.prisma.user.delete({
+    await prisma.user.delete({
       where: {
         id: userId,
       },
@@ -68,7 +68,7 @@ export class UsersRepository {
   }
 
   public async updateUser(userId: string, name: string, newPassword?: string): Promise<User> {
-    const user = await this.prisma.user.update({
+    const user = await prisma.user.update({
       where: {
         id: userId,
       },

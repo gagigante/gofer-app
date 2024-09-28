@@ -1,10 +1,43 @@
-import { PrismaClient, type Product } from '@prisma/client'
+import { type Product, type Category } from '@prisma/client'
+
+import { prisma } from '../db/client'
 
 export class ProductsRepository {
-  private readonly prisma = new PrismaClient()
+  public async getProducts(
+    name = '',
+    page = 1,
+    itemsPerPage = 15,
+  ): Promise<Array<Product & { category: Category | null }>> {
+    const products = await prisma.product.findMany({
+      where: {
+        name: {
+          contains: name,
+        },
+      },
+      include: {
+        category: true,
+      },
+      take: itemsPerPage,
+      skip: page === 1 ? 0 : page,
+    })
+
+    return products
+  }
+
+  public async countProducts(name = ''): Promise<number> {
+    const productsCount = await prisma.product.count({
+      where: {
+        name: {
+          contains: name,
+        },
+      },
+    })
+
+    return productsCount
+  }
 
   public async getProductByName(productName: string): Promise<Product | null> {
-    const product = await this.prisma.product.findUnique({
+    const product = await prisma.product.findUnique({
       where: {
         name: productName,
       },
@@ -14,7 +47,7 @@ export class ProductsRepository {
   }
 
   public async getProductByBarCode(productBarCode: string): Promise<Product | null> {
-    const product = await this.prisma.product.findUnique({
+    const product = await prisma.product.findUnique({
       where: {
         barCode: productBarCode,
       },
@@ -40,7 +73,7 @@ export class ProductsRepository {
     cestSegment,
     cestDescription,
   }: Product): Promise<Product> {
-    const product = await this.prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         id,
         barCode: barCode ?? '',
