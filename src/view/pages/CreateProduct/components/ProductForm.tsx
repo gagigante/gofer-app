@@ -168,7 +168,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           name="costPrice"
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Preço de custo *</FormLabel>
+              <FormLabel>Preço de custo (R$) *</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Digite o preço de custo do produto"
@@ -191,7 +191,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           name="price"
           render={({ field }) => (
             <FormItem className="flex-1">
-              <FormLabel>Preço *</FormLabel>
+              <FormLabel>Preço (R$) *</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Digite o preço do produto"
