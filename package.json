@@ -3,7 +3,7 @@
   "productName": "gofer-app",
   "description": "Gofer app",
   "author": "Gabriel Henrique Gigante da Silva",
-  "version": "1.0.13",
+  "version": "1.0.18",
   "repository": {
     "type": "git",
     "url": "https://github.com/gagigante/gofer-app"
