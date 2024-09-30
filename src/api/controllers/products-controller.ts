@@ -7,6 +7,7 @@ import { UsersRepository } from '../repositories/users-repository'
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
+import { NotFoundError } from '../errors/NotFoundError'
 
 import { type Response } from '@/api/types/response'
 
@@ -43,6 +44,27 @@ export interface CreateProductRequest {
 }
 
 export type CreateProductResponse = Response<Product>
+
+export interface UpdateProductRequest {
+  loggedUserId: string
+  productId: string
+  barCode: string
+  name: string
+  description?: string
+  brand: string
+  price: number
+  costPrice: number
+  availableQuantity?: number
+  minimumQuantity?: number
+  categoryId?: string
+  icms: number
+  ncm: string
+  cest: string
+  cestSegment?: string
+  cestDescription?: string
+}
+
+export type UpdateProductResponse = Response<Product>
 
 export class ProductsController {
   private readonly usersRepository: UsersRepository
@@ -116,7 +138,7 @@ export class ProductsController {
       }
     }
 
-    const createProduct = await this.productsRepository.createProduct({
+    const createdProduct = await this.productsRepository.createProduct({
       id: randomUUID(),
       barCode,
       name,
@@ -134,6 +156,78 @@ export class ProductsController {
       cestDescription,
     })
 
-    return { data: createProduct, err: null }
+    return { data: createdProduct, err: null }
+  }
+
+  public async updateProduct({
+    loggedUserId,
+    productId,
+    barCode,
+    name,
+    description = '',
+    brand,
+    price,
+    costPrice,
+    availableQuantity = 0,
+    minimumQuantity = 0,
+    categoryId,
+    icms,
+    ncm,
+    cest,
+    cestSegment = '',
+    cestDescription = '',
+  }: UpdateProductRequest): Promise<UpdateProductResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const productToBeUpdated = await this.productsRepository.getProductById(productId)
+
+    if (!productToBeUpdated) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    let response = await this.productsRepository.getProductByName(name)
+
+    if (response && response.id !== productId) {
+      const err = new ProductAlreadyExistsError()
+
+      return { data: null, err }
+    }
+
+    if (barCode) {
+      response = await this.productsRepository.getProductByBarCode(barCode)
+
+      if (response && response.id !== productId) {
+        const err = new ProductWithThisBarCodeALreadyExistsError()
+
+        return { data: null, err }
+      }
+    }
+
+    const updatedProduct = await this.productsRepository.updateProduct({
+      id: productId,
+      barCode,
+      name,
+      description,
+      brand,
+      price,
+      costPrice,
+      availableQuantity,
+      minimumQuantity,
+      categoryId: categoryId ?? null,
+      icms,
+      ncm,
+      cest,
+      cestSegment,
+      cestDescription,
+    })
+
+    return { data: updatedProduct, err: null }
   }
 }

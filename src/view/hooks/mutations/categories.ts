@@ -52,7 +52,10 @@ export function useMutateOnUpdateCategory() {
       return data
     },
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['categories'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories'] }),
+        queryClient.invalidateQueries({ queryKey: ['products'] }),
+      ])
 
       return response
     },
@@ -74,7 +77,10 @@ export function useMutateOnDeleteCategory() {
       return data
     },
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['categories'] })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['categories'] }),
+        queryClient.invalidateQueries({ queryKey: ['products'] }),
+      ])
 
       return response
     },

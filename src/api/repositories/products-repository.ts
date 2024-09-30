@@ -36,6 +36,16 @@ export class ProductsRepository {
     return productsCount
   }
 
+  public async getProductById(productId: string): Promise<Product | null> {
+    const product = await prisma.product.findUnique({
+      where: {
+        id: productId,
+      },
+    })
+
+    return product
+  }
+
   public async getProductByName(productName: string): Promise<Product | null> {
     const product = await prisma.product.findUnique({
       where: {
@@ -91,6 +101,15 @@ export class ProductsRepository {
         cestSegment,
         cestDescription,
       },
+    })
+
+    return product
+  }
+
+  public async updateProduct({ id, ...data }: Product): Promise<Product> {
+    const product = await prisma.product.update({
+      where: { id },
+      data,
     })
 
     return product

@@ -5,7 +5,7 @@ import { type apiName, type ProductsApi } from '@/api/exposes/products-api'
 
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
-export function useCategories(
+export function useProducts(
   { loggedUserId, name = '', page = 1, itemsPerPage = ITEMS_PER_PAGE }: ListProductsRequest,
   options?: Omit<UseQueryOptions<ListProductsResponse['data']>, 'queryKey'>,
 ) {

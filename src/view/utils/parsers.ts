@@ -6,3 +6,7 @@ export const parseStringNumber = (value: string) => {
   const [preComma, posComma] = value.split(',')
   return Number(`${preComma.replaceAll('.', '')}.${posComma}`)
 }
+
+export function parseCentsToDecimal(cents: number) {
+  return cents / 100
+}
