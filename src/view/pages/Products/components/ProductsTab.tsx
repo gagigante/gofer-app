@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { type Category, type Product } from '@prisma/client'
-import { FaEye } from 'react-icons/fa'
+import { FaEye, FaPencilAlt } from 'react-icons/fa'
 
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
@@ -15,12 +16,18 @@ interface ProductsTabProps {
 }
 
 export function ProductsTab({ products }: ProductsTabProps) {
+  const navigate = useNavigate()
+
   const [selectedProduct, setSelectedProduct] = useState<Product & { category: Category | null }>()
   const [isProductDetailsDialogOpen, setIsProductDetailsDialog] = useState(false)
 
   function handleRequestProductDetails(product: Product & { category: Category | null }) {
     setSelectedProduct(product)
     setIsProductDetailsDialog(true)
+  }
+
+  function handleRequestProductUpdate(product: Product & { category: Category | null }) {
+    navigate('update', { state: { selectedProduct: product } })
   }
 
   return (
@@ -67,6 +74,19 @@ export function ProductsTab({ products }: ProductsTabProps) {
                 >
                   <FaEye className="w-3 h-3" />
                 </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const product = products.find((item) => item.id === id)
+                    if (product) {
+                      handleRequestProductUpdate(product)
+                    }
+                  }}
+                >
+                  <FaPencilAlt className="w-3 h-3" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
@@ -76,7 +96,7 @@ export function ProductsTab({ products }: ProductsTabProps) {
       <ProductDetailsDialog
         product={selectedProduct}
         isOpen={isProductDetailsDialogOpen}
-        onRequestEdit={console.log}
+        onRequestEdit={handleRequestProductUpdate}
         onClose={() => {
           setIsProductDetailsDialog(false)
           setSelectedProduct(undefined)
