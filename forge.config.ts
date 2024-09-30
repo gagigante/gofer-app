@@ -57,6 +57,7 @@ const config: ForgeConfig = {
         draft: false,
         generateReleaseNotes: true,
         prerelease: false,
+        authToken: process.env.GITHUB_TOKEN,
       },
     },
   ],
