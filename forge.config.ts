@@ -56,6 +56,7 @@ const config: ForgeConfig = {
         },
         draft: false,
         generateReleaseNotes: true,
+        prerelease: false,
       },
     },
   ],
