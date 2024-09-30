@@ -11,16 +11,28 @@ import {
 import { Button } from '@/view/components/ui/button'
 
 interface DialogProps {
+  className?: string
   open: boolean
   title: string
   description?: string
   children?: ReactNode
   proceedButtonLabel: string
-  onProceed: () => Promise<void>
+  cancelButtonLabel?: string
+  onProceed: () => Promise<void> | void
   onClose: () => void
 }
 
-export function Dialog({ open, children, title, description, proceedButtonLabel, onProceed, onClose }: DialogProps) {
+export function Dialog({
+  className,
+  open,
+  children,
+  title,
+  description,
+  proceedButtonLabel,
+  cancelButtonLabel = 'Cancelar',
+  onProceed,
+  onClose,
+}: DialogProps) {
   return (
     <ShadDialog
       open={open}
@@ -30,18 +42,18 @@ export function Dialog({ open, children, title, description, proceedButtonLabel,
         }
       }}
     >
-      <DialogContent aria-describedby={undefined}>
+      <DialogContent className={className} aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
-        {children && <div>{children}</div>}
+        {children && <div className="flex-1 max-h-[480px] mx-[-1.5rem] p-6 overflow-auto">{children}</div>}
 
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" onClick={onClose}>
-              Cancelar
+              {cancelButtonLabel}
             </Button>
           </DialogClose>
 
