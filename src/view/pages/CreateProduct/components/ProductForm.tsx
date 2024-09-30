@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 import type * as z from 'zod'
+import { type Category, type Product } from '@prisma/client'
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/view/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
@@ -19,14 +20,39 @@ import { type createProductSchema } from '../schema'
 
 interface ProductFormProps {
   form: UseFormReturn<z.infer<typeof createProductSchema>>
+  defaultValue?: Product & { category: Category | null }
 }
 
-export function ProductForm({ form }: ProductFormProps) {
+export function ProductForm({ form, defaultValue }: ProductFormProps) {
   const { user } = useAuth()
 
   // TODO: paginate categories
-  const { data } = useCategories({ loggedUserId: user?.id ?? '', itemsPerPage: 99 }, { enabled: !!user?.id })
+  const { data, isLoading } = useCategories({ loggedUserId: user?.id ?? '', itemsPerPage: 99 }, { enabled: !!user?.id })
   const categories = data?.categories ?? []
+
+  useEffect(() => {
+    if (defaultValue) {
+      form.setValue('name', defaultValue.name)
+      form.setValue('brand', defaultValue.brand ?? '')
+      form.setValue('description', defaultValue.description ?? '')
+      form.setValue('barCode', defaultValue.barCode ?? '')
+      form.setValue('costPrice', formatDecimal(String(defaultValue.costPrice)))
+      form.setValue('price', formatDecimal(String(defaultValue.price)))
+      form.setValue('availableQuantity', defaultValue.availableQuantity ?? 0)
+      form.setValue('minimumQuantity', defaultValue.minimumQuantity ?? 0)
+      form.setValue('icms', formatDecimal(String(defaultValue.icms)))
+      form.setValue('ncm', formatNCM(defaultValue.ncm))
+      form.setValue('cest', formatCEST(defaultValue.cest))
+      form.setValue('cestSegment', defaultValue.cestSegment ?? '')
+      form.setValue('cestDescription', defaultValue.cestDescription ?? '')
+    }
+  }, [defaultValue])
+
+  useEffect(() => {
+    if (!isLoading && defaultValue) {
+      form.setValue('category', defaultValue.categoryId ?? '')
+    }
+  }, [isLoading, defaultValue])
 
   const [costPrice, price] = form.watch(['costPrice', 'price'])
   const profitMargin = (() => {
@@ -70,7 +96,7 @@ export function ProductForm({ form }: ProductFormProps) {
               // TODO: filter categories field
               <FormItem className="flex-1">
                 <FormLabel>Categoria</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione a categoria do produto" />
@@ -256,7 +282,7 @@ export function ProductForm({ form }: ProductFormProps) {
                       e.target.value = formatted
                       field.onChange(formatted)
                     }}
-                    maxLength={5}
+                    maxLength={6}
                   />
                 </FormControl>
                 <FormMessage />

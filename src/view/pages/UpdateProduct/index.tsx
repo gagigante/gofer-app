@@ -1,27 +1,30 @@
 import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { type Category, type Product } from '@prisma/client'
 import type * as z from 'zod'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Form } from '@/view/components/ui/form'
-
 import { Button } from '@/view/components/ui/button'
+import { ProductForm } from '../CreateProduct/components/ProductForm'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
-import { useMutateOnCreateProduct } from '@/view/hooks/mutations/products'
+import { useToast } from '@/view/components/ui/use-toast'
+import { useMutateOnUpdateProduct } from '@/view/hooks/mutations/products'
 
+import { createProductSchema } from '../CreateProduct/schema'
 import { parseStringNumber } from '@/view/utils/parsers'
-import { createProductSchema } from './schema'
-import { ProductForm } from './components/ProductForm'
 
-export function CreateProduct() {
+export function UpdateProduct() {
+  const {
+    state: { selectedProduct },
+  } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync } = useMutateOnCreateProduct()
+  const { mutateAsync } = useMutateOnUpdateProduct()
 
   const form = useForm<z.infer<typeof createProductSchema>>({
     resolver: zodResolver(createProductSchema),
@@ -49,7 +52,7 @@ export function CreateProduct() {
     const formattedValues = (() => {
       return {
         ...values,
-        categoryId: values.category,
+        categoryId: values.category || undefined,
         barCode: values.barCode,
         cest: values.cest.replaceAll('.', ''),
         ncm: values.ncm.replaceAll('.', ''),
@@ -60,11 +63,11 @@ export function CreateProduct() {
     })()
 
     await mutateAsync(
-      { loggedUserId: user.id, ...formattedValues },
+      { loggedUserId: user.id, productId: product.id, ...formattedValues },
       {
         onSuccess: () => {
           toast({
-            title: 'Produto criado com sucesso.',
+            title: 'Produto atualizado com sucesso.',
             duration: 3000,
           })
 
@@ -88,7 +91,7 @@ export function CreateProduct() {
           }
 
           toast({
-            title: 'Houve um erro ao criar o produto. Tente novamente.',
+            title: 'Houve um erro ao atualizar este produto. Tente novamente.',
             duration: 3000,
           })
         },
@@ -96,18 +99,20 @@ export function CreateProduct() {
     )
   }
 
+  const product = selectedProduct as Product & { category: Category | null }
+
   return (
     <Form {...form}>
       <form className="h-full flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex-1 px-3 py-6 overflow-auto">
-          <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Criar produto</h2>
+          <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Atualizar produto</h2>
 
-          <ProductForm form={form} />
+          <ProductForm form={form} defaultValue={product} />
         </div>
 
         <footer className="flex px-3 py-4 border-t border-border">
           <div className="flex gap-2 ml-auto">
-            <Button type="submit">Adicionar produto</Button>
+            <Button type="submit">Atualizar produto</Button>
 
             <Button variant="outline" asChild>
               <Link to=".." relative="path">
