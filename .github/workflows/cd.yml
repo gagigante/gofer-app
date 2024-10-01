@@ -24,16 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
-
-      # - name: Build Electron app
-      #   run: npm run make
-      #   env:
-      #     ENABLE_DEV_DATABASE: ${{ env.ENABLE_DEV_DATABASE }}
-      #     TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-      #     TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-      #     DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.DEFAULT_SUPER_ADMIN_USERNAME }}
-      #     DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.DEFAULT_SUPER_ADMIN_PASSWORD }}
-
+    
       - name: Publish to GitHub Releases
         run: yarn run publish
         env:
