@@ -12,7 +12,9 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { useCategories } from '@/view/hooks/queries/categories'
 import { useProducts } from '@/view/hooks/queries/products'
 
-export type CategoryWithProductsQuantity = Category & { productsQuantity: number }
+import { type Category } from '@/api/db/schema'
+
+export type CategoryWithProductsQuantity = Category & { products: number }
 
 export function Products() {
   const { user } = useAuth()

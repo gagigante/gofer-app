@@ -123,7 +123,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
         </TableHeader>
 
         <TableBody>
-          {categories.map(({ id, name, description, productsQuantity }) => (
+          {categories.map(({ id, name, description, products }) => (
             <TableRow key={id}>
               <TableCell>
                 <p className="font-medium">{name}</p>
@@ -134,7 +134,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
               </TableCell>
 
               <TableCell>
-                <p className="font-medium">{productsQuantity}</p>
+                <p className="font-medium">{products}</p>
               </TableCell>
 
               <TableCell className="flex-nowrap text-right space-x-1.5">
