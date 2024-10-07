@@ -14,7 +14,10 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint . --ext js,jsx,ts,tsx --fix"
+    "lint": "eslint . --ext js,jsx,ts,tsx --fix",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.5.0",
