@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1727918198628,
+      "tag": "0000_nebulous_masked_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1727919107880,
+      "tag": "0001_special_titania",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1727919938428,
+      "tag": "0002_cooing_devos",
+      "breakpoints": true
+    }
+  ]
+}

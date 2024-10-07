@@ -60,7 +60,7 @@ export function CreateProduct() {
     })()
 
     await mutateAsync(
-      { loggedUserId: user.id, ...formattedValues },
+      { loggedUserId: user.id, ...formattedValues } as any,
       {
         onSuccess: () => {
           toast({

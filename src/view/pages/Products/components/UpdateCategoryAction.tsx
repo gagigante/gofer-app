@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { type Category } from '@prisma/client'
 import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type * as z from 'zod'
@@ -13,6 +12,8 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
 
 import { createCategorySchema } from './CreateCategoryAction/schema'
+
+import { type Category } from '@/api/db/schema'
 
 interface UpdateCategoryActionProps {
   isOpen: boolean

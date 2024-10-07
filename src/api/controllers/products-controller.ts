@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto'
-import { type Category, type Product } from '@prisma/client'
 
 import { ProductsRepository } from '../repositories/products-repository'
 import { UsersRepository } from '../repositories/users-repository'
@@ -9,6 +8,7 @@ import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
 
+import { type Category, type Product } from '@/api/db/schema'
 import { type Response } from '@/api/types/response'
 
 export interface ListProductsRequest {

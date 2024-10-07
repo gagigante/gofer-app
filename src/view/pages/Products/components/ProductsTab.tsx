@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { type Category, type Product } from '@prisma/client'
 import { FaEye, FaPencilAlt } from 'react-icons/fa'
 
 import { TabsContent } from '@/view/components/ui/tabs'
@@ -10,6 +9,8 @@ import { ProductDetailsDialog } from './ProductDetailsDialog'
 
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 import { formatCurrency } from '@/view/utils/formatters'
+
+import { type Category, type Product } from '@/api/db/schema'
 
 interface ProductsTabProps {
   products: Array<Product & { category: Category | null }>
@@ -54,7 +55,7 @@ export function ProductsTab({ products }: ProductsTabProps) {
               </TableCell>
 
               <TableCell>
-                <p className="font-medium">{formatCurrency(parseCentsToDecimal(price))}</p>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
               </TableCell>
 
               <TableCell>

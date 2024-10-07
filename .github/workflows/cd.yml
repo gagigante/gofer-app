@@ -1,39 +1,36 @@
 name: CD
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+  build:
+    strategy:
+      matrix:
+        os:
+          [
+            { name: 'linux', image: 'ubuntu-latest' },
+            { name: 'windows', image: 'windows-latest' },
+            { name: 'macos', image: 'macos-latest' },
+          ]
 
+    runs-on: ${{ matrix.os.image }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-     
+      - name: Github checkout
+        uses: actions/checkout@v4
+
       - name: Read .nvmrc
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_OUTPUT
         id: nvm
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '${{ steps.nvm.outputs.NVMRC }}'
 
-      - name: Install dependencies
-        run: yarn install
-    
-      - name: Publish to GitHub Releases
-        run: yarn run publish
+      - run: npm ci
+      - name: Publish app
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_KEY }}
-          ENABLE_DEV_DATABASE: ${{ env.ENABLE_DEV_DATABASE }}
-          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
-          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
-          DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.DEFAULT_SUPER_ADMIN_USERNAME }}
-          DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.DEFAULT_SUPER_ADMIN_PASSWORD }}
 
-      - name: Notify deployment
-        run: echo "Deployment finished for version ${{ github.ref_name }}"
+        run: npm run publish

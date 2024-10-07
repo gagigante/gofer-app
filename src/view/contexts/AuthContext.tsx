@@ -36,7 +36,7 @@ interface Window {
   }
 }
 
-export const AuthContext = createContext<AuthContextProps>({} satisfies AuthContextProps)
+export const AuthContext = createContext<AuthContextProps>({} as AuthContextProps)
 
 export const AuthProvider = ({ children }: AuthProviderProps): ReactNode => {
   const { toast } = useToast()

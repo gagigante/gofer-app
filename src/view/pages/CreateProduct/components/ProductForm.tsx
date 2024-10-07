@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 import type * as z from 'zod'
-import { type Category, type Product } from '@prisma/client'
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/view/components/ui/form'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
@@ -16,7 +15,9 @@ import { useCategories } from '@/view/hooks/queries/categories'
 
 import { formatCEST, formatDecimal, formatNCM } from '@/view/utils/formatters'
 import { parseStringNumber } from '@/view/utils/parsers'
+
 import { type createProductSchema } from '../schema'
+import { type Category, type Product } from '@/api/db/schema'
 
 interface ProductFormProps {
   form: UseFormReturn<z.infer<typeof createProductSchema>>
@@ -32,7 +33,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
 
   useEffect(() => {
     if (defaultValue) {
-      form.setValue('name', defaultValue.name)
+      form.setValue('name', defaultValue.name ?? '')
       form.setValue('brand', defaultValue.brand ?? '')
       form.setValue('description', defaultValue.description ?? '')
       form.setValue('barCode', defaultValue.barCode ?? '')
@@ -41,8 +42,8 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
       form.setValue('availableQuantity', defaultValue.availableQuantity ?? 0)
       form.setValue('minimumQuantity', defaultValue.minimumQuantity ?? 0)
       form.setValue('icms', formatDecimal(String(defaultValue.icms)))
-      form.setValue('ncm', formatNCM(defaultValue.ncm))
-      form.setValue('cest', formatCEST(defaultValue.cest))
+      form.setValue('ncm', formatNCM(defaultValue.ncm ?? ''))
+      form.setValue('cest', formatCEST(defaultValue.cest ?? ''))
       form.setValue('cestSegment', defaultValue.cestSegment ?? '')
       form.setValue('cestDescription', defaultValue.cestDescription ?? '')
     }

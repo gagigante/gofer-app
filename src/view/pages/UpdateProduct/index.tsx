@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { type Category, type Product } from '@prisma/client'
 import type * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -15,6 +14,8 @@ import { useMutateOnUpdateProduct } from '@/view/hooks/mutations/products'
 
 import { createProductSchema } from '../CreateProduct/schema'
 import { parseStringNumber } from '@/view/utils/parsers'
+
+import { type Category, type Product } from '@/api/db/schema'
 
 export function UpdateProduct() {
   const {

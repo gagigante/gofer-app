@@ -1,6 +1,8 @@
-import { type Product, type Category } from '@prisma/client'
+import { asc, count, eq, like } from 'drizzle-orm'
 
-import { prisma } from '../db/client'
+import { db } from '../db/client'
+
+import { type Category, NewProduct, type Product, categories, products } from '../db/schema'
 
 export class ProductsRepository {
   public async getProducts(
@@ -8,62 +10,45 @@ export class ProductsRepository {
     page = 1,
     itemsPerPage = 15,
   ): Promise<Array<Product & { category: Category | null }>> {
-    const products = await prisma.product.findMany({
-      where: {
-        name: {
-          contains: name,
-        },
-      },
-      include: {
-        category: true,
-      },
-      take: itemsPerPage,
-      skip: page === 1 ? 0 : page,
-    })
+    const response = await db
+      .select()
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .where(like(products.name, `%${name}%`))            
+      .orderBy(asc(products.name))
+      .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
+      .limit(itemsPerPage)
 
-    return products
+    return response.map(item => {
+      return {
+        ...item.products,
+        category: item.categories,        
+      }
+    })
   }
 
   public async countProducts(name = ''): Promise<number> {
-    const productsCount = await prisma.product.count({
-      where: {
-        name: {
-          contains: name,
-        },
-      },
-    })
+    const [response] = await db.select({ count: count() }).from(products).where(like(products.name, `%${name}%`))
 
-    return productsCount
+    return response.count
   }
 
   public async getProductById(productId: string): Promise<Product | null> {
-    const product = await prisma.product.findUnique({
-      where: {
-        id: productId,
-      },
-    })
-
-    return product
+    const response = await db.select().from(products).where(eq(products.id, productId)).get()
+    
+    return response ?? null    
   }
 
   public async getProductByName(productName: string): Promise<Product | null> {
-    const product = await prisma.product.findUnique({
-      where: {
-        name: productName,
-      },
-    })
-
-    return product
+    const response = await db.select().from(products).where(eq(products.name, productName)).get()
+    
+    return response ?? null
   }
 
   public async getProductByBarCode(productBarCode: string): Promise<Product | null> {
-    const product = await prisma.product.findUnique({
-      where: {
-        barCode: productBarCode,
-      },
-    })
-
-    return product
+    const response = await db.select().from(products).where(eq(products.barCode, productBarCode)).get()
+    
+    return response ?? null    
   }
 
   public async createProduct({
@@ -82,36 +67,35 @@ export class ProductsRepository {
     cest,
     cestSegment,
     cestDescription,
-  }: Product): Promise<Product> {
-    const product = await prisma.product.create({
-      data: {
-        id,
-        barCode: barCode ?? '',
-        name,
-        description,
-        brand,
-        price,
-        costPrice,
-        availableQuantity,
-        minimumQuantity,
-        categoryId,
-        icms,
-        ncm,
-        cest,
-        cestSegment,
-        cestDescription,
-      },
-    })
+  }: NewProduct): Promise<Product> {
+    const [response] = await db.insert(products).values({
+      id,
+      barCode,
+      name,
+      description,
+      brand,
+      price,
+      costPrice,
+      availableQuantity,
+      minimumQuantity,
+      categoryId,
+      icms,
+      ncm,
+      cest,
+      cestSegment,
+      cestDescription,
+    }).returning()
 
-    return product
+    return response    
   }
 
   public async updateProduct({ id, ...data }: Product): Promise<Product> {
-    const product = await prisma.product.update({
-      where: { id },
-      data,
+    const [response] = await db.update(products).set({
+      ...data,
     })
+    .where(eq(products.id, id))
+    .returning()
 
-    return product
+    return response
   }
 }

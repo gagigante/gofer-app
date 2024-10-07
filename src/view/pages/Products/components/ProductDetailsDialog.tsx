@@ -1,5 +1,4 @@
 import React from 'react'
-import { type Category, type Product } from '@prisma/client'
 
 import { Dialog } from '@/view/components/Dialog'
 import { Input } from '@/view/components/ui/input'
@@ -10,6 +9,8 @@ import { Label } from '@/view/components/ui/label'
 
 import { formatCEST, formatCurrency, formatDecimal, formatNCM } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
+
+import { type Category, type Product } from '@/api/db/schema'
 
 interface ProductDetailsDialogProps {
   product?: Product & { category: Category | null }
@@ -22,8 +23,8 @@ export function ProductDetailsDialog({ product, isOpen, onRequestEdit, onClose }
   const profitMargin = (() => {
     if (!product) return
 
-    const costPriceNumber = product.costPrice * 100
-    const priceNumber = product.price * 100
+    const costPriceNumber = (product.costPrice ?? 0) * 100
+    const priceNumber = (product.price ?? 0) * 100
 
     const profit = priceNumber - costPriceNumber
     const profitMargin = (profit / costPriceNumber) * 100
@@ -55,7 +56,7 @@ export function ProductDetailsDialog({ product, isOpen, onRequestEdit, onClose }
           <div className="flex-1 flex flex-col gap-4">
             <Label htmlFor="name">Nome *</Label>
 
-            <Input id="name" value={product?.name} readOnly disabled />
+            <Input id="name" value={product?.name ?? ''} readOnly disabled />
           </div>
 
           <div className="flex-1 flex flex-col gap-4">

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
-import { type User } from '@prisma/client'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
@@ -14,21 +13,20 @@ import { CreateUserAction } from './components/CreateUserAction'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
+import { useUsers } from '@/view/hooks/queries/users'
+import { useMutateOnCreateUser, useMutateOnDeleteUser, useMutateOnUpdateUser } from '@/view/hooks/mutations/users'
 
-import { ROLES } from '@/view/constants/ROLES'
-import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
-
+import { type User } from '@/api/db/schema'
 import { type UserRole } from '@/api/types/user-role'
-import { type apiName, type UsersApi } from '@/api/exposes/users-api'
 import { type createUserSchema } from './components/CreateUserAction/schema'
 import { type updateUserSchema } from './components/UpdateUserAction/schema'
+
+import { ROLES } from '@/view/constants/ROLES'
 
 export function Users() {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const [users, setUsers] = useState<User[]>([])
-  const [total, setTotal] = useState(0)
   const [nameFilter, setNameFilter] = useState('')
   const [pagination, setPagination] = useState(1)
   const [selectedUser, setSelectedUser] = useState<User>()
@@ -36,25 +34,17 @@ export function Users() {
   const [isUpdateUserDialogOpen, setIsUpdateUserDialogOpen] = useState(false)
   const [isDeleteUserAlertOpen, setIsDeleteUserAlertOpen] = useState(false)
 
-  async function loadUsers(name = '', page = 1) {
-    if (!user) return
+  const { mutateAsync: mutateOnCreate } = useMutateOnCreateUser()
+  const { mutateAsync: mutateOnUpdate } = useMutateOnUpdateUser()
+  const { mutateAsync: mutateOnDelete } = useMutateOnDeleteUser()
 
-    const { data, err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.list({
-      loggedUserId: user.id,
-      name,
-      page,
-      itemsPerPage: ITEMS_PER_PAGE,
+  const { data } = useUsers(
+    { loggedUserId: user?.id ?? '', name: nameFilter, page: pagination }, 
+    {
+      enabled: !!user,
+      placeholderData: (previousData) => previousData,
     })
-
-    if (!err) {
-      setUsers(data.users)
-      setTotal(data.total)
-    }
-  }
-
-  useEffect(() => {
-    loadUsers(nameFilter, pagination)
-  }, [nameFilter, pagination])
+  const users = data?.users ?? []
 
   function handleRequestUserEdition(user: User) {
     setSelectedUser(user)
@@ -66,88 +56,95 @@ export function Users() {
     setIsDeleteUserAlertOpen(true)
   }
 
-  async function handleCreateUser(formData: z.infer<typeof createUserSchema>) {
+  async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
     if (!user) return
 
-    const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.create({
+    await mutateOnCreate({
       loggedUserId: user.id,
-      name: formData.name,
-      password: formData.password,
-      role: formData.role,
-    })
-
-    if (!err) {
-      toast({
-        title: 'Usuário criado com sucesso',
-        duration: 3000,
-      })
-
-      await loadUsers()
-      setIsCreateUserDialogOpen(false)
-    }
-
-    if (err) {
-      if (err.message === 'UserAlreadyExistsError') {
+      name: data.name,
+      password: data.password,
+      role: data.role,
+    }, {
+      onSuccess: () => {
         toast({
-          title: 'Já existe um usuário com esse nome.',
+          title: 'Usuário criado com sucesso',
           duration: 3000,
         })
-      } else {
+        setIsCreateUserDialogOpen(false)
+      },
+      onError: (err) => {
+        if (err.message === 'UserAlreadyExistsError') {
+          toast({
+            title: 'Já existe um usuário com esse nome.',
+            duration: 3000,
+          })
+          return
+        } 
+        
         toast({
           title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
           duration: 3000,
-        })
+        })        
       }
-    }
+    })  
   }
 
-  async function handleUpdateUser(formData: z.infer<typeof updateUserSchema>) {
+  async function handleUpdateUser(data: z.infer<typeof updateUserSchema>) {
     if (!user) return
 
-    const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.update({
+    await mutateOnUpdate({
       loggedUserId: user.id,
-      updatedName: formData.name,
-      currentPassword: formData.password,
-      newPassword: formData.newPassword,
-      newPasswordConfirmation: formData.newPasswordConfirmation,
+      updatedName: data.name,
+      currentPassword: data.password,
+      newPassword: data.newPassword,
+      newPasswordConfirmation: data.newPasswordConfirmation,
+    }, {
+      onSuccess: () => {
+        toast({
+          title: 'Usuário atualizado com sucesso',
+          duration: 3000,
+        })
+        setIsUpdateUserDialogOpen(false)
+      },
+      onError: (err) => {
+        if (err.message === 'IncorrectCredentialsError') {
+          toast({
+            title: 'Senha incorreta.',
+            duration: 3000,
+          })
+          return
+        }
+
+        toast({
+          title: 'Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.',
+          duration: 3000,
+        })  
+      }
     })
-
-    if (err?.message === 'IncorrectCredentialsError') {
-      toast({
-        title: 'Senha incorreta.',
-        duration: 3000,
-      })
-
-      return
-    }
-
-    await loadUsers()
-    setIsUpdateUserDialogOpen(false)
   }
 
   async function handleDeleteUser(userId: string) {
     if (!user) return
 
-    const { err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.delete({
+    await mutateOnDelete({
       loggedUserId: user.id,
       userId,
+    }, {
+      onSuccess: () => {
+        toast({
+          title: 'Usuário removido com sucesso.',
+          duration: 3000,
+        })
+        setIsDeleteUserAlertOpen(false)
+      },
+      onError: () => {
+        toast({
+          title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+          duration: 3000,
+        })
+        setIsDeleteUserAlertOpen(false)
+      }
     })
-
-    if (err) {
-      toast({
-        title: 'Houve um erro ao apagar o usuário. Tente novamente.',
-        duration: 3000,
-      })
-    } else {
-      toast({
-        title: 'Usuário removido com sucesso.',
-        duration: 3000,
-      })
-
-      loadUsers()
-    }
-
-    setIsDeleteUserAlertOpen(false)
   }
 
   return (
@@ -238,7 +235,7 @@ export function Users() {
       <Footer
         role={user?.role}
         page={pagination}
-        total={total}
+        total={data?.total ?? 0}
         onChange={setPagination}
         onRequestCreateUser={() => {
           setIsCreateUserDialogOpen(true)
