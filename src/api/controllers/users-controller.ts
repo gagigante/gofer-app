@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import { compare, hash } from 'bcryptjs'
-import { type User } from '@prisma/client'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 
@@ -13,6 +12,14 @@ import { IncorrectCredentialsError } from '@/api/errors/IncorrectCredentialsErro
 
 import { type UserRole } from '@/api/types/user-role'
 import { type Response } from '@/api/types/response'
+import { type User } from '../db/schema'
+
+export interface ListUsersRequest {
+  loggedUserId: string
+  name?: string
+  page?: number
+  itemsPerPage?: number
+}
 
 export type ListUsersResponse = Response<{
   users: User[]
@@ -21,7 +28,30 @@ export type ListUsersResponse = Response<{
   total: number
 }>
 
+export interface CreateUserRequest {
+  loggedUserId: string
+  name: string
+  password: string
+  role: UserRole,
+}
+
 export type CreateUserResponse = Response<User>
+
+export interface DeleteUserRequest {
+  loggedUserId: string
+  userId: string
+
+}
+
+export type DeleteUserResponse = Response<null>
+
+export interface UpdateUserRequest {
+  loggedUserId: string
+  updatedName: string
+  currentPassword?: string
+  newPassword?: string
+  newPasswordConfirmation?: string
+}
 
 export type UpdateUserResponse = Response<User>
 
@@ -32,7 +62,12 @@ export class UsersController {
     this.usersRepository = new UsersRepository()
   }
 
-  public async listUsers(loggedUserId: string, name = '', page = 1, itemsPerPage = 15): Promise<ListUsersResponse> {
+  public async listUsers({
+    loggedUserId,
+    name = '',
+    page = 1,
+    itemsPerPage = 15,
+  }: ListUsersRequest): Promise<ListUsersResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator') {
@@ -49,12 +84,12 @@ export class UsersController {
     return { data, err: null }
   }
 
-  public async createUser(
-    loggedUserId: string,
-    name: string,
-    password: string,
-    role: UserRole,
-  ): Promise<CreateUserResponse> {
+  public async createUser({
+    loggedUserId,
+    name,
+    password,
+    role,
+  }: CreateUserRequest): Promise<CreateUserResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator') {
@@ -95,7 +130,10 @@ export class UsersController {
     return { data: createdUser, err: null }
   }
 
-  public async deleteUser(loggedUserId: string, userId: string): Promise<Response<null>> {
+  public async deleteUser({
+    loggedUserId,
+    userId
+  }: DeleteUserRequest): Promise<DeleteUserResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator') {
@@ -123,13 +161,13 @@ export class UsersController {
     return { data: null, err: null }
   }
 
-  public async updateUser(
-    loggedUserId: string,
-    updatedName: string,
-    currentPassword?: string,
-    newPassword?: string,
-    newPasswordConfirmation?: string,
-  ): Promise<UpdateUserResponse> {
+  public async updateUser({ 
+    loggedUserId,
+    updatedName,
+    currentPassword,
+    newPassword,
+    newPasswordConfirmation,
+  }: UpdateUserRequest): Promise<UpdateUserResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -147,7 +185,7 @@ export class UsersController {
     }
 
     if (!currentPassword) {
-      const response = await this.usersRepository.updateUser(loggedUser.id, updatedName)
+      const response = await this.usersRepository.updateUser({ id: loggedUser.id, name: updatedName })
 
       return { data: response, err: null }
     }
@@ -168,7 +206,11 @@ export class UsersController {
 
     const hashedNewPassword = await hash(newPassword, 8)
 
-    const response = await this.usersRepository.updateUser(loggedUser.id, updatedName, hashedNewPassword)
+    const response = await this.usersRepository.updateUser({
+      id: loggedUser.id,
+      name: updatedName,
+      password: hashedNewPassword,
+    })
 
     return { data: response, err: null }
   }
