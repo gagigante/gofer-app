@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto'
-import { type Category } from '@prisma/client'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { CategoriesRepository } from '@/api/repositories/categories-repository'
@@ -9,6 +8,7 @@ import { NotFoundError } from '@/api/errors/NotFoundError'
 import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsError'
 
 import { type Response } from '@/api/types/response'
+import { type Category } from '@/api/db/schema'
 
 export interface ListCategoriesRequest {
   loggedUserId: string
@@ -18,7 +18,7 @@ export interface ListCategoriesRequest {
 }
 
 export type ListCategoriesResponse = Response<{
-  categories: Array<Category & { productsQuantity: number }>
+  categories: Array<Category & { products: number }>
   page: number
   itemsPerPage: number
   total: number
@@ -73,12 +73,7 @@ export class CategoriesController {
     const total = await this.categoriesRepository.countCategories(name)
     const categories = await this.categoriesRepository.getCategories(name, page, itemsPerPage)
 
-    const formattedCategories = categories.map((category) => ({
-      ...category,
-      productsQuantity: category._count.products,
-    }))
-
-    const data = { categories: formattedCategories, total, page, itemsPerPage }
+    const data = { categories, total, page, itemsPerPage }
 
     return { data, err: null }
   }

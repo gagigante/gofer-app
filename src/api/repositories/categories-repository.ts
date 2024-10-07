@@ -1,98 +1,81 @@
-import { type Category } from '@prisma/client'
+import { asc, count, eq, like } from 'drizzle-orm'
 
-import { prisma } from '../db/client'
+import { db } from '@/api/db/client'
+
+import { type Category, type NewCategory, categories, products } from '@/api/db/schema'
 
 export class CategoriesRepository {
   public async getCategories(
     name = '',
     page = 1,
     itemsPerPage = 15,
-  ): Promise<Array<Category & { _count: { products: number } }>> {
-    const categories = await prisma.category.findMany({
-      where: {
-        name: {
-          contains: name,
-        },
-      },
-      include: {
-        _count: { select: { products: true } },
-      },
-      take: itemsPerPage,
-      skip: page === 1 ? 0 : (page - 1) * itemsPerPage,
-    })
+  ): Promise<Array<Category & { products: number }>> {    
+    const response = await db
+      .select({
+        category: categories,        
+        products: count(products.id)
+      })
+      .from(categories)      
+      .leftJoin(products, eq(categories.id, products.categoryId))
+      .where(like(categories.name, `%${name}%`))      
+      .orderBy(asc(categories.name))
+      .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
+      .limit(itemsPerPage)  
 
-    return categories
+    return response.reduce<Array<Category & { products: number }>>((acc, item) => {
+      if (item.category.id === null) {
+        return acc
+      }
+
+      return [...acc, { ...item.category, products: item.products }]
+    }, [])    
   }
 
   public async countCategories(name = ''): Promise<number> {
-    const categoriesCount = await prisma.category.count({
-      where: {
-        name: {
-          contains: name,
-        },
-      },
-    })
+    const [response] = await db.select({ count: count() }).from(categories).where(like(categories.name, `%${name}%`))
 
-    return categoriesCount
+    return response.count
   }
 
   public async getCategoryById(categoryId: string): Promise<Category | null> {
-    const category = await prisma.category.findUnique({
-      where: {
-        id: categoryId,
-      },
-    })
+    const response = await db.select().from(categories).where(eq(categories.id, categoryId)).get()
 
-    return category
+    return response ?? null
   }
 
   public async getCategoryByName(categoryName: string): Promise<Category | null> {
-    const category = await prisma.category.findUnique({
-      where: {
-        name: categoryName,
-      },
-    })
+    const response = await db.select().from(categories).where(eq(categories.name, categoryName)).get()
 
-    return category
+    return response ?? null
   }
 
-  public async createCategory({
-    id,
-    name,
-    description,
-    productsIds = [],
-  }: Omit<Category, 'products'> & { productsIds?: string[] }): Promise<Category> {
-    const categoryProductsIds = productsIds.map((id) => ({ id }))
-
-    const category = await prisma.category.create({
-      data: {
+  public async createCategory({ id, name, description }: NewCategory): Promise<Category> {    
+    const [response] = await db
+      .insert(categories)
+      .values({
         id,
         name,
-        description,
-        products: {
-          connect: categoryProductsIds,
-        },
-      },
-    })
+      description,
+      })
+      .returning()
 
-    return category
+    return response
   }
 
   public async updateCategory({ id, name, description }: Category): Promise<Category> {
-    const category = await prisma.category.update({
-      where: { id },
-      data: {
+    const [response] = await db
+      .update(categories)
+      .set({
         name,
         description,
-      },
-    })
+      })
+      .where(eq(categories.id, id))
+      .returning()
 
-    return category
+    return response
   }
 
   public async deleteCategory(categoryId: string): Promise<void> {
-    await prisma.category.delete({
-      where: { id: categoryId },
-    })
+    await db.delete(categories).where(eq(categories.id, categoryId))
   }
 }
