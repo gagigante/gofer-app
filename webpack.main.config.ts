@@ -1,8 +1,9 @@
 import path from 'path'
-import type { Configuration } from 'webpack';
+import type { Configuration } from 'webpack'
+import Dotenv from 'dotenv-webpack'
 
-import { rules } from './webpack.rules';
-import { plugins } from './webpack.plugins';
+import { rules } from './webpack.rules'
+import { plugins } from './webpack.plugins'
 
 export const mainConfig: Configuration = {
   /**
@@ -17,7 +18,10 @@ export const mainConfig: Configuration = {
   externals: {
     '@libsql/client': 'commonjs @libsql/client'
   },
-  plugins,
+  plugins: [
+    new Dotenv(),
+    ...plugins
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

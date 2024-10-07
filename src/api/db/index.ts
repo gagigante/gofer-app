@@ -1,3 +1,3 @@
-import { seed } from '@/api/db/seed'
+import { seed } from './seed'
 
 seed()
