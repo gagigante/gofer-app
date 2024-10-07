@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { type Category } from '@prisma/client'
 
 import { Tabs, TabsList, TabsTrigger } from '@/view/components/ui/tabs'
 import { Input } from '@/view/components/ui/input'

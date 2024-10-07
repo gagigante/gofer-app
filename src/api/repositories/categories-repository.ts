@@ -20,7 +20,7 @@ export class CategoriesRepository {
       .where(like(categories.name, `%${name}%`))      
       .orderBy(asc(categories.name))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
-      .limit(itemsPerPage)  
+      .limit(itemsPerPage)
 
     return response.reduce<Array<Category & { products: number }>>((acc, item) => {
       if (item.category.id === null) {
