@@ -22,13 +22,31 @@ jobs:
       - name: Read .nvmrc
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_OUTPUT
         id: nvm
+      
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v2.0.3
+        with:
+          envkey_TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          envkey_TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          envkey_DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.DEFAULT_SUPER_ADMIN_USERNAME }}
+          envkey_DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.DEFAULT_SUPER_ADMIN_PASSWORD }}          
+    
+      # - name: 'Create env file'
+      #   run: |
+      #     touch .env                    
+      #     TURSO_DATABASE_URL="${{ secrets.TURSO_DATABASE_URL }}" >> .env
+      #     TURSO_AUTH_TOKEN="${{ secrets.TURSO_AUTH_TOKEN }}" >> .env
+      #     DEFAULT_SUPER_ADMIN_USERNAME="${{ secrets.DEFAULT_SUPER_ADMIN_USERNAME }}" >> .env
+      #     DEFAULT_SUPER_ADMIN_PASSWORD="${{ secrets.DEFAULT_SUPER_ADMIN_PASSWORD }}" >> .env
+          
+      #     cat .env                            
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '${{ steps.nvm.outputs.NVMRC }}'
+      - run: yarn install --frozen-lockfile
 
-      - run: npm ci
       - name: Publish app
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_KEY }}
