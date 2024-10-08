@@ -1,23 +1,20 @@
-import { asc, count, eq, like } from 'drizzle-orm'
+import { asc, count, eq, like, sql } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
 import { type Category, type NewCategory, categories, products } from '@/api/db/schema'
 
 export class CategoriesRepository {
-  public async getCategories(
-    name = '',
-    page = 1,
-    itemsPerPage = 15,
-  ): Promise<Array<Category & { products: number }>> {    
+  public async getCategories(name = '', page = 1, itemsPerPage = 15): Promise<Array<Category & { products: number }>> {
     const response = await db
       .select({
-        category: categories,        
-        products: count(products.id)
+        category: categories,
+        productsCount: sql<number>`COUNT(${products.id})`,
       })
-      .from(categories)      
+      .from(categories)
       .leftJoin(products, eq(categories.id, products.categoryId))
-      .where(like(categories.name, `%${name}%`))      
+      .where(like(categories.name, `%${name}%`))
+      .groupBy(categories.name)
       .orderBy(asc(categories.name))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
@@ -27,12 +24,15 @@ export class CategoriesRepository {
         return acc
       }
 
-      return [...acc, { ...item.category, products: item.products }]
-    }, [])    
+      return [...acc, { ...item.category, products: item.productsCount }]
+    }, [])
   }
 
   public async countCategories(name = ''): Promise<number> {
-    const [response] = await db.select({ count: count() }).from(categories).where(like(categories.name, `%${name}%`))
+    const [response] = await db
+      .select({ count: count() })
+      .from(categories)
+      .where(like(categories.name, `%${name}%`))
 
     return response.count
   }
@@ -49,13 +49,13 @@ export class CategoriesRepository {
     return response ?? null
   }
 
-  public async createCategory({ id, name, description }: NewCategory): Promise<Category> {    
+  public async createCategory({ id, name, description }: NewCategory): Promise<Category> {
     const [response] = await db
       .insert(categories)
       .values({
         id,
         name,
-      description,
+        description,
       })
       .returning()
 
