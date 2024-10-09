@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Read .nvmrc
+        run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+        id: nvm
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run type-check
+        run: yarn type-check
+
+      - name: Run linter
+        run: echo "yarn lint" # TODO
+
+      # DEPENDENCY ANALISYS npm audit --production npm outdated
+      # SEC CHECKS
+      # UNITY TESTS/INTEGRATION TESTS
+      # SONAR
+      # https://coderabbit.ai/#pricing
+      # PREVIEW BUILD
