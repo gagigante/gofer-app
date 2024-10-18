@@ -57,14 +57,14 @@ export function Combobox({
           aria-expanded={isOpen}
           className="w-full justify-between"
         >
-          {value
-            ? options.find((item) => item.value === value.value)?.label
-            : placeholder}
+          {!value 
+            ? placeholder
+            : options.find((item) => item.value === value.value)?.label ?? ''}
 
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-[320px] p-0">
         <Command shouldFilter={false}>
           <CommandInput placeholder={searchPlaceholder} value={inputValue} onValueChange={setInputValue} />
           <CommandList>
