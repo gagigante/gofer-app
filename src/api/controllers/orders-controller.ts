@@ -9,6 +9,19 @@ import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
 
+export interface ListOrdersRequest {
+  loggedUserId: string
+  page?: number
+  itemsPerPage?: number
+}
+
+export type ListOrdersResponse = Response<{
+  orders: Order[]
+  page: number
+  itemsPerPage: number
+  total: number
+}>
+
 export interface CreateOrderRequest {
   loggedUserId: string
   products: Array<{ id: string, quantity: number }>
@@ -25,6 +38,26 @@ export class OrdersController {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
     this.productsRepository = new ProductsRepository()
+  }
+
+  public async listOrders({
+    loggedUserId,
+    page = 1,
+    itemsPerPage = 15,
+  }: ListOrdersRequest): Promise<ListOrdersResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const total = await this.ordersRepository.countOrders()
+    const orders = await this.ordersRepository.getOrders(page, itemsPerPage)
+
+    const data = { orders, total, page, itemsPerPage }
+
+    return { data, err: null }
   }
 
   public async createOrder({ loggedUserId, products }: CreateOrderRequest): Promise<CreateOrderResponse> {

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
 import { Button } from '@/view/components/ui/button'
@@ -163,6 +163,8 @@ export function Users() {
         />
 
         <Table>
+          {users.length === 0 && <TableCaption>Nenhum usuário encontrado.</TableCaption>} 
+
           <TableHeader>
             <TableRow>
               <TableHead>Usuário</TableHead>

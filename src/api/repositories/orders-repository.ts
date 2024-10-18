@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { count, desc, eq } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
@@ -11,6 +11,23 @@ import {
 } from '@/api/db/schema'
 
 export class OrdersRepository {
+  public async getOrders(page = 1, itemsPerPage = 15): Promise<any> {
+    const response = await db.select().from(orders) 
+      .orderBy(desc(orders.createdAt))
+      .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
+      .limit(itemsPerPage)
+
+    return response
+  }
+
+  public async countOrders(): Promise<number> {
+    const [response] = await db
+      .select({ count: count() })
+      .from(orders)
+
+    return response.count
+  }
+
   public async createOrder({ 
     id,
     totalPrice,

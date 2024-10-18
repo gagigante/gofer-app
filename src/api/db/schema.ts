@@ -48,3 +48,22 @@ export const productsRelations = relations(products, ({ one }) => ({
     references: [categories.id],
   }),
 }))
+
+export const orders = sqliteTable('orders', {
+  id: text('id').primaryKey(),  
+  totalPrice: integer('total_price'),
+  createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+});
+export type Order = typeof orders.$inferSelect
+export type NewOrder = typeof orders.$inferInsert
+
+export const ordersProducts = sqliteTable('orders_products', {  
+  orderId: text('order_id').references(() => orders.id),
+  productId: text('product_id').references(() => products.id),
+  productPrice: integer('product_price'),
+  quantity: integer('quantity')
+}, (table) => {
+  return {
+    pk: primaryKey({ name: 'id', columns: [table.orderId, table.productId] }),
+  };
+})
