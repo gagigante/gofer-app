@@ -1,5 +1,6 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Check, ChevronsUpDown } from "lucide-react"
+import { useDebounce } from "use-debounce";
 
 import { Button } from "@/view/components/ui/button"
 import {
@@ -17,7 +18,6 @@ import {
 } from "@/view/components/ui/popover"
 
 import { cn } from "@/view/lib/utils"
-import { debounce } from "@/view/utils/debounce"
 
 interface Option { label: string, value: string }
 
@@ -41,12 +41,12 @@ export function Combobox({
   onChangeFilter,
 }: ComboboxProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [filter, setFilter] = useState('')
+  const [inputValue, setInputValue] = useState('')
+  const [search] = useDebounce(inputValue, 250);
 
-  function handleChangeFilter(filter: string) {
-    setFilter(filter)
-    onChangeFilter(filter) // TODO: debounce callback
-  }
+  useEffect(() => {
+    onChangeFilter(search)
+  },  [search])
 
   return (
     <Popover open={isOpen} onOpenChange={open => setIsOpen(open)}>
@@ -66,7 +66,7 @@ export function Combobox({
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command shouldFilter={false}>
-          <CommandInput placeholder={searchPlaceholder} value={filter} onValueChange={handleChangeFilter} />
+          <CommandInput placeholder={searchPlaceholder} value={inputValue} onValueChange={setInputValue} />
           <CommandList>
             <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
             

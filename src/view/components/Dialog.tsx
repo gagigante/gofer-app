@@ -18,6 +18,7 @@ interface DialogProps {
   children?: ReactNode
   proceedButtonLabel: string
   cancelButtonLabel?: string
+  isProceedButtonDisabled?: boolean
   onProceed: () => Promise<void> | void
   onClose: () => void
 }
@@ -30,6 +31,7 @@ export function Dialog({
   description,
   proceedButtonLabel,
   cancelButtonLabel = 'Cancelar',
+  isProceedButtonDisabled = false,
   onProceed,
   onClose,
 }: DialogProps) {
@@ -63,6 +65,7 @@ export function Dialog({
             onClick={async () => {
               await onProceed()
             }}
+            disabled={isProceedButtonDisabled}
           >
             {proceedButtonLabel}
           </Button>
