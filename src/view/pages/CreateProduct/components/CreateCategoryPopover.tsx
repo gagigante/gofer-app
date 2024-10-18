@@ -45,12 +45,17 @@ export function CreateCategoryPopover() {
         onError: (err) => {
           if (err.message === 'CategoryAlreadyExistsError') {
             toast({
-              title: 'Ja existe uma categoria com este nome.',
+              title: 'Já existe uma categoria com este nome.',
               duration: 3000,
             })
           }
         },
         onSuccess: () => {
+          toast({
+            title: 'Categoria criada com sucesso.',
+            duration: 3000,
+          })
+
           setIsPopoverOpen(false)
           reset()
         },

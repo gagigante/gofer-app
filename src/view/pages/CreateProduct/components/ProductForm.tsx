@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { type UseFormReturn } from 'react-hook-form'
 import type * as z from 'zod'
 
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/view/components/ui/form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
+import { Combobox } from '@/view/components/Combobox'
 import { Input } from '@/view/components/ui/input'
 import { Textarea } from '@/view/components/ui/textarea'
 
@@ -27,9 +27,10 @@ interface ProductFormProps {
 export function ProductForm({ form, defaultValue }: ProductFormProps) {
   const { user } = useAuth()
 
-  // TODO: paginate categories
-  const { data, isLoading } = useCategories({ loggedUserId: user?.id ?? '', itemsPerPage: 99 }, { enabled: !!user?.id })
-  const categories = data?.categories ?? []
+  const [categoriesFilter, setCategoriesFilter] = useState('')
+  
+  const { data, isLoading } = useCategories({ loggedUserId: user?.id ?? '', name: categoriesFilter, itemsPerPage: 99 }, { enabled: !!user?.id })
+  const categories = (data?.categories ?? []).map(item => ({ label: item.name!, value: item.id }))
 
   useEffect(() => {
     if (defaultValue) {
@@ -93,27 +94,16 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           <FormField
             control={form.control}
             name="category"
-            render={({ field }) => (
-              // TODO: filter categories field
-              <FormItem className="flex-1">
-                <FormLabel>Categoria</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a categoria do produto" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <FormMessage />
-              </FormItem>
+            render={({ field }) => (     
+              <Combobox
+                placeholder="Selecione uma categoria"
+                searchPlaceholder="Busque pelo nome da categoria"
+                emptyPlaceholder="Nenhuma categoria encontrada."
+                options={categories}
+                onChangeFilter={setCategoriesFilter}
+                value={categories.find(item => item.value === field.value)}
+                onSelectOption={({ value }) => field.onChange(value)}
+              />          
             )}
           />
 

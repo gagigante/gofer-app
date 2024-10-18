@@ -1,4 +1,4 @@
-import { asc, count, eq, like } from 'drizzle-orm'
+import { asc, count, eq, inArray, like } from 'drizzle-orm'
 
 import { db } from '../db/client'
 
@@ -14,7 +14,7 @@ export class ProductsRepository {
       .select()
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
-      .where(like(products.name, `%${name}%`))            
+      .where(like(products.name, `%${name}%`))
       .orderBy(asc(products.name))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
@@ -25,6 +25,12 @@ export class ProductsRepository {
         category: item.categories,        
       }
     })
+  }
+
+  public async getProductsByIds(productIds: string[]): Promise<Product[]> {
+    const response = await db.select().from(products).where(inArray(products.id, productIds))
+
+    return response
   }
 
   public async countProducts(name = ''): Promise<number> {
