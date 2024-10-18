@@ -5,6 +5,7 @@ import { OrdersRepository } from '../repositories/orders-repository'
 import { ProductsRepository } from '../repositories/products-repository'
 
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
+import { NotFoundError } from '../errors/NotFoundError'
 
 import { type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
@@ -20,6 +21,24 @@ export type ListOrdersResponse = Response<{
   page: number
   itemsPerPage: number
   total: number
+}>
+
+export interface GetOrderRequest {
+  loggedUserId: string
+  orderId: string
+}
+
+export type GetOrderResponse = Response<{
+  id: string;
+  totalPrice: number | null;
+  createdAt: string | null;
+  products: Array<{
+    productId: string | null;
+    quantity: number | null;
+    price: number | null;
+    name: string | null;
+    barCode: string | null;
+  }>
 }>
 
 export interface CreateOrderRequest {
@@ -58,6 +77,25 @@ export class OrdersController {
     const data = { orders, total, page, itemsPerPage }
 
     return { data, err: null }
+  }
+
+  public async getOrder({ loggedUserId, orderId }: GetOrderRequest): Promise<GetOrderResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const order = await this.ordersRepository.getOrderById(orderId)
+
+    if (!order) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    return { data: order, err: null }
   }
 
   public async createOrder({ loggedUserId, products }: CreateOrderRequest): Promise<CreateOrderResponse> {

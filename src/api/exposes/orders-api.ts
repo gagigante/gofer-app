@@ -5,10 +5,13 @@ import {
   type ListOrdersResponse,
   type CreateOrderRequest,
   type CreateOrderResponse,
+  type GetOrderRequest,
+  type GetOrderResponse,
 } from '../controllers/orders-controller'
 
 export interface OrdersApi {  
   list: (data: ListOrdersRequest) => Promise<ListOrdersResponse>
+  get: (data: GetOrderRequest) => Promise<GetOrderResponse>
   create: (data: CreateOrderRequest) => Promise<CreateOrderResponse>  
 }
 
@@ -16,6 +19,7 @@ export const apiName = 'ordersApi'
 
 const api = {
   list: async (data) => await ipcRenderer.invoke('orders:list', data),
+  get: async (data) => await ipcRenderer.invoke('orders:get', data),
   create: async (data) => await ipcRenderer.invoke('orders:create', data),  
 } satisfies OrdersApi
 

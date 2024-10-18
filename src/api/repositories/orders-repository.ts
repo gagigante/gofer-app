@@ -10,6 +10,19 @@ import {
   products as productsSchema
 } from '@/api/db/schema'
 
+interface OrderResponse {
+  id: string;
+  totalPrice: number | null;
+  createdAt: string | null;
+  products: Array<{
+    productId: string | null;
+    quantity: number | null;
+    price: number | null;
+    name: string | null;
+    barCode: string | null;
+  }>
+}
+
 export class OrdersRepository {
   public async getOrders(page = 1, itemsPerPage = 15): Promise<any> {
     const response = await db.select().from(orders) 
@@ -26,6 +39,39 @@ export class OrdersRepository {
       .from(orders)
 
     return response.count
+  }
+
+  public async getOrderById(orderId: string): Promise<OrderResponse | null> {
+    const response = await db.select({
+      order: orders,
+      orderProduct: {
+        productId: ordersProducts.productId,
+        quantity: ordersProducts.quantity,
+        price: ordersProducts.productPrice,
+        name: productsSchema.name,
+        barCode: productsSchema.barCode,
+      }
+    }).from(orders)
+      .leftJoin(ordersProducts, eq(orders.id, ordersProducts.orderId))
+      .leftJoin(productsSchema, eq(ordersProducts.productId, productsSchema.id))
+      .where(eq(orders.id, orderId))
+
+    if (response.length === 0) return null
+
+    const formattedResponse = response.reduce<OrderResponse>((acc, item) => {
+      const { order, orderProduct } = item
+
+      return {
+        ...acc,
+        ...order,
+        products: [
+          ...(acc.products ?? []),
+          orderProduct,
+        ]
+      }
+    }, {} as OrderResponse) 
+
+    return formattedResponse
   }
 
   public async createOrder({ 

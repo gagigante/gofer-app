@@ -21,7 +21,8 @@ export function useMutateOnCreateOrder() {
     },
     onSuccess: async (response) => {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['orders'] }),       
+        queryClient.invalidateQueries({ queryKey: ['orders'] }),
+        queryClient.invalidateQueries({ queryKey: ['products'] }),
       ])
 
       return response
