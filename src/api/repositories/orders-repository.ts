@@ -3,8 +3,8 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/api/db/client'
 
 import { 
-  NewOrder,
-  Order,
+  type NewOrder,
+  type Order,
   orders,
   ordersProducts,
   products as productsSchema
