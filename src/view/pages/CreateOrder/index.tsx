@@ -99,7 +99,7 @@ export function CreateOrder() {
                   <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice))}</p>
                 </TableCell>
 
-                <TableCell>
+                <TableCell className="flex items-end justify-end">
                   <Button
                     variant="destructive"
                     size="sm"

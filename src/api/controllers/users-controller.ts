@@ -190,7 +190,7 @@ export class UsersController {
       return { data: response, err: null }
     }
 
-    const doesPasswordMatch = await compare(currentPassword, loggedUser.password)
+    const doesPasswordMatch = await compare(currentPassword, loggedUser.password!)
 
     if (!doesPasswordMatch) {
       return { data: null, err: new IncorrectCredentialsError() }
