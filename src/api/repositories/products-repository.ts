@@ -33,6 +33,12 @@ export class ProductsRepository {
     return response
   }
 
+  public async getProductsByCategoryId(categoryId: string): Promise<Product[]> {
+    const response = await db.select().from(products).where(eq(products.categoryId, categoryId))
+
+    return response
+  }
+
   public async countProducts(name = ''): Promise<number> {
     const [response] = await db.select({ count: count() }).from(products).where(like(products.name, `%${name}%`))
 

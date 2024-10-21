@@ -8,7 +8,8 @@ import { NotFoundError } from '@/api/errors/NotFoundError'
 import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsError'
 
 import { type Response } from '@/api/types/response'
-import { type Category } from '@/api/db/schema'
+import { Product, type Category } from '@/api/db/schema'
+import { ProductsRepository } from '../repositories/products-repository'
 
 export interface ListCategoriesRequest {
   loggedUserId: string
@@ -23,6 +24,13 @@ export type ListCategoriesResponse = Response<{
   itemsPerPage: number
   total: number
 }>
+
+export interface GetCategoryRequest {
+  loggedUserId: string
+  categoryId: string
+}
+
+export type GetCategoryResponse = Response<Category & { products: Product[] }>
 
 export interface CreateCategoryRequest {
   loggedUserId: string
@@ -51,10 +59,12 @@ export type UpdateCategoryResponse = Response<Category>
 export class CategoriesController {
   private readonly usersRepository: UsersRepository
   private readonly categoriesRepository: CategoriesRepository
+  private readonly productsRepository: ProductsRepository
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.categoriesRepository = new CategoriesRepository()
+    this.productsRepository = new ProductsRepository()
   }
 
   public async listCategories({
@@ -76,6 +86,30 @@ export class CategoriesController {
     const data = { categories, total, page, itemsPerPage }
 
     return { data, err: null }
+  }
+
+  public async getCategory({ loggedUserId, categoryId }: GetCategoryRequest) {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const category = await this.categoriesRepository.getCategoryById(categoryId)
+
+    if (!category) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    const products = await this.productsRepository.getProductsByCategoryId(category.id)
+
+    return {
+      ...category,
+      products,
+    }
   }
 
   public async createCategory({
