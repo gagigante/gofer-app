@@ -2,7 +2,7 @@
   "name": "gofer-app",
   "productName": "gofer-app",
   "description": "Gofer app",
-  "version": "1.0.20",
+  "version": "1.1.0",
   "author": {
     "name": "Gabriel Gigante",
     "email": "gabrielgigante29@gmail.com"
@@ -14,8 +14,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint . --ext js,jsx,ts,tsx --fix",
     "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext js,jsx,ts,tsx --fix",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
