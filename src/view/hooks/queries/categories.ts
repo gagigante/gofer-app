@@ -1,7 +1,12 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 import { type apiName, type CategoriesApi } from '@/api/exposes/categories-api'
-import { type ListCategoriesRequest, type ListCategoriesResponse } from '@/api/controllers/categories-controller'
+import { 
+  type GetCategoryRequest,
+  type GetCategoryResponse,
+  type ListCategoriesRequest,
+  type ListCategoriesResponse,
+} from '@/api/controllers/categories-controller'
 
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
@@ -19,6 +24,30 @@ export function useCategories(
         name,
         page,
         itemsPerPage,
+      })
+
+      if (err) {
+        throw err
+      }
+
+      return data
+    },
+    ...options,
+  })
+}
+
+export function useCategory(
+  { loggedUserId, categoryId }: GetCategoryRequest,
+  options?: Omit<UseQueryOptions<GetCategoryResponse['data']>, 'queryKey'>,
+) {
+  const key = ['categories', categoryId]
+
+  return useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      const { data, err } = await (window as unknown as Record<typeof apiName, CategoriesApi>).categoriesApi.get({
+        loggedUserId,
+        categoryId,
       })
 
       if (err) {

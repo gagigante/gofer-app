@@ -94,16 +94,19 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           <FormField
             control={form.control}
             name="category"
-            render={({ field }) => (     
-              <Combobox
-                placeholder="Selecione uma categoria"
-                searchPlaceholder="Busque pelo nome da categoria"
-                emptyPlaceholder="Nenhuma categoria encontrada."
-                options={categories}
-                onChangeFilter={setCategoriesFilter}
-                value={categories.find(item => item.value === field.value)}
-                onSelectOption={({ value }) => field.onChange(value)}
-              />          
+            render={({ field }) => (
+              <div className="flex flex-1 flex-col gap-3">
+                <FormLabel>Categoria</FormLabel>
+                <Combobox
+                  placeholder="Selecione uma categoria"
+                  searchPlaceholder="Busque pelo nome da categoria"
+                  emptyPlaceholder="Nenhuma categoria encontrada."
+                  options={categories}
+                  onChangeFilter={setCategoriesFilter}
+                  value={categories.find(item => item.value === field.value)}
+                  onSelectOption={({ value }) => field.onChange(value)}
+                />
+              </div>
             )}
           />
 
