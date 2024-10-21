@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import {
   Dialog as ShadDialog,
   DialogContent,
@@ -16,9 +16,10 @@ interface DialogProps {
   title: string
   description?: string
   children?: ReactNode
-  proceedButtonLabel: string
+  proceedButtonLabel?: string
   cancelButtonLabel?: string
-  onProceed: () => Promise<void> | void
+  isProceedButtonDisabled?: boolean
+  onProceed?: () => Promise<void> | void
   onClose: () => void
 }
 
@@ -30,6 +31,7 @@ export function Dialog({
   description,
   proceedButtonLabel,
   cancelButtonLabel = 'Cancelar',
+  isProceedButtonDisabled = false,
   onProceed,
   onClose,
 }: DialogProps) {
@@ -57,15 +59,18 @@ export function Dialog({
             </Button>
           </DialogClose>
 
+        {proceedButtonLabel && (
           <Button
             type="button"
             variant="default"
             onClick={async () => {
-              await onProceed()
+              await onProceed?.()
             }}
+            disabled={isProceedButtonDisabled}
           >
             {proceedButtonLabel}
           </Button>
+        )}
         </DialogFooter>
       </DialogContent>
     </ShadDialog>

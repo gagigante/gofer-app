@@ -20,7 +20,7 @@ export class LoginController {
       return { data: null, err }
     }
 
-    const doesPasswordMatch = await compare(password, response.password)
+    const doesPasswordMatch = await compare(password, response.password!)
 
     if (!doesPasswordMatch) {
       return { data: null, err: new IncorrectCredentialsError() }

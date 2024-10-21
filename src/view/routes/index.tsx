@@ -1,9 +1,10 @@
-import React from 'react'
 import { createHashRouter } from 'react-router-dom'
 
 import { Login } from '@/view/pages/Login'
 import { Home } from '@/view/pages/Home'
 import { Users } from '@/view/pages/Users'
+import { Orders } from '@/view/pages/Orders'
+import { CreateOrder } from '../pages/CreateOrder'
 import { Products } from '@/view/pages/Products'
 import { CreateProduct } from '@/view/pages/CreateProduct'
 import { UpdateProduct } from '@/view/pages/UpdateProduct'
@@ -31,6 +32,14 @@ export const router = createHashRouter([
       {
         path: 'users',
         element: <Users />,
+      },
+      {
+        path: 'orders',
+        element: <Orders />
+      },
+      {
+        path: 'orders/new',
+        element: <CreateOrder />
       },
       {
         path: 'products',

@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS `products_bar_code_unique`;

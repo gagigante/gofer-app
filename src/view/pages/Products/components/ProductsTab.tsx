@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FaEye, FaPencilAlt } from 'react-icons/fa'
 
 import { TabsContent } from '@/view/components/ui/tabs'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 import { ProductDetailsDialog } from './ProductDetailsDialog'
 
@@ -34,6 +34,8 @@ export function ProductsTab({ products }: ProductsTabProps) {
   return (
     <TabsContent value="products">
       <Table>
+        {products.length === 0 && <TableCaption>Nenhum produto encontrado.</TableCaption>} 
+
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>

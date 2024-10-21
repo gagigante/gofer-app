@@ -3,7 +3,7 @@ import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
 import { TabsContent } from '@/view/components/ui/tabs'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 
 import { UpdateCategoryAction } from './UpdateCategoryAction'
@@ -113,6 +113,8 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
   return (
     <TabsContent value="categories">
       <Table>
+        {categories.length === 0 && <TableCaption>Nenhuma categoria encontrada.</TableCaption>}
+
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>

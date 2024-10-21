@@ -8,13 +8,6 @@ import {
   type DeleteCategoryRequest,
 } from '@/api/controllers/categories-controller'
 
-export interface UpdateCategoryData {
-  loggedUserId: string
-  categoryId: string
-  updatedName: string
-  updatedDescription?: string
-}
-
 const categoryController = new CategoriesController()
 
 ipcMain.handle(
