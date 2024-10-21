@@ -6,6 +6,7 @@ import {
   type CreateCategoryRequest,
   type UpdateCategoryRequest,
   type DeleteCategoryRequest,
+  type GetCategoryRequest,
 } from '@/api/controllers/categories-controller'
 
 const categoryController = new CategoriesController()
@@ -13,6 +14,11 @@ const categoryController = new CategoriesController()
 ipcMain.handle(
   'categories:list',
   async (_event, data: ListCategoriesRequest) => await categoryController.listCategories(data),
+)
+
+ipcMain.handle(
+  'categories:get',
+  async (_event, data: GetCategoryRequest) => await categoryController.getCategory(data),
 )
 
 ipcMain.handle(

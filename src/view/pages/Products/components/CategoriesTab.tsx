@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import type * as z from 'zod'
-import { FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
 
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
@@ -8,6 +8,7 @@ import { Button } from '@/view/components/ui/button'
 
 import { UpdateCategoryAction } from './UpdateCategoryAction'
 import { DeleteCategoryAction } from './DeleteCategoryAction'
+import { CategoryDetails } from './CategoryDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
@@ -29,12 +30,23 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteCategory()
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryWithProductsQuantity>()
-  const [isUpdateCategoryDialogOpen, setIsUpdateCategoryDialogOpen] = useState(false)
-  const [isDeleteCategoryAlertOpen, setIsDeleteCategoryAlertOpen] = useState(false)
+
+  const [dialogsVisibility, setDialogsVisibility] = useState({
+    categoryDetails: false,
+    updateCategory: false,
+    deleteCategory: false,
+  })
+
+  function handleToggleDialog(dialog: keyof typeof dialogsVisibility) {
+    setDialogsVisibility(prevState => ({
+      ...prevState,
+      [dialog]: !prevState[dialog]
+    }))
+  }
 
   function handleRequestCategoryUpdate(category: CategoryWithProductsQuantity) {
     setSelectedCategory(category)
-    setIsUpdateCategoryDialogOpen(true)
+    handleToggleDialog('updateCategory')
   }
 
   async function handleUpdateCategory(data: z.infer<typeof createCategorySchema> & { categoryId: string }) {
@@ -54,7 +66,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
             duration: 3000,
           })
 
-          setIsUpdateCategoryDialogOpen(false)
+          handleToggleDialog('updateCategory')
           setSelectedCategory(undefined)
         },
         onError: (err) => {
@@ -71,7 +83,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
             duration: 3000,
           })
 
-          setIsUpdateCategoryDialogOpen(false)
+          handleToggleDialog('updateCategory')
           setSelectedCategory(undefined)
         },
       },
@@ -80,7 +92,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
 
   function handleRequestCategoryDeletion(category: CategoryWithProductsQuantity) {
     setSelectedCategory(category)
-    setIsDeleteCategoryAlertOpen(true)
+    handleToggleDialog('deleteCategory')
   }
 
   async function handleDeleteCategory(categoryId: string) {
@@ -103,7 +115,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
           })
         },
         onSettled: () => {
-          setIsDeleteCategoryAlertOpen(false)
+          handleToggleDialog('deleteCategory')
           setSelectedCategory(undefined)
         },
       },
@@ -145,6 +157,20 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
                   size="sm"
                   onClick={() => {
                     const category = categories.find((item) => item.id === id)
+                    if (category) {
+                      setSelectedCategory(category)
+                      handleToggleDialog('categoryDetails')
+                    }
+                  }}
+                >
+                  <FaEye className="w-3 h-3" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const category = categories.find((item) => item.id === id)
 
                     if (category) {
                       handleRequestCategoryUpdate(category)
@@ -173,9 +199,15 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
         </TableBody>
       </Table>
 
+      <CategoryDetails
+        categoryId={selectedCategory?.id}
+        isOpen={dialogsVisibility.categoryDetails}
+        onClose={() => handleToggleDialog('categoryDetails')}
+      />
+
       <UpdateCategoryAction
         selectedCategory={selectedCategory}
-        isOpen={isUpdateCategoryDialogOpen}
+        isOpen={dialogsVisibility.updateCategory}
         onUpdateCategory={async (updatedCategory) => {
           if (!selectedCategory) return
 
@@ -185,19 +217,19 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
           })
         }}
         onClose={() => {
-          setIsUpdateCategoryDialogOpen(false)
+          handleToggleDialog('updateCategory')
         }}
       />
 
       <DeleteCategoryAction
-        isOpen={isDeleteCategoryAlertOpen}
+        isOpen={dialogsVisibility.deleteCategory}
         onDelete={async () => {
           if (!selectedCategory) return
 
           await handleDeleteCategory(selectedCategory.id)
         }}
         onClose={() => {
-          setIsDeleteCategoryAlertOpen(false)
+          handleToggleDialog('deleteCategory')
         }}
       />
     </TabsContent>

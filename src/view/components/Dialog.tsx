@@ -54,7 +54,7 @@ export function Dialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline">
               {cancelButtonLabel}
             </Button>
           </DialogClose>
