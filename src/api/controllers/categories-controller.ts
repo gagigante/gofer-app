@@ -106,10 +106,7 @@ export class CategoriesController {
 
     const products = await this.productsRepository.getProductsByCategoryId(category.id)
 
-    return {
-      ...category,
-      products,
-    }
+    return { data: { ...category, products }, err: null }
   }
 
   public async createCategory({
