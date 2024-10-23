@@ -2,18 +2,19 @@ import { asc, count, eq, inArray, like } from 'drizzle-orm'
 
 import { db } from '../db/client'
 
-import { type Category, NewProduct, type Product, categories, products } from '../db/schema'
+import { type Brand, type Category, NewProduct, type Product, brands, categories, products } from '../db/schema'
 
 export class ProductsRepository {
   public async getProducts(
     name = '',
     page = 1,
     itemsPerPage = 15,
-  ): Promise<Array<Product & { category: Category | null }>> {
+  ): Promise<Array<Product & { category: Category | null } & { brand: Brand | null }>> {
     const response = await db
       .select()
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(brands, eq(products.brandId, brands.id))
       .where(like(products.name, `%${name}%`))
       .orderBy(asc(products.name))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
@@ -22,7 +23,8 @@ export class ProductsRepository {
     return response.map(item => {
       return {
         ...item.products,
-        category: item.categories,        
+        category: item.categories,
+        brand: item.brands,
       }
     })
   }
@@ -35,6 +37,12 @@ export class ProductsRepository {
 
   public async getProductsByCategoryId(categoryId: string): Promise<Product[]> {
     const response = await db.select().from(products).where(eq(products.categoryId, categoryId))
+
+    return response
+  }
+
+  public async getProductsByBrandId(brandId: string): Promise<Product[]> {
+    const response = await db.select().from(products).where(eq(products.brandId, brandId))
 
     return response
   }
@@ -68,12 +76,12 @@ export class ProductsRepository {
     barCode,
     name,
     description,
-    brand,
     price,
     costPrice,
     availableQuantity,
     minimumQuantity,
     categoryId,
+    brandId,
     icms,
     ncm,
     cest,
@@ -85,7 +93,7 @@ export class ProductsRepository {
       barCode,
       name,
       description,
-      brand,
+      brandId,
       price,
       costPrice,
       availableQuantity,

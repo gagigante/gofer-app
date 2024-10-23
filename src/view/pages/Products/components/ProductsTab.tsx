@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaEye, FaPencilAlt } from 'react-icons/fa'
+import { useDebounce } from 'use-debounce'
 
+import { Input } from '@/view/components/ui/input'
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
@@ -10,19 +12,27 @@ import { ProductDetailsDialog } from './ProductDetailsDialog'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 import { formatCurrency } from '@/view/utils/formatters'
 
-import { type Category, type Product } from '@/api/db/schema'
+import { type Brand, type Category, type Product } from '@/api/db/schema'
 
 interface ProductsTabProps {
-  products: Array<Product & { category: Category | null }>
+  products: Array<Product & { category: Category | null } & { brand: Brand | null }>
+  onChangeFilter: (nameFilter: string) => void
 }
 
-export function ProductsTab({ products }: ProductsTabProps) {
+export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
   const navigate = useNavigate()
 
-  const [selectedProduct, setSelectedProduct] = useState<Product & { category: Category | null }>()
+  const [selectedProduct, setSelectedProduct] = useState<Product & { category: Category | null } & { brand: Brand | null }>()
   const [isProductDetailsDialogOpen, setIsProductDetailsDialog] = useState(false)
 
-  function handleRequestProductDetails(product: Product & { category: Category | null }) {
+  const [nameFilter, setNameFilter] = useState('')
+  const [search] = useDebounce(nameFilter, 250);
+
+  useEffect(() => {
+    onChangeFilter(search)
+  }, [search])
+
+  function handleRequestProductDetails(product: Product & { category: Category | null } & { brand: Brand | null }) {
     setSelectedProduct(product)
     setIsProductDetailsDialog(true)
   }
@@ -33,12 +43,22 @@ export function ProductsTab({ products }: ProductsTabProps) {
 
   return (
     <TabsContent value="products">
+      <Input
+        className="mt-[4.5rem] mb-4"
+        placeholder="Buscar por nome do produto"
+        value={nameFilter}
+        onChange={(e) => {
+          setNameFilter(e.target.value)
+        }}
+      />
+
       <Table>
         {products.length === 0 && <TableCaption>Nenhum produto encontrado.</TableCaption>} 
 
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
+            <TableHead>Marca</TableHead>
             <TableHead>Categoria</TableHead>
             <TableHead>Preço</TableHead>
             <TableHead>Qtd. disponível em estoque</TableHead>
@@ -46,10 +66,14 @@ export function ProductsTab({ products }: ProductsTabProps) {
         </TableHeader>
 
         <TableBody>
-          {products.map(({ id, name, category, price, availableQuantity }) => (
+          {products.map(({ id, name, category, brand, price, availableQuantity }) => (
             <TableRow key={id}>
               <TableCell>
                 <p className="font-medium">{name}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{brand?.name ?? 'N/A'}</p>
               </TableCell>
 
               <TableCell>

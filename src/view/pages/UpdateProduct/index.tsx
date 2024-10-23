@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type * as z from 'zod'
 import { useForm } from 'react-hook-form'
@@ -54,6 +53,7 @@ export function UpdateProduct() {
       return {
         ...values,
         categoryId: values.category || undefined,
+        brandId: values.brand || undefined,
         barCode: values.barCode,
         cest: values.cest.replaceAll('.', ''),
         ncm: values.ncm.replaceAll('.', ''),

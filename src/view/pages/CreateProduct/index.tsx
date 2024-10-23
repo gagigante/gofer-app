@@ -50,6 +50,7 @@ export function CreateProduct() {
       return {
         ...values,
         categoryId: values.category,
+        brandId: values.brand,
         barCode: values.barCode,
         cest: values.cest.replaceAll('.', ''),
         ncm: values.ncm.replaceAll('.', ''),

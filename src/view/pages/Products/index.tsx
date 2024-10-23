@@ -1,33 +1,43 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Tabs, TabsList, TabsTrigger } from '@/view/components/ui/tabs'
-import { Input } from '@/view/components/ui/input'
+import { BrandsTab } from './components/BrandsTab'
 import { CategoriesTab } from './components/CategoriesTab'
 import { ProductsTab } from './components/ProductsTab'
 import { Footer } from './components/Footer'
-import { CreateCategoryAction } from './components/CreateCategoryAction'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useCategories } from '@/view/hooks/queries/categories'
 import { useProducts } from '@/view/hooks/queries/products'
+import { useBrands } from '@/view/hooks/queries/brands'
 
-import { type Category } from '@/api/db/schema'
+import { type Brand, type Category } from '@/api/db/schema'
 
 export type CategoryWithProductsQuantity = Category & { products: number }
+export type BrandWithProductsQuantity = Brand & { products: number }
 
 export function Products() {
   const { user } = useAuth()
 
+  const [brandsPagination, setBrandsPagination] = useState(1)
   const [categoriesPagination, setCategoriesPagination] = useState(1)
   const [productsPagination, setProductsPagination] = useState(1)
 
-  const [activeTab, setActiveTab] = useState<'categories' | 'products'>('products')
-  const [nameFilter, setNameFilter] = useState('')
+  const [activeTab, setActiveTab] = useState<'categories' | 'products' | 'brands'>('products')
 
-  const [isCreateCategoryDialogOpen, setIsCreateCategoryDialogOpen] = useState(false)
+  const [brandsNameFilter, setBrandsNameFilter] = useState('')
+  const { data: brandsResponse } = useBrands(
+    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: categoriesPagination },
+    {
+      enabled: !!user,
+      placeholderData: (previousData) => previousData,
+    },
+  )
+  const brands = brandsResponse?.brands ?? []
 
+  const [categoriesNameFilter, setCategoriesNameFilter] = useState('')
   const { data: categoriesResponse } = useCategories(
-    { loggedUserId: user?.id ?? '', name: nameFilter, page: categoriesPagination },
+    { loggedUserId: user?.id ?? '', name: categoriesNameFilter, page: categoriesPagination },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -35,10 +45,11 @@ export function Products() {
   )
   const categories = categoriesResponse?.categories ?? []
 
+  const [productsNameFilter, setProductsNameFilter] = useState('')
   const { data: productsResponse } = useProducts(
     {
       loggedUserId: user?.id ?? '',
-      name: nameFilter,
+      name: productsNameFilter,
       page: productsPagination,
     },
     {
@@ -48,9 +59,25 @@ export function Products() {
   )
   const products = productsResponse?.products ?? []
 
-  const nameFilterPlaceholder = activeTab === 'products' ? 'Buscar por nome de produto' : 'Buscar por nome da categoria'
-  const page = activeTab === 'products' ? productsPagination : categoriesPagination
-  const total = (activeTab === 'products' ? productsResponse?.total ?? 0 : categoriesResponse?.total) ?? 0
+  const page = (() => {
+    const TABS_PAGE = {
+      products: productsPagination,
+      categories: categoriesPagination,
+      brands: brandsPagination,
+    }
+
+    return TABS_PAGE[activeTab]
+  })()
+
+  const total = (() => {
+    const TABS_TOTAL = {
+      products: productsResponse?.total ?? 0,
+      categories: categoriesResponse?.total ?? 0,
+      brands: brandsResponse?.total ?? 0,
+    }
+
+    return TABS_TOTAL[activeTab]
+  })()
 
   return (
     <div className="h-full flex flex-col">
@@ -64,28 +91,39 @@ export function Products() {
           }}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="products">Produtos</TabsTrigger>
             <TabsTrigger value="categories">Categorias</TabsTrigger>
+            <TabsTrigger value="brands">Marcas</TabsTrigger>
           </TabsList>
 
-          <Input
-            className="mb-4"
-            placeholder={nameFilterPlaceholder}
-            value={nameFilter}
-            onChange={(e) => {
-              setNameFilter(e.target.value)
-              setCategoriesPagination(1)
+          <ProductsTab 
+            products={products} 
+            onChangeFilter={filter => {
+              setProductsNameFilter(filter)
               setProductsPagination(1)
             }}
           />
 
-          <ProductsTab products={products} />
-
           <CategoriesTab
             categories={categories}
+            onChangeFilter={filter => {
+              setCategoriesNameFilter(filter)
+              setCategoriesPagination(1)
+            }}
             onDelete={() => {
               setCategoriesPagination(1)
+            }}
+          />
+
+          <BrandsTab
+            brands={brands}
+            onChangeFilter={filter => {
+              setBrandsNameFilter(filter)
+              setBrandsPagination(1)
+            }}
+            onDelete={() => {
+              setBrandsPagination(1)
             }}
           />
         </Tabs>
@@ -101,16 +139,6 @@ export function Products() {
           }
 
           setCategoriesPagination(page)
-        }}
-        onRequestCreateCategory={() => {
-          setIsCreateCategoryDialogOpen(true)
-        }}
-      />
-
-      <CreateCategoryAction
-        isOpen={isCreateCategoryDialogOpen}
-        onClose={() => {
-          setIsCreateCategoryDialogOpen(false)
         }}
       />
     </div>

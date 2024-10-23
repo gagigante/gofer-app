@@ -61,5 +61,6 @@ app.on('activate', () => {
 import('@/api/handlers/login-handlers')
 import('@/api/handlers/users-handler')
 import('@/api/handlers/categories-handler')
+import('@/api/handlers/brands-handler')
 import('@/api/handlers/products-handler')
 import('@/api/handlers/orders-handler')

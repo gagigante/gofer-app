@@ -8,7 +8,7 @@ import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
 
-import { type Category, type Product } from '@/api/db/schema'
+import { type Brand, type Category, type Product } from '@/api/db/schema'
 import { type Response } from '@/api/types/response'
 
 export interface ListProductsRequest {
@@ -19,7 +19,7 @@ export interface ListProductsRequest {
 }
 
 export type ListProductsResponse = Response<{
-  products: Array<Product & { category: Category | null }>
+  products: Array<Product & { category: Category | null } & { brand: Brand | null }>
   page: number
   itemsPerPage: number
   total: number
@@ -30,12 +30,12 @@ export interface CreateProductRequest {
   barCode: string
   name: string
   description?: string
-  brand: string
   price: number
   costPrice: number
   availableQuantity?: number
   minimumQuantity?: number
   categoryId?: string
+  brandId?: string
   icms: number
   ncm: string
   cest: string
@@ -51,12 +51,12 @@ export interface UpdateProductRequest {
   barCode: string
   name: string
   description?: string
-  brand: string
   price: number
   costPrice: number
   availableQuantity?: number
   minimumQuantity?: number
   categoryId?: string
+  brandId?: string
   icms: number
   ncm: string
   cest: string
@@ -101,12 +101,12 @@ export class ProductsController {
     barCode,
     name,
     description = '',
-    brand,
     price,
     costPrice,
     availableQuantity = 0,
     minimumQuantity = 0,
     categoryId,
+    brandId,
     icms,
     ncm,
     cest,
@@ -143,12 +143,12 @@ export class ProductsController {
       barCode,
       name,
       description,
-      brand,
       price,
       costPrice,
       availableQuantity,
       minimumQuantity,
       categoryId: categoryId ?? null,
+      brandId: brandId ?? null,
       icms,
       ncm,
       cest,
@@ -165,12 +165,12 @@ export class ProductsController {
     barCode,
     name,
     description = '',
-    brand,
     price,
     costPrice,
     availableQuantity = 0,
     minimumQuantity = 0,
     categoryId,
+    brandId,
     icms,
     ncm,
     cest,
@@ -215,12 +215,12 @@ export class ProductsController {
       barCode,
       name,
       description,
-      brand,
       price,
       costPrice,
       availableQuantity,
       minimumQuantity,
       categoryId: categoryId ?? null,
+      brandId: brandId ?? null,
       icms,
       ncm,
       cest,

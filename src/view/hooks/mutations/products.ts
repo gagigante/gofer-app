@@ -45,7 +45,7 @@ export function useMutateOnUpdateProduct() {
       return response
     },
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['products'] })
+      await queryClient.invalidateQueries({ queryKey: ['products', 'categories', 'brands'] })
 
       return response
     },
