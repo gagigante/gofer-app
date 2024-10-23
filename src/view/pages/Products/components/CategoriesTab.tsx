@@ -79,7 +79,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
           }
 
           toast({
-            title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+            title: 'Houve um erro ao atualizar a categoria. Tente novamente.',
             duration: 3000,
           })
 
@@ -110,7 +110,7 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
         },
         onError: () => {
           toast({
-            title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+            title: 'Houve um erro ao apagar a categoria. Tente novamente.',
             duration: 3000,
           })
         },
