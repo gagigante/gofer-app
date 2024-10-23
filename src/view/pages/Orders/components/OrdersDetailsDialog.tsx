@@ -1,17 +1,9 @@
-import React from 'react'
-
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Dialog } from '@/view/components/Dialog'
-import { Input } from '@/view/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
-import { Card } from '@/view/components/ui/card'
-import { Textarea } from '@/view/components/ui/textarea'
-import { Label } from '@/view/components/ui/label'
 
-import { formatCEST, formatCurrency, formatDecimal, formatNCM } from '@/view/utils/formatters'
+import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
-import { type Category, type Product } from '@/api/db/schema'
 import { useOrder } from '@/view/hooks/queries/orders'
 import { useAuth } from '@/view/hooks/useAuth'
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
-import { FaEye, FaTrash } from 'react-icons/fa'
+import { FaEye } from 'react-icons/fa'
 
 import { Button } from '@/view/components/ui/button'
 import { OrdersDetailsDialog } from './OrdersDetailsDialog'

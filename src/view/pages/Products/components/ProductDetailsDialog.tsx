@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Dialog } from '@/view/components/Dialog'
 import { Input } from '@/view/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
