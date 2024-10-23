@@ -15,6 +15,13 @@
       "when": 1728940723390,
       "tag": "0001_bored_marvel_apes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1729652639539,
+      "tag": "0002_shallow_victor_mancha",
+      "breakpoints": true
     }
   ]
 }

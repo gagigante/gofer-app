@@ -44,7 +44,7 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
   return (
     <TabsContent value="products">
       <Input
-        className="mb-4"
+        className="mt-[4.5rem] mb-4"
         placeholder="Buscar por nome do produto"
         value={nameFilter}
         onChange={(e) => {
@@ -58,6 +58,7 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
+            <TableHead>Marca</TableHead>
             <TableHead>Categoria</TableHead>
             <TableHead>Preço</TableHead>
             <TableHead>Qtd. disponível em estoque</TableHead>
@@ -65,10 +66,14 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
         </TableHeader>
 
         <TableBody>
-          {products.map(({ id, name, category, price, availableQuantity }) => (
+          {products.map(({ id, name, category, brand, price, availableQuantity }) => (
             <TableRow key={id}>
               <TableCell>
                 <p className="font-medium">{name}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{brand?.name ?? 'N/A'}</p>
               </TableCell>
 
               <TableCell>

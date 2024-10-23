@@ -109,6 +109,9 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
   async function handleDeleteBrand(brandId: string) {
     if (!user) return
 
+    handleToggleDialog('deleteBrand')
+    setSelectedBrand(undefined)
+
     await mutateOnDelete(
       { loggedUserId: user.id, brandId },
       {
@@ -124,10 +127,6 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
             title: 'Houve um erro ao apagar a marca. Tente novamente.',
             duration: 3000,
           })
-        },
-        onSettled: () => {
-          handleToggleDialog('deleteBrand')
-          setSelectedBrand(undefined)
         },
       },
     )

@@ -51,6 +51,10 @@ export function CreateCategoryAction({ isOpen, onClose }: CreateCategoryActionPr
           }
         },
         onSuccess: () => {
+          toast({
+            title: 'Categoria criada com sucesso.',
+            duration: 3000,
+          })
           onClose()
           reset()
         },

@@ -9,9 +9,11 @@ import { Textarea } from '@/view/components/ui/textarea'
 
 import { Card } from '@/view/components/ui/card'
 import { CreateCategoryPopover } from './CreateCategoryPopover'
+import { CreateBrandPopover } from './CreateBrandPopover'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useCategories } from '@/view/hooks/queries/categories'
+import { useBrands } from '@/view/hooks/queries/brands'
 
 import { formatCEST, formatDecimal, formatNCM } from '@/view/utils/formatters'
 import { parseStringNumber } from '@/view/utils/parsers'
@@ -28,14 +30,27 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
   const { user } = useAuth()
 
   const [categoriesFilter, setCategoriesFilter] = useState('')
+  const [brandsFilter, setBrandsFilter] = useState('')
   
-  const { data, isLoading } = useCategories({ loggedUserId: user?.id ?? '', name: categoriesFilter, itemsPerPage: 99 }, { enabled: !!user?.id })
-  const categories = (data?.categories ?? []).map(item => ({ label: item.name!, value: item.id }))
+  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories({ 
+    loggedUserId: user?.id ?? '',
+    name: categoriesFilter,
+  }, { 
+    enabled: !!user?.id
+  })
+  const categories = (categoriesResponse?.categories ?? []).map(item => ({ label: item.name!, value: item.id }))
+
+  const { data: brandsResponse, isLoading: isLoadingBrands } = useBrands({ 
+    loggedUserId: user?.id ?? '',
+    name: brandsFilter,
+  }, {
+    enabled: !!user?.id
+  })
+  const brands = (brandsResponse?.brands ?? []).map(item => ({ label: item.name!, value: item.id }))
 
   useEffect(() => {
     if (defaultValue) {
       form.setValue('name', defaultValue.name ?? '')
-      form.setValue('brand', defaultValue.brand ?? '')
       form.setValue('description', defaultValue.description ?? '')
       form.setValue('barCode', defaultValue.barCode ?? '')
       form.setValue('costPrice', formatDecimal(String(defaultValue.costPrice)))
@@ -51,10 +66,16 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
   }, [defaultValue])
 
   useEffect(() => {
-    if (!isLoading && defaultValue) {
-      form.setValue('category', defaultValue.categoryId ?? '')
+    if (defaultValue) {
+      if (!isLoadingCategories) {
+        form.setValue('category', defaultValue.categoryId ?? '')  
+      }
+
+      if (!isLoadingBrands) {
+        form.setValue('brand', defaultValue.brandId ?? '')  
+      }
     }
-  }, [isLoading, defaultValue])
+  }, [isLoadingCategories, isLoadingBrands, defaultValue])
 
   const [costPrice, price] = form.watch(['costPrice', 'price'])
   const profitMargin = (() => {
@@ -113,19 +134,28 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           <CreateCategoryPopover />
         </div>
 
-        <FormField
-          control={form.control}
-          name="brand"
-          render={({ field }) => (
-            <FormItem className="flex-1">
-              <FormLabel>Marca</FormLabel>
-              <FormControl>
-                <Input placeholder="Digite a marca do produto" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex flex-1 items-end gap-2">
+          <FormField
+            control={form.control}
+            name="brand"
+            render={({ field }) => (
+              <div className="flex flex-1 flex-col gap-3">
+                <FormLabel>Marca</FormLabel>
+                <Combobox
+                  placeholder="Selecione uma marca"
+                  searchPlaceholder="Busque pelo nome da marca"
+                  emptyPlaceholder="Nenhuma marca encontrada."
+                  options={brands}
+                  onChangeFilter={setBrandsFilter}
+                  value={brands.find(item => item.value === field.value)}
+                  onSelectOption={({ value }) => field.onChange(value)}
+                />
+              </div>
+            )}
+          />
+          
+          <CreateBrandPopover />
+        </div>
       </div>
 
       <FormField

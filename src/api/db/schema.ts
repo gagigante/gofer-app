@@ -18,7 +18,14 @@ export const categories = sqliteTable('categories', {
 export type Category = typeof categories.$inferSelect
 export type NewCategory = typeof categories.$inferInsert
 
-export const categoriesRelations = relations(categories, ({ many }) => ({
+export const brands = sqliteTable('brands', {
+  id: text('id').primaryKey(),
+  name: text('name').unique(),
+})
+export type Brand = typeof brands.$inferSelect
+export type NewBrand = typeof brands.$inferInsert
+
+export const brandsRelations = relations(brands, ({ many }) => ({
   products: many(products),
 }))
 
@@ -27,12 +34,12 @@ export const products = sqliteTable('products', {
   barCode: text('bar_code'),
   name: text('name').unique(),
   description: text('description'),
-  brand: text('brand'),
   price: integer('price'),
   costPrice: integer('cost_price'),
   availableQuantity: integer('available_quantity').default(0),
   minimumQuantity: integer('minimum_quantity').default(0),
   categoryId: text('category_id'),
+  brandId: text('brand_id'),
   icms: integer('icms'),
   ncm: text('ncm'),
   cest: text('cest'),
@@ -46,6 +53,10 @@ export const productsRelations = relations(products, ({ one }) => ({
   category: one(categories, {
     fields: [products.categoryId],
     references: [categories.id],
+  }),
+  brand: one(brands, {
+    fields: [products.brandId],
+    references: [brands.id],
   }),
 }))
 
