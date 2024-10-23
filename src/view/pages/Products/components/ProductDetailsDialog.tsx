@@ -1,6 +1,5 @@
 import { Dialog } from '@/view/components/Dialog'
 import { Input } from '@/view/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
 import { Card } from '@/view/components/ui/card'
 import { Textarea } from '@/view/components/ui/textarea'
 import { Label } from '@/view/components/ui/label'
@@ -8,10 +7,10 @@ import { Label } from '@/view/components/ui/label'
 import { formatCEST, formatCurrency, formatDecimal, formatNCM } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
-import { type Category, type Product } from '@/api/db/schema'
+import { type Brand, type Category, type Product } from '@/api/db/schema'
 
 interface ProductDetailsDialogProps {
-  product?: Product & { category: Category | null }
+  product?: Product & { category: Category | null } & { brand: Brand | null }
   isOpen: boolean
   onRequestEdit: (product: Product & { category: Category | null }) => void
   onClose: () => void
@@ -59,20 +58,12 @@ export function ProductDetailsDialog({ product, isOpen, onRequestEdit, onClose }
 
           <div className="flex-1 flex flex-col gap-4">
             <Label>Categoria</Label>
-            <Select value={product?.category?.id ?? 'N/A'} disabled>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value={product?.category?.id ?? 'N/A'}>{product?.category?.name ?? 'N/A'}</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input value={product?.category?.name || 'N/A'} readOnly disabled />
           </div>
 
           <div className="flex-1 flex flex-col gap-4">
             <Label>Marca</Label>
-            <Input value={product?.brand || 'N/A'} readOnly disabled />
+            <Input value={product?.brand?.name || 'N/A'} readOnly disabled />
           </div>
         </div>
 

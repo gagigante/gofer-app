@@ -1,28 +1,32 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type * as z from 'zod'
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { useDebounce } from 'use-debounce'
 
+import { Input } from '@/view/components/ui/input'
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 
-import { UpdateCategoryAction } from './UpdateCategoryAction'
-import { DeleteCategoryAction } from './DeleteCategoryAction'
-import { CategoryDetails } from './CategoryDetails'
+import { CreateCategoryAction } from './components/CreateCategoryAction'
+import { UpdateCategoryAction } from './components/UpdateCategoryAction'
+import { DeleteCategoryAction } from './components/DeleteCategoryAction'
+import { CategoryDetails } from './components/CategoryDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnDeleteCategory, useMutateOnUpdateCategory } from '@/view/hooks/mutations/categories'
 
-import { type CategoryWithProductsQuantity } from '..'
-import { type createCategorySchema } from './CreateCategoryAction/schema'
+import { type CategoryWithProductsQuantity } from '../..'
+import { type createCategorySchema } from './components/CreateCategoryAction/schema'
 
 interface CategoriesTabProps {
   categories: CategoryWithProductsQuantity[]
+  onChangeFilter: (nameFilter: string) => void
   onDelete: () => void
 }
 
-export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
+export function CategoriesTab({ categories, onChangeFilter, onDelete }: CategoriesTabProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -30,12 +34,19 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteCategory()
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryWithProductsQuantity>()
-
   const [dialogsVisibility, setDialogsVisibility] = useState({
+    createCategory: false,
     categoryDetails: false,
     updateCategory: false,
     deleteCategory: false,
   })
+
+  const [nameFilter, setNameFilter] = useState('')
+  const [search] = useDebounce(nameFilter, 250);
+  
+  useEffect(() => {
+    onChangeFilter(search)
+  }, [search])
 
   function handleToggleDialog(dialog: keyof typeof dialogsVisibility) {
     setDialogsVisibility(prevState => ({
@@ -124,6 +135,19 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
 
   return (
     <TabsContent value="categories">
+      <div className="flex justify-end items-center my-4">
+        <Button onClick={() => handleToggleDialog('createCategory')}>Adicionar categoria</Button>
+      </div>
+
+      <Input
+        className="mb-4"
+        placeholder="Buscar por nome da categoria"
+        value={nameFilter}
+        onChange={(e) => {
+          setNameFilter(e.target.value)
+        }}
+      />
+
       <Table>
         {categories.length === 0 && <TableCaption>Nenhuma categoria encontrada.</TableCaption>}
 
@@ -198,6 +222,13 @@ export function CategoriesTab({ categories, onDelete }: CategoriesTabProps) {
           ))}
         </TableBody>
       </Table>
+
+      <CreateCategoryAction
+        isOpen={dialogsVisibility.createCategory}
+        onClose={() => {
+          handleToggleDialog('createCategory')
+        }}
+      />
 
       <CategoryDetails
         categoryId={selectedCategory?.id}

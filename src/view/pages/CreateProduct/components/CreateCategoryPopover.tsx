@@ -14,7 +14,7 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnCreateCategory } from '@/view/hooks/mutations/categories'
 
-import { createCategorySchema } from '../../Products/components/CreateCategoryAction/schema'
+import { createCategorySchema } from '../../Products/components/CategoriesTab/components/CreateCategoryAction/schema'
 
 export function CreateCategoryPopover() {
   const { user } = useAuth()
