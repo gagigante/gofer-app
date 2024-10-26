@@ -8,6 +8,7 @@ export const createProductSchema = z.object({
   barCode: z.string(),
   price: z.string().min(1, 'Preço é um campo obrigatório'),
   costPrice: z.string().min(1, 'Preço de custo é um campo obrigatório'),
+  profitMargin: z.string().regex(/^\d{1,3}(,\d{1,2})?$/, 'Margem de lucro precisa ser uma porcentagem valida'),
   availableQuantity: z.number().int().min(0),
   minimumQuantity: z.number().int().min(0),
   icms: z.string().regex(/^\d{1,3}(,\d{1,2})?$/, 'ICMS precisa ser uma porcentagem valida'),
