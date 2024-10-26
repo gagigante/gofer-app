@@ -31,22 +31,24 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
 
   const [categoriesFilter, setCategoriesFilter] = useState('')
   const [brandsFilter, setBrandsFilter] = useState('')
-  
-  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories({ 
+
+  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories({
     loggedUserId: user?.id ?? '',
     name: categoriesFilter,
-  }, { 
+  }, {
     enabled: !!user?.id
   })
   const categories = (categoriesResponse?.categories ?? []).map(item => ({ label: item.name!, value: item.id }))
 
-  const { data: brandsResponse, isLoading: isLoadingBrands } = useBrands({ 
+  const { data: brandsResponse, isLoading: isLoadingBrands } = useBrands({
     loggedUserId: user?.id ?? '',
     name: brandsFilter,
   }, {
     enabled: !!user?.id
   })
   const brands = (brandsResponse?.brands ?? []).map(item => ({ label: item.name!, value: item.id }))
+
+  const [costPrice, price] = form.watch(['costPrice', 'price', 'profitMargin'])
 
   useEffect(() => {
     if (defaultValue) {
@@ -55,6 +57,14 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
       form.setValue('barCode', defaultValue.barCode ?? '')
       form.setValue('costPrice', formatDecimal(String(defaultValue.costPrice)))
       form.setValue('price', formatDecimal(String(defaultValue.price)))
+      form.setValue(
+        'profitMargin',
+        calculateProfitMargin(
+          formatDecimal(String(defaultValue.costPrice)),
+          formatDecimal(String(defaultValue.price)),
+        ),
+        { shouldDirty: false, shouldTouch: false },
+      )
       form.setValue('availableQuantity', defaultValue.availableQuantity ?? 0)
       form.setValue('minimumQuantity', defaultValue.minimumQuantity ?? 0)
       form.setValue('icms', formatDecimal(String(defaultValue.icms)))
@@ -68,19 +78,18 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
   useEffect(() => {
     if (defaultValue) {
       if (!isLoadingCategories) {
-        form.setValue('category', defaultValue.categoryId ?? '')  
+        form.setValue('category', defaultValue.categoryId ?? '')
       }
 
       if (!isLoadingBrands) {
-        form.setValue('brand', defaultValue.brandId ?? '')  
+        form.setValue('brand', defaultValue.brandId ?? '')
       }
     }
   }, [isLoadingCategories, isLoadingBrands, defaultValue])
 
-  const [costPrice, price] = form.watch(['costPrice', 'price'])
-  const profitMargin = (() => {
+  function calculateProfitMargin(costPrice: string, price: string) {
     if (costPrice.trim() === '' || costPrice.trim() === '0,00' || price.trim() === '' || price.trim() === '0,00')
-      return 'N/A'
+      return '0,00'
 
     const costPriceNumber = parseStringNumber(costPrice)
     const priceNumber = parseStringNumber(price)
@@ -92,7 +101,19 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(profitMargin)
-  })()
+  }
+
+  function calculatePrice(costPrice: string, profitMargin: string) {
+    if (costPrice.trim() === '' || costPrice.trim() === '0,00' || profitMargin.trim() === '' || profitMargin.trim() === '0,00')
+      return '0,00'
+
+    const parsedCostPrice = parseStringNumber(costPrice)
+    const parsedProfitMargin = parseStringNumber(profitMargin)
+
+    const updatedPrice = parsedCostPrice * (1 + parsedProfitMargin / 100)
+
+    return formatDecimal(String(updatedPrice * 100))
+  }
 
   return (
     <div className="space-y-6">
@@ -153,7 +174,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
               </div>
             )}
           />
-          
+
           <CreateBrandPopover />
         </div>
       </div>
@@ -197,11 +218,17 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                 <Input
                   placeholder="Digite o preço de custo do produto"
                   {...field}
-                  value={field.value.toString()}
                   onChange={(e) => {
                     const formatted = formatDecimal(e.target.value)
                     e.target.value = formatted
+
+                    const updatedProfitMargin = calculateProfitMargin(formatted, price)
+
                     field.onChange(formatted)
+                    form.setValue('profitMargin', updatedProfitMargin, {
+                      shouldDirty: false,
+                      shouldTouch: false,
+                    })
                   }}
                 />
               </FormControl>
@@ -220,11 +247,17 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                 <Input
                   placeholder="Digite o preço do produto"
                   {...field}
-                  value={field.value.toString()}
                   onChange={(e) => {
                     const formatted = formatDecimal(e.target.value)
                     e.target.value = formatted
+
+                    const updatedProfitMargin = calculateProfitMargin(costPrice, formatted)
+
                     field.onChange(formatted)
+                    form.setValue('profitMargin', updatedProfitMargin, {
+                      shouldDirty: false,
+                      shouldTouch: false,
+                    })
                   }}
                 />
               </FormControl>
@@ -233,13 +266,34 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           )}
         />
 
-        <FormItem className="flex-1">
-          <FormLabel>Margem de lucro (%)</FormLabel>
-          <FormControl>
-            <Input value={profitMargin} readOnly disabled />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
+        <FormField
+          control={form.control}
+          name="profitMargin"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Margem de lucro (%)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const formatted = formatDecimal(e.target.value)
+                    e.target.value = formatted
+
+                    const updatedProfitMargin = calculatePrice(costPrice, formatted)
+
+                    field.onChange(formatted)
+                    form.setValue('price', updatedProfitMargin, {
+                      shouldDirty: false,
+                      shouldTouch: false,
+                    })
+                  }}
+                  maxLength={6}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>)
+          }
+        />
       </div>
 
       <div className="flex gap-4">

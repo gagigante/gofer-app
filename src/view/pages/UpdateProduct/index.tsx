@@ -36,6 +36,7 @@ export function UpdateProduct() {
       barCode: '',
       price: '0,00',
       costPrice: '0,00',
+      profitMargin: '0,00',
       availableQuantity: 0,
       minimumQuantity: 0,
       icms: '0,00',
