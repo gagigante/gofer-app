@@ -72,6 +72,18 @@ export function ProductDetailsDialog({ product, isOpen, onRequestEdit, onClose }
           <Textarea value={product?.description || 'N/A'} readOnly disabled />
         </div>
 
+        <div className="flex gap-4">
+          <div className="flex-1 flex flex-col gap-4">
+            <Label>Identificador fácil</Label>
+            <Input value={product?.fastId || 'N/A'} readOnly disabled />
+          </div>
+
+          <div className="flex-1 flex flex-col gap-4">
+            <Label>Código de barras</Label>
+            <Input value={product?.barCode || 'N/A'} readOnly disabled />
+          </div>
+        </div>
+
         <div className="flex-1 flex flex-col gap-4">
           <Label>Código de barras</Label>
           <Input value={product?.barCode || 'N/A'} readOnly disabled />

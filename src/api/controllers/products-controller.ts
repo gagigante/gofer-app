@@ -25,6 +25,12 @@ export type ListProductsResponse = Response<{
   total: number
 }>
 
+export interface GetLastProductRequest {
+  loggedUserId: string
+}
+
+export type GetLastProductResponse = Response<Product | null>
+
 export interface CreateProductRequest {
   loggedUserId: string
   barCode: string
@@ -96,6 +102,19 @@ export class ProductsController {
     return { data, err: null }
   }
 
+  public async getLastProduct({ loggedUserId }: GetLastProductRequest): Promise<GetLastProductResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const response = await this.productsRepository.getLastProductCreated()
+
+    return { data: response, err: null }
+  }
+
   public async createProduct({
     loggedUserId,
     barCode,
@@ -138,8 +157,12 @@ export class ProductsController {
       }
     }
 
+    const lastProduct = await this.productsRepository.getLastProductCreated()
+    const newProductFastId = (lastProduct?.fastId ?? 0) + 1
+
     const createdProduct = await this.productsRepository.createProduct({
       id: randomUUID(),
+      fastId: newProductFastId,
       barCode,
       name,
       description,
@@ -161,7 +184,7 @@ export class ProductsController {
 
   public async updateProduct({
     loggedUserId,
-    productId,
+    productId,    
     barCode,
     name,
     description = '',
@@ -213,6 +236,7 @@ export class ProductsController {
     const updatedProduct = await this.productsRepository.updateProduct({
       id: productId,
       barCode,
+      fastId: productToBeUpdated.fastId,
       name,
       description,
       price,

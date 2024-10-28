@@ -31,6 +31,7 @@ export const brandsRelations = relations(brands, ({ many }) => ({
 
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(),
+  fastId: integer('fast_id').unique(),
   barCode: text('bar_code'),
   name: text('name').unique(),
   description: text('description'),

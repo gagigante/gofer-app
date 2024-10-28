@@ -15,6 +15,7 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { useCategories } from '@/view/hooks/queries/categories'
 import { useBrands } from '@/view/hooks/queries/brands'
 
+import { type ProductsApi, apiName } from '@/api/exposes/products-api'
 import { formatCEST, formatDecimal, formatNCM } from '@/view/utils/formatters'
 import { parseStringNumber } from '@/view/utils/parsers'
 
@@ -51,9 +52,24 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
   const [costPrice, price] = form.watch(['costPrice', 'price', 'profitMargin'])
 
   useEffect(() => {
-    if (defaultValue) {
+    async function generateFastId() {
+      if (!user) return
+  
+      const { data } = await (window as unknown as Record<typeof apiName, ProductsApi>).productsApi.getLast({
+        loggedUserId: user.id,
+      })
+  
+      const newProductFastId = (data?.fastId ?? 0) + 1
+  
+      form.setValue('fastId', newProductFastId)
+    }
+
+    if (!defaultValue) {
+      generateFastId() 
+    } else {
       form.setValue('name', defaultValue.name ?? '')
       form.setValue('description', defaultValue.description ?? '')
+      form.setValue('fastId', defaultValue.fastId ?? 0)
       form.setValue('barCode', defaultValue.barCode ?? '')
       form.setValue('costPrice', formatDecimal(String(defaultValue.costPrice)))
       form.setValue('price', formatDecimal(String(defaultValue.price)))
@@ -72,7 +88,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
       form.setValue('cest', formatCEST(defaultValue.cest ?? ''))
       form.setValue('cestSegment', defaultValue.cestSegment ?? '')
       form.setValue('cestDescription', defaultValue.cestDescription ?? '')
-    }
+    }    
   }, [defaultValue])
 
   useEffect(() => {
@@ -193,20 +209,38 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="barCode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Código de barras</FormLabel>
-            <FormControl>
-              <Input placeholder="Digite o código de barras do produto" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="flex gap-4">
+        <FormField
+          control={form.control}
+          name="fastId"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Identificador fácil</FormLabel>
+              <FormControl>
+                <Input {...field} readOnly disabled />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
+
+        <FormField
+          control={form.control}
+          name="barCode"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel>Código de barras</FormLabel>
+              <FormControl>
+                <Input placeholder="Digite o código de barras do produto" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+      </div>
+      
       <div className="flex gap-4">
         <FormField
           control={form.control}

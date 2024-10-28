@@ -1,4 +1,4 @@
-import { asc, count, eq, inArray, like } from 'drizzle-orm'
+import { asc, count, eq, inArray, like, max } from 'drizzle-orm'
 
 import { db } from '../db/client'
 
@@ -71,8 +71,15 @@ export class ProductsRepository {
     return response ?? null    
   }
 
+  public async getLastProductCreated(): Promise<Product | null> {
+    const response = await db.select({ products, value: max(products.fastId) }).from(products).get()
+
+    return response?.products ?? null
+  }
+
   public async createProduct({
     id,
+    fastId,
     barCode,
     name,
     description,
@@ -90,6 +97,7 @@ export class ProductsRepository {
   }: NewProduct): Promise<Product> {
     const [response] = await db.insert(products).values({
       id,
+      fastId,
       barCode,
       name,
       description,
