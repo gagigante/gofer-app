@@ -5,6 +5,7 @@ export const createProductSchema = z.object({
   category: z.string(),
   brand: z.string(),
   description: z.string(),
+  fastId: z.number().min(0),
   barCode: z.string(),
   price: z.string().min(1, 'Preço é um campo obrigatório'),
   costPrice: z.string().min(1, 'Preço de custo é um campo obrigatório'),
