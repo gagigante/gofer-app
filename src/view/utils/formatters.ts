@@ -28,17 +28,11 @@ export function formatNCM(value: string) {
   return `${a}.${b}.${c}`
 }
 
-export function formatDecimal(value: string) {
-  const format = (numStr: string) => {
-    if (numStr === '') return ''
-
-    return new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(+numStr / 100)
-  }
-
-  return format(value.replace(/\D/g, ''))
+export function formatDecimal(value: number) {
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
 }
 
 export function formatCurrency(value: number) {

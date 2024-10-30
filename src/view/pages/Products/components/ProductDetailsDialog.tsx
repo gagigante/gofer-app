@@ -122,7 +122,7 @@ export function ProductDetailsDialog({ product, isOpen, onRequestEdit, onClose }
           <div className="flex gap-4">
             <div className="flex-1 flex flex-col gap-4">
               <Label>ICMS (%) *</Label>
-              <Input value={formatDecimal(String(parseCentsToDecimal(product?.icms ?? 0)))} readOnly disabled />
+              <Input value={formatDecimal(parseCentsToDecimal(product?.icms ?? 0))} readOnly disabled />
             </div>
 
             <div className="flex-1 flex flex-col gap-4">
