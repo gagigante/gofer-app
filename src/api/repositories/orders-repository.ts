@@ -18,7 +18,7 @@ interface OrderResponse {
 }
 
 export class OrdersRepository {
-  public async getOrders(page = 1, itemsPerPage = 15): Promise<any> {
+  public async getOrders(page = 1, itemsPerPage = 15): Promise<Order[]> {
     const response = await db
       .select()
       .from(orders)

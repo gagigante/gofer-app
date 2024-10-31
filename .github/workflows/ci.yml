@@ -7,7 +7,7 @@ on:
 
 jobs:
   ci:
-    name: Type Check
+    name: CI
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +30,7 @@ jobs:
         run: yarn type-check
 
       - name: Run linter
-        run: echo "yarn lint" # TODO
+        run: echo "yarn lint"
 
       # DEPENDENCY ANALISYS npm audit --production npm outdated
       # SEC CHECKS
