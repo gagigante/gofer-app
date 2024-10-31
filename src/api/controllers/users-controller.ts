@@ -32,7 +32,7 @@ export interface CreateUserRequest {
   loggedUserId: string
   name: string
   password: string
-  role: UserRole,
+  role: UserRole
 }
 
 export type CreateUserResponse = Response<User>
@@ -40,7 +40,6 @@ export type CreateUserResponse = Response<User>
 export interface DeleteUserRequest {
   loggedUserId: string
   userId: string
-
 }
 
 export type DeleteUserResponse = Response<null>
@@ -84,12 +83,7 @@ export class UsersController {
     return { data, err: null }
   }
 
-  public async createUser({
-    loggedUserId,
-    name,
-    password,
-    role,
-  }: CreateUserRequest): Promise<CreateUserResponse> {
+  public async createUser({ loggedUserId, name, password, role }: CreateUserRequest): Promise<CreateUserResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator') {
@@ -130,10 +124,7 @@ export class UsersController {
     return { data: createdUser, err: null }
   }
 
-  public async deleteUser({
-    loggedUserId,
-    userId
-  }: DeleteUserRequest): Promise<DeleteUserResponse> {
+  public async deleteUser({ loggedUserId, userId }: DeleteUserRequest): Promise<DeleteUserResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser || loggedUser.role === 'operator') {
@@ -161,7 +152,7 @@ export class UsersController {
     return { data: null, err: null }
   }
 
-  public async updateUser({ 
+  public async updateUser({
     loggedUserId,
     updatedName,
     currentPassword,

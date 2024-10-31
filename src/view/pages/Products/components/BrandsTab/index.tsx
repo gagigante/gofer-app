@@ -20,7 +20,6 @@ import { BrandWithProductsQuantity } from '../..'
 import { createBrandSchema } from './components/CreateBrandAction/schema'
 import { BrandDetails } from './components/BrandDetails'
 
-
 interface BrandsTabProps {
   brands: BrandWithProductsQuantity[]
   onChangeFilter: (nameFilter: string) => void
@@ -43,16 +42,16 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
   })
 
   const [nameFilter, setNameFilter] = useState('')
-  const [search] = useDebounce(nameFilter, 250);
-  
+  const [search] = useDebounce(nameFilter, 250)
+
   useEffect(() => {
     onChangeFilter(search)
   }, [search])
 
   function handleToggleDialog(dialog: keyof typeof dialogsVisibility) {
-    setDialogsVisibility(prevState => ({
+    setDialogsVisibility((prevState) => ({
       ...prevState,
-      [dialog]: !prevState[dialog]
+      [dialog]: !prevState[dialog],
     }))
   }
 
@@ -256,7 +255,7 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
         onClose={() => {
           handleToggleDialog('deleteBrand')
         }}
-      /> 
+      />
     </TabsContent>
   )
 }

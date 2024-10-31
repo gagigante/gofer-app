@@ -20,7 +20,7 @@ export class ProductsRepository {
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
 
-    return response.map(item => {
+    return response.map((item) => {
       return {
         ...item.products,
         category: item.categories,
@@ -48,31 +48,37 @@ export class ProductsRepository {
   }
 
   public async countProducts(name = ''): Promise<number> {
-    const [response] = await db.select({ count: count() }).from(products).where(like(products.name, `%${name}%`))
+    const [response] = await db
+      .select({ count: count() })
+      .from(products)
+      .where(like(products.name, `%${name}%`))
 
     return response.count
   }
 
   public async getProductById(productId: string): Promise<Product | null> {
     const response = await db.select().from(products).where(eq(products.id, productId)).get()
-    
-    return response ?? null    
+
+    return response ?? null
   }
 
   public async getProductByName(productName: string): Promise<Product | null> {
     const response = await db.select().from(products).where(eq(products.name, productName)).get()
-    
+
     return response ?? null
   }
 
   public async getProductByBarCode(productBarCode: string): Promise<Product | null> {
     const response = await db.select().from(products).where(eq(products.barCode, productBarCode)).get()
-    
-    return response ?? null    
+
+    return response ?? null
   }
 
   public async getLastProductCreated(): Promise<Product | null> {
-    const response = await db.select({ products, value: max(products.fastId) }).from(products).get()
+    const response = await db
+      .select({ products, value: max(products.fastId) })
+      .from(products)
+      .get()
 
     return response?.products ?? null
   }
@@ -95,34 +101,39 @@ export class ProductsRepository {
     cestSegment,
     cestDescription,
   }: NewProduct): Promise<Product> {
-    const [response] = await db.insert(products).values({
-      id,
-      fastId,
-      barCode,
-      name,
-      description,
-      brandId,
-      price,
-      costPrice,
-      availableQuantity,
-      minimumQuantity,
-      categoryId,
-      icms,
-      ncm,
-      cest,
-      cestSegment,
-      cestDescription,
-    }).returning()
+    const [response] = await db
+      .insert(products)
+      .values({
+        id,
+        fastId,
+        barCode,
+        name,
+        description,
+        brandId,
+        price,
+        costPrice,
+        availableQuantity,
+        minimumQuantity,
+        categoryId,
+        icms,
+        ncm,
+        cest,
+        cestSegment,
+        cestDescription,
+      })
+      .returning()
 
-    return response    
+    return response
   }
 
   public async updateProduct({ id, ...data }: Product): Promise<Product> {
-    const [response] = await db.update(products).set({
-      ...data,
-    })
-    .where(eq(products.id, id))
-    .returning()
+    const [response] = await db
+      .update(products)
+      .set({
+        ...data,
+      })
+      .where(eq(products.id, id))
+      .returning()
 
     return response
   }

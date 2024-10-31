@@ -42,16 +42,16 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
   })
 
   const [nameFilter, setNameFilter] = useState('')
-  const [search] = useDebounce(nameFilter, 250);
-  
+  const [search] = useDebounce(nameFilter, 250)
+
   useEffect(() => {
     onChangeFilter(search)
   }, [search])
 
   function handleToggleDialog(dialog: keyof typeof dialogsVisibility) {
-    setDialogsVisibility(prevState => ({
+    setDialogsVisibility((prevState) => ({
       ...prevState,
-      [dialog]: !prevState[dialog]
+      [dialog]: !prevState[dialog],
     }))
   }
 

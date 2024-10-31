@@ -107,10 +107,7 @@ export class BrandsController {
     return { data: { ...brand, products }, err: null }
   }
 
-  public async createBrand({
-    loggedUserId,
-    name,
-  }: CreateBrandRequest): Promise<CreateBrandResponse> {
+  public async createBrand({ loggedUserId, name }: CreateBrandRequest): Promise<CreateBrandResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -155,11 +152,7 @@ export class BrandsController {
     return { data: null, err: null }
   }
 
-  public async updateBrand({
-    loggedUserId,
-    brandId,
-    updatedName,
-  }: UpdateBrandRequest): Promise<UpdateBrandResponse> {
+  public async updateBrand({ loggedUserId, brandId, updatedName }: UpdateBrandRequest): Promise<UpdateBrandResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {

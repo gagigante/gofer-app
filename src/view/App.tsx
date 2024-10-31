@@ -10,8 +10,8 @@ import { router } from './routes'
 
 import '@/view/styles/global.css'
 
-const container = document.getElementById('root')!;
-const root = createRoot(container);
+const container = document.getElementById('root')!
+const root = createRoot(container)
 
 root.render(
   <ReactQueryContext>

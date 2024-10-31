@@ -54,23 +54,21 @@ export function Dialog({
 
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">
-              {cancelButtonLabel}
-            </Button>
+            <Button variant="outline">{cancelButtonLabel}</Button>
           </DialogClose>
 
-        {proceedButtonLabel && (
-          <Button
-            type="button"
-            variant="default"
-            onClick={async () => {
-              await onProceed?.()
-            }}
-            disabled={isProceedButtonDisabled}
-          >
-            {proceedButtonLabel}
-          </Button>
-        )}
+          {proceedButtonLabel && (
+            <Button
+              type="button"
+              variant="default"
+              onClick={async () => {
+                await onProceed?.()
+              }}
+              disabled={isProceedButtonDisabled}
+            >
+              {proceedButtonLabel}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </ShadDialog>

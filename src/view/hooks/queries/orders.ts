@@ -1,7 +1,12 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 import { type apiName, type OrdersApi } from '@/api/exposes/orders-api'
-import { type GetOrderRequest, type GetOrderResponse, type ListOrdersRequest, type ListOrdersResponse } from '@/api/controllers/orders-controller'
+import {
+  type GetOrderRequest,
+  type GetOrderResponse,
+  type ListOrdersRequest,
+  type ListOrdersResponse,
+} from '@/api/controllers/orders-controller'
 
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 

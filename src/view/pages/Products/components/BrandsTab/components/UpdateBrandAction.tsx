@@ -21,12 +21,7 @@ interface UpdateBrandActionProps {
   onClose: () => void
 }
 
-export function UpdateBrandAction({
-  selectedBrand,
-  isOpen,
-  onUpdateBrand,
-  onClose,
-}: UpdateBrandActionProps) {
+export function UpdateBrandAction({ selectedBrand, isOpen, onUpdateBrand, onClose }: UpdateBrandActionProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 

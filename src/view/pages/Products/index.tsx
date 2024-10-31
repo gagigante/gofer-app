@@ -97,9 +97,9 @@ export function Products() {
             <TabsTrigger value="brands">Marcas</TabsTrigger>
           </TabsList>
 
-          <ProductsTab 
-            products={products} 
-            onChangeFilter={filter => {
+          <ProductsTab
+            products={products}
+            onChangeFilter={(filter) => {
               setProductsNameFilter(filter)
               setProductsPagination(1)
             }}
@@ -107,7 +107,7 @@ export function Products() {
 
           <CategoriesTab
             categories={categories}
-            onChangeFilter={filter => {
+            onChangeFilter={(filter) => {
               setCategoriesNameFilter(filter)
               setCategoriesPagination(1)
             }}
@@ -118,7 +118,7 @@ export function Products() {
 
           <BrandsTab
             brands={brands}
-            onChangeFilter={filter => {
+            onChangeFilter={(filter) => {
               setBrandsNameFilter(filter)
               setBrandsPagination(1)
             }}

@@ -184,7 +184,7 @@ export class ProductsController {
 
   public async updateProduct({
     loggedUserId,
-    productId,    
+    productId,
     barCode,
     name,
     description = '',

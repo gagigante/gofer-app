@@ -16,10 +16,7 @@ ipcMain.handle(
   async (_event, data: ListCategoriesRequest) => await categoryController.listCategories(data),
 )
 
-ipcMain.handle(
-  'categories:get',
-  async (_event, data: GetCategoryRequest) => await categoryController.getCategory(data),
-)
+ipcMain.handle('categories:get', async (_event, data: GetCategoryRequest) => await categoryController.getCategory(data))
 
 ipcMain.handle(
   'categories:create',

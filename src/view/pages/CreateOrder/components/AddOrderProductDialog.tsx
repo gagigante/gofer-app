@@ -18,9 +18,9 @@ interface AddOrderProductDialogProps {
 // TODO: deve validar se ha quantidade suficiente
 export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderProductDialogProps) {
   const { user } = useAuth()
-  
+
   const [filter, setFilter] = useState('')
-  const [product, setProduct] = useState<{ label: string, value: string }>()
+  const [product, setProduct] = useState<{ label: string; value: string }>()
   const [quantity, setQuantity] = useState(0)
 
   const { data: productsResponse } = useProducts(
@@ -34,7 +34,7 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
       placeholderData: (previousData) => previousData,
     },
   )
-  const products = (productsResponse?.products ?? []).map(item => ({ label: item.name!, value: item.id }))
+  const products = (productsResponse?.products ?? []).map((item) => ({ label: item.name!, value: item.id }))
 
   useEffect(() => {
     setProduct(undefined)
@@ -44,7 +44,7 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
   function handleSubmit() {
     if (!product) return
 
-    const selectedProduct = productsResponse?.products.find(item => item.id === product.value)
+    const selectedProduct = productsResponse?.products.find((item) => item.id === product.value)
 
     if (selectedProduct) {
       onSubmit(selectedProduct, quantity)
@@ -53,7 +53,7 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
   }
 
   return (
-    <Dialog      
+    <Dialog
       title="Adicionar produto ao pedido"
       onProceed={handleSubmit}
       proceedButtonLabel="Adicionar produto"
@@ -64,7 +64,7 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
         onClose()
       }}
     >
-      <div className='flex items-center gap-2'>
+      <div className="flex items-center gap-2">
         <Combobox
           placeholder="Selecione um produto"
           searchPlaceholder="Pesquisar por nome de produto"
@@ -74,9 +74,15 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
           onSelectOption={setProduct}
           onChangeFilter={setFilter}
         />
-              
-        <Input className='w-full' type="number" min={0} value={quantity} onChange={e => setQuantity(Number(e.target.value))} />
-      </div>      
+
+        <Input
+          className="w-full"
+          type="number"
+          min={0}
+          value={quantity}
+          onChange={(e) => setQuantity(Number(e.target.value))}
+        />
+      </div>
     </Dialog>
   )
 }

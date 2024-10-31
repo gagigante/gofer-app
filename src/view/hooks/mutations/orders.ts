@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query'
 
 import { queryClient } from '@/view/contexts/ReactQueryContext'
 
-import {type  CreateOrderRequest, type CreateOrderResponse } from '@/api/controllers/orders-controller'
+import { type CreateOrderRequest, type CreateOrderResponse } from '@/api/controllers/orders-controller'
 import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
 export function useMutateOnCreateOrder() {
