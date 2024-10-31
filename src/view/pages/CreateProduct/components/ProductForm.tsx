@@ -109,10 +109,10 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
     }
   }, [isLoadingCategories, isLoadingBrands, defaultValue])
 
-  function handleCurrencyFieldsChangeEvent(
+  function handleDecimalFieldsChangeEvent(
     e: React.ChangeEvent<HTMLInputElement>,
     onChange: (value: string) => void,
-    cb: (formattedValue: string) => void,
+    cb?: (formattedValue: string) => void,
   ) {
     const number = Number(e.target.value.replace(',', ''))
 
@@ -127,7 +127,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
     e.target.value = formatted
     onChange(formatted)
 
-    cb(formatted)
+    cb?.(formatted)
   }
 
   function calculateProfitMargin(costPrice: string, price: string) {
@@ -283,7 +283,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   placeholder="Digite o preço de custo do produto"
                   {...field}
                   onChange={(e) => {
-                    handleCurrencyFieldsChangeEvent(e, field.onChange, (formatted) => {
+                    handleDecimalFieldsChangeEvent(e, field.onChange, (formatted) => {
                       const updatedProfitMargin = calculateProfitMargin(formatted, price)
 
                       form.setValue('profitMargin', updatedProfitMargin, {
@@ -310,8 +310,8 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   placeholder="Digite o preço do produto"
                   {...field}
                   onChange={(e) => {
-                    handleCurrencyFieldsChangeEvent(e, field.onChange, (formatted) => {
-                      const updatedProfitMargin = calculateProfitMargin(formatted, price)
+                    handleDecimalFieldsChangeEvent(e, field.onChange, (formatted) => {
+                      const updatedProfitMargin = calculateProfitMargin(costPrice, formatted)
 
                       form.setValue('profitMargin', updatedProfitMargin, {
                         shouldDirty: false,
@@ -336,7 +336,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                 <Input
                   {...field}
                   onChange={(e) => {
-                    handleCurrencyFieldsChangeEvent(e, field.onChange, (formatted) => {
+                    handleDecimalFieldsChangeEvent(e, field.onChange, (formatted) => {
                       const updatedPrice = calculatePrice(costPrice, formatted)
 
                       form.setValue('price', updatedPrice, {
@@ -413,10 +413,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                     placeholder="Enter ICMS percentage"
                     {...field}
                     onChange={(e) => {
-                      const formatted = formatDecimal(parseStringNumber(e.target.value))
-
-                      e.target.value = formatted
-                      field.onChange(formatted)
+                      handleDecimalFieldsChangeEvent(e, field.onChange)
                     }}
                     maxLength={6}
                   />
