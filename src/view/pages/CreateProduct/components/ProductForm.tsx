@@ -33,39 +33,45 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
   const [categoriesFilter, setCategoriesFilter] = useState('')
   const [brandsFilter, setBrandsFilter] = useState('')
 
-  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories({
-    loggedUserId: user?.id ?? '',
-    name: categoriesFilter,
-  }, {
-    enabled: !!user?.id
-  })
-  const categories = (categoriesResponse?.categories ?? []).map(item => ({ label: item.name!, value: item.id }))
+  const { data: categoriesResponse, isLoading: isLoadingCategories } = useCategories(
+    {
+      loggedUserId: user?.id ?? '',
+      name: categoriesFilter,
+    },
+    {
+      enabled: !!user?.id,
+    },
+  )
+  const categories = (categoriesResponse?.categories ?? []).map((item) => ({ label: item.name!, value: item.id }))
 
-  const { data: brandsResponse, isLoading: isLoadingBrands } = useBrands({
-    loggedUserId: user?.id ?? '',
-    name: brandsFilter,
-  }, {
-    enabled: !!user?.id
-  })
-  const brands = (brandsResponse?.brands ?? []).map(item => ({ label: item.name!, value: item.id }))
+  const { data: brandsResponse, isLoading: isLoadingBrands } = useBrands(
+    {
+      loggedUserId: user?.id ?? '',
+      name: brandsFilter,
+    },
+    {
+      enabled: !!user?.id,
+    },
+  )
+  const brands = (brandsResponse?.brands ?? []).map((item) => ({ label: item.name!, value: item.id }))
 
   const [costPrice, price] = form.watch(['costPrice', 'price', 'profitMargin'])
 
   useEffect(() => {
     async function generateFastId() {
       if (!user) return
-  
+
       const { data } = await (window as unknown as Record<typeof apiName, ProductsApi>).productsApi.getLast({
         loggedUserId: user.id,
       })
-  
+
       const newProductFastId = (data?.fastId ?? 0) + 1
-  
+
       form.setValue('fastId', newProductFastId)
     }
 
     if (!defaultValue) {
-      generateFastId() 
+      generateFastId()
     } else {
       form.setValue('name', defaultValue.name ?? '')
       form.setValue('description', defaultValue.description ?? '')
@@ -88,7 +94,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
       form.setValue('cest', formatCEST(defaultValue.cest ?? ''))
       form.setValue('cestSegment', defaultValue.cestSegment ?? '')
       form.setValue('cestDescription', defaultValue.cestDescription ?? '')
-    }    
+    }
   }, [defaultValue])
 
   useEffect(() => {
@@ -103,18 +109,22 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
     }
   }, [isLoadingCategories, isLoadingBrands, defaultValue])
 
-  function handleCurrencyFieldsChangeEvent(e: React.ChangeEvent<HTMLInputElement>, onChange: (value: string) => void, cb: (formattedValue: string) => void) {
-    const number = Number(e.target.value.replace(',', ''))                   
+  function handleCurrencyFieldsChangeEvent(
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: string) => void,
+    cb: (formattedValue: string) => void,
+  ) {
+    const number = Number(e.target.value.replace(',', ''))
 
-    if (Number.isNaN(number)) {                      
+    if (Number.isNaN(number)) {
       e.target.value = '0,00'
-      onChange('0,00')                      
+      onChange('0,00')
       return
-    }                   
+    }
 
     const formatted = formatDecimal(number / 100)
 
-    e.target.value = formatted  
+    e.target.value = formatted
     onChange(formatted)
 
     cb(formatted)
@@ -137,7 +147,12 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
   }
 
   function calculatePrice(costPrice: string, profitMargin: string) {
-    if (costPrice.trim() === '' || costPrice.trim() === '0,00' || profitMargin.trim() === '' || profitMargin.trim() === '0,00')
+    if (
+      costPrice.trim() === '' ||
+      costPrice.trim() === '0,00' ||
+      profitMargin.trim() === '' ||
+      profitMargin.trim() === '0,00'
+    )
       return '0,00'
 
     const parsedCostPrice = parseStringNumber(costPrice)
@@ -178,7 +193,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   emptyPlaceholder="Nenhuma categoria encontrada."
                   options={categories}
                   onChangeFilter={setCategoriesFilter}
-                  value={categories.find(item => item.value === field.value)}
+                  value={categories.find((item) => item.value === field.value)}
                   onSelectOption={({ value }) => field.onChange(value)}
                 />
               </div>
@@ -201,7 +216,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   emptyPlaceholder="Nenhuma marca encontrada."
                   options={brands}
                   onChangeFilter={setBrandsFilter}
-                  value={brands.find(item => item.value === field.value)}
+                  value={brands.find((item) => item.value === field.value)}
                   onSelectOption={({ value }) => field.onChange(value)}
                 />
               </div>
@@ -255,7 +270,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
           )}
         />
       </div>
-      
+
       <div className="flex gap-4">
         <FormField
           control={form.control}
@@ -270,7 +285,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   onChange={(e) => {
                     handleCurrencyFieldsChangeEvent(e, field.onChange, (formatted) => {
                       const updatedProfitMargin = calculateProfitMargin(formatted, price)
-                      
+
                       form.setValue('profitMargin', updatedProfitMargin, {
                         shouldDirty: false,
                         shouldTouch: false,
@@ -297,12 +312,12 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   onChange={(e) => {
                     handleCurrencyFieldsChangeEvent(e, field.onChange, (formatted) => {
                       const updatedProfitMargin = calculateProfitMargin(formatted, price)
-                      
+
                       form.setValue('profitMargin', updatedProfitMargin, {
                         shouldDirty: false,
                         shouldTouch: false,
                       })
-                    })                                      
+                    })
                   }}
                 />
               </FormControl>
@@ -323,7 +338,7 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                   onChange={(e) => {
                     handleCurrencyFieldsChangeEvent(e, field.onChange, (formatted) => {
                       const updatedPrice = calculatePrice(costPrice, formatted)
-                      
+
                       form.setValue('price', updatedPrice, {
                         shouldDirty: false,
                         shouldTouch: false,
@@ -334,8 +349,8 @@ export function ProductForm({ form, defaultValue }: ProductFormProps) {
                 />
               </FormControl>
               <FormMessage />
-            </FormItem>)
-          }
+            </FormItem>
+          )}
         />
       </div>
 

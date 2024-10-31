@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
-import { 
+import {
   type ListOrdersRequest,
   type ListOrdersResponse,
   type CreateOrderRequest,
@@ -9,10 +9,10 @@ import {
   type GetOrderResponse,
 } from '../controllers/orders-controller'
 
-export interface OrdersApi {  
+export interface OrdersApi {
   list: (data: ListOrdersRequest) => Promise<ListOrdersResponse>
   get: (data: GetOrderRequest) => Promise<GetOrderResponse>
-  create: (data: CreateOrderRequest) => Promise<CreateOrderResponse>  
+  create: (data: CreateOrderRequest) => Promise<CreateOrderResponse>
 }
 
 export const apiName = 'ordersApi'
@@ -20,7 +20,7 @@ export const apiName = 'ordersApi'
 const api = {
   list: async (data) => await ipcRenderer.invoke('orders:list', data),
   get: async (data) => await ipcRenderer.invoke('orders:get', data),
-  create: async (data) => await ipcRenderer.invoke('orders:create', data),  
+  create: async (data) => await ipcRenderer.invoke('orders:create', data),
 } satisfies OrdersApi
 
 export function ordersApi() {

@@ -1,4 +1,4 @@
-import { createClient } from "@libsql/client/web";
+import { createClient } from '@libsql/client/web'
 import { drizzle } from 'drizzle-orm/libsql'
 
 const client = createClient({

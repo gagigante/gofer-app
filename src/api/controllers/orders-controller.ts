@@ -29,21 +29,21 @@ export interface GetOrderRequest {
 }
 
 export type GetOrderResponse = Response<{
-  id: string;
-  totalPrice: number | null;
-  createdAt: string | null;
+  id: string
+  totalPrice: number | null
+  createdAt: string | null
   products: Array<{
-    productId: string | null;
-    quantity: number | null;
-    price: number | null;
-    name: string | null;
-    barCode: string | null;
+    productId: string | null
+    quantity: number | null
+    price: number | null
+    name: string | null
+    barCode: string | null
   }>
 }>
 
 export interface CreateOrderRequest {
   loggedUserId: string
-  products: Array<{ id: string, quantity: number }>
+  products: Array<{ id: string; quantity: number }>
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -104,22 +104,22 @@ export class OrdersController {
     if (!loggedUser) {
       const err = new WithoutPermissionError()
       return { data: null, err }
-    }  
-   
-    const mergedProductsMap = products.reduce<Map<string, { id: string, quantity: number }>>((acc, item) => {
-      const existingProduct = acc.get(item.id);
-    
+    }
+
+    const mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number }>>((acc, item) => {
+      const existingProduct = acc.get(item.id)
+
       if (existingProduct) {
-        existingProduct.quantity += item.quantity;
+        existingProduct.quantity += item.quantity
       } else {
-        acc.set(item.id, { id: item.id, quantity: item.quantity });
+        acc.set(item.id, { id: item.id, quantity: item.quantity })
       }
 
-      return acc;
+      return acc
     }, new Map())
 
     const orderProducts = await this.productsRepository.getProductsByIds(
-      Array.from(mergedProductsMap.values()).map(item => item.id)
+      Array.from(mergedProductsMap.values()).map((item) => item.id),
     )
 
     const totalPrice = orderProducts.reduce((acc, item) => {
@@ -135,9 +135,9 @@ export class OrdersController {
     const response = await this.ordersRepository.createOrder({
       id: randomUUID(),
       products: Array.from(mergedProductsMap.values()),
-      totalPrice
+      totalPrice,
     })
 
-    return { data: response, err: null }    
+    return { data: response, err: null }
   }
 }

@@ -1,7 +1,7 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 import { type apiName, type CategoriesApi } from '@/api/exposes/categories-api'
-import { 
+import {
   type GetCategoryRequest,
   type GetCategoryResponse,
   type ListCategoriesRequest,

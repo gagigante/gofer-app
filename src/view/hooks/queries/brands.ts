@@ -1,7 +1,7 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
 import { type apiName, type BrandsApi } from '@/api/exposes/brands-api'
-import { 
+import {
   type GetBrandRequest,
   type GetBrandResponse,
   type ListBrandsRequest,

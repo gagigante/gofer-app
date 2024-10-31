@@ -39,11 +39,12 @@ export function Users() {
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteUser()
 
   const { data } = useUsers(
-    { loggedUserId: user?.id ?? '', name: nameFilter, page: pagination }, 
+    { loggedUserId: user?.id ?? '', name: nameFilter, page: pagination },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
-    })
+    },
+  )
   const users = data?.users ?? []
 
   function handleRequestUserEdition(user: User) {
@@ -59,92 +60,101 @@ export function Users() {
   async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
     if (!user) return
 
-    await mutateOnCreate({
-      loggedUserId: user.id,
-      name: data.name,
-      password: data.password,
-      role: data.role,
-    }, {
-      onSuccess: () => {
-        toast({
-          title: 'Usuário criado com sucesso',
-          duration: 3000,
-        })
-        setIsCreateUserDialogOpen(false)
+    await mutateOnCreate(
+      {
+        loggedUserId: user.id,
+        name: data.name,
+        password: data.password,
+        role: data.role,
       },
-      onError: (err) => {
-        if (err.message === 'UserAlreadyExistsError') {
+      {
+        onSuccess: () => {
           toast({
-            title: 'Já existe um usuário com esse nome.',
+            title: 'Usuário criado com sucesso',
             duration: 3000,
           })
-          return
-        } 
-        
-        toast({
-          title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
-          duration: 3000,
-        })        
-      }
-    })  
+          setIsCreateUserDialogOpen(false)
+        },
+        onError: (err) => {
+          if (err.message === 'UserAlreadyExistsError') {
+            toast({
+              title: 'Já existe um usuário com esse nome.',
+              duration: 3000,
+            })
+            return
+          }
+
+          toast({
+            title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
+            duration: 3000,
+          })
+        },
+      },
+    )
   }
 
   async function handleUpdateUser(data: z.infer<typeof updateUserSchema>) {
     if (!user) return
 
-    await mutateOnUpdate({
-      loggedUserId: user.id,
-      updatedName: data.name,
-      currentPassword: data.password,
-      newPassword: data.newPassword,
-      newPasswordConfirmation: data.newPasswordConfirmation,
-    }, {
-      onSuccess: () => {
-        toast({
-          title: 'Usuário atualizado com sucesso',
-          duration: 3000,
-        })
-        setIsUpdateUserDialogOpen(false)
+    await mutateOnUpdate(
+      {
+        loggedUserId: user.id,
+        updatedName: data.name,
+        currentPassword: data.password,
+        newPassword: data.newPassword,
+        newPasswordConfirmation: data.newPasswordConfirmation,
       },
-      onError: (err) => {
-        if (err.message === 'IncorrectCredentialsError') {
+      {
+        onSuccess: () => {
           toast({
-            title: 'Senha incorreta.',
+            title: 'Usuário atualizado com sucesso',
             duration: 3000,
           })
-          return
-        }
+          setIsUpdateUserDialogOpen(false)
+        },
+        onError: (err) => {
+          if (err.message === 'IncorrectCredentialsError') {
+            toast({
+              title: 'Senha incorreta.',
+              duration: 3000,
+            })
+            return
+          }
 
-        toast({
-          title: 'Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.',
-          duration: 3000,
-        })  
-      }
-    })
+          toast({
+            title: 'Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.',
+            duration: 3000,
+          })
+        },
+      },
+    )
   }
 
   async function handleDeleteUser(userId: string) {
     if (!user) return
 
-    await mutateOnDelete({
-      loggedUserId: user.id,
-      userId,
-    }, {
-      onSuccess: () => {
-        toast({
-          title: 'Usuário removido com sucesso.',
-          duration: 3000,
-        })
-        setIsDeleteUserAlertOpen(false)
+    await mutateOnDelete(
+      {
+        loggedUserId: user.id,
+        userId,
       },
-      onError: () => {
-        toast({
-          title: 'Houve um erro ao apagar o usuário. Tente novamente.',
-          duration: 3000,
-        })
-        setIsDeleteUserAlertOpen(false)
-      }
-    })
+      {
+        onSuccess: () => {
+          toast({
+            title: 'Usuário removido com sucesso.',
+            duration: 3000,
+          })
+          setIsDeleteUserAlertOpen(false)
+        },
+        onError: () => {
+          toast({
+            title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+            duration: 3000,
+          })
+          setIsDeleteUserAlertOpen(false)
+        },
+      },
+    )
   }
 
   return (
@@ -163,7 +173,7 @@ export function Users() {
         />
 
         <Table>
-          {users.length === 0 && <TableCaption>Nenhum usuário encontrado.</TableCaption>} 
+          {users.length === 0 && <TableCaption>Nenhum usuário encontrado.</TableCaption>}
 
           <TableHeader>
             <TableRow>

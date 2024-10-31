@@ -18,12 +18,15 @@ interface BrandDetailsProps {
 export function BrandDetails({ brandId, isOpen, onClose }: BrandDetailsProps) {
   const { user } = useAuth()
 
-  const { data } = useBrand({
-    loggedUserId: user?.id ?? '',
-    brandId: brandId ?? '',
-  }, {
-    enabled: !!user && !!brandId
-  })
+  const { data } = useBrand(
+    {
+      loggedUserId: user?.id ?? '',
+      brandId: brandId ?? '',
+    },
+    {
+      enabled: !!user && !!brandId,
+    },
+  )
   const products = data?.products ?? []
 
   return (
@@ -36,7 +39,7 @@ export function BrandDetails({ brandId, isOpen, onClose }: BrandDetailsProps) {
         onClose()
       }}
     >
-      <div className='flex flex-col gap-4'>
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col items-start gap-3">
           <Label htmlFor="name" className="text-right">
             Nome *
@@ -45,7 +48,7 @@ export function BrandDetails({ brandId, isOpen, onClose }: BrandDetailsProps) {
         </div>
 
         <Table>
-          {products.length === 0 && <TableCaption>Nenhum produto encontrado.</TableCaption>} 
+          {products.length === 0 && <TableCaption>Nenhum produto encontrado.</TableCaption>}
 
           <TableHeader>
             <TableRow>

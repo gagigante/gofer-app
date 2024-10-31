@@ -31,7 +31,10 @@ export class UsersRepository {
   }
 
   public async countUsers(name = ''): Promise<number> {
-    const [response] = await db.select({ count: count() }).from(users).where(like(users.name, `%${name}%`))
+    const [response] = await db
+      .select({ count: count() })
+      .from(users)
+      .where(like(users.name, `%${name}%`))
 
     return response.count
   }

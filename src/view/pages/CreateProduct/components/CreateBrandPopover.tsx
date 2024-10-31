@@ -8,7 +8,6 @@ import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
 import { Label } from '@/view/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/view/components/ui/popover'
-import { Textarea } from '@/view/components/ui/textarea'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'

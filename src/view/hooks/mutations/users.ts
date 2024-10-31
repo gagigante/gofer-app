@@ -19,7 +19,7 @@ export function useMutateOnCreateUser() {
         loggedUserId,
         name,
         password,
-        role
+        role,
       })
 
       if (err) {
@@ -38,13 +38,13 @@ export function useMutateOnCreateUser() {
 
 export function useMutateOnUpdateUser() {
   return useMutation<UpdateUserResponse['data'], Error, UpdateUserRequest>({
-    mutationFn: async ({ loggedUserId, updatedName, currentPassword, newPassword, newPasswordConfirmation}) => {
+    mutationFn: async ({ loggedUserId, updatedName, currentPassword, newPassword, newPasswordConfirmation }) => {
       const { data, err } = await (window as unknown as Record<typeof apiName, UsersApi>).usersApi.update({
-       loggedUserId,
-       updatedName,
-       currentPassword,
-       newPassword,
-       newPasswordConfirmation
+        loggedUserId,
+        updatedName,
+        currentPassword,
+        newPassword,
+        newPasswordConfirmation,
       })
 
       if (err) {
@@ -54,9 +54,7 @@ export function useMutateOnUpdateUser() {
       return data
     },
     onSuccess: async (response) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['users'] }),        
-      ])
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ['users'] })])
 
       return response
     },
@@ -78,9 +76,7 @@ export function useMutateOnDeleteUser() {
       return data
     },
     onSuccess: async (response) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['users'] }),        
-      ])
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ['users'] })])
 
       return response
     },

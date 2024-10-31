@@ -22,11 +22,13 @@ interface ProductsTabProps {
 export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
   const navigate = useNavigate()
 
-  const [selectedProduct, setSelectedProduct] = useState<Product & { category: Category | null } & { brand: Brand | null }>()
+  const [selectedProduct, setSelectedProduct] = useState<
+    Product & { category: Category | null } & { brand: Brand | null }
+  >()
   const [isProductDetailsDialogOpen, setIsProductDetailsDialog] = useState(false)
 
   const [nameFilter, setNameFilter] = useState('')
-  const [search] = useDebounce(nameFilter, 250);
+  const [search] = useDebounce(nameFilter, 250)
 
   useEffect(() => {
     onChangeFilter(search)
@@ -53,7 +55,7 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
       />
 
       <Table>
-        {products.length === 0 && <TableCaption>Nenhum produto encontrado.</TableCaption>} 
+        {products.length === 0 && <TableCaption>Nenhum produto encontrado.</TableCaption>}
 
         <TableHeader>
           <TableRow>

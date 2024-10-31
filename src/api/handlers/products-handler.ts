@@ -18,7 +18,6 @@ ipcMain.handle('products:getLast', async (_event, data: GetLastProductRequest) =
   return await productsController.getLastProduct(data)
 })
 
-
 ipcMain.handle(
   'products:create',
   async (_event, data: CreateProductRequest) => await productsController.createProduct(data),

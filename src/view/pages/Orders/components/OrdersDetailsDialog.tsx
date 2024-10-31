@@ -18,12 +18,15 @@ const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeSt
 export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsDialogProps) {
   const { user } = useAuth()
 
-  const { data } = useOrder({
-    loggedUserId: user?.id ?? '',
-    orderId: orderId ?? '',
-  }, {
-    enabled: !!user && !!orderId
-  })
+  const { data } = useOrder(
+    {
+      loggedUserId: user?.id ?? '',
+      orderId: orderId ?? '',
+    },
+    {
+      enabled: !!user && !!orderId,
+    },
+  )
 
   return (
     <Dialog
@@ -37,8 +40,12 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
     >
       {data && (
         <div className="mb-4 gap-4">
-          <p className="font-medium"><b>Preço total:</b> {formatCurrency(parseCentsToDecimal(data.totalPrice ?? 0))}</p>
-          <p className="font-medium"><b>Data do pedido:</b> {FORMATTER.format(new Date(data.createdAt + ' UTC'))}</p>
+          <p className="font-medium">
+            <b>Preço total:</b> {formatCurrency(parseCentsToDecimal(data.totalPrice ?? 0))}
+          </p>
+          <p className="font-medium">
+            <b>Data do pedido:</b> {FORMATTER.format(new Date(data.createdAt + ' UTC'))}
+          </p>
         </div>
       )}
 
@@ -69,11 +76,11 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
 
               <TableCell>
                 <p className="font-medium">{quantity}</p>
-              </TableCell>             
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
-      </Table>     
+      </Table>
     </Dialog>
   )
 }

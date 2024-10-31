@@ -35,11 +35,11 @@ export const router = createHashRouter([
       },
       {
         path: 'orders',
-        element: <Orders />
+        element: <Orders />,
       },
       {
         path: 'orders/new',
-        element: <CreateOrder />
+        element: <CreateOrder />,
       },
       {
         path: 'products',

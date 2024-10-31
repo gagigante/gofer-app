@@ -23,7 +23,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   return (
     <>
       <Table>
-        {orders.length === 0 && <TableCaption>Nenhum pedido encontrado.</TableCaption>} 
+        {orders.length === 0 && <TableCaption>Nenhum pedido encontrado.</TableCaption>}
 
         <TableHeader>
           <TableRow>
