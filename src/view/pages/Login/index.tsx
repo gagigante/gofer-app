@@ -24,8 +24,16 @@ export function Login() {
     }
   }
 
+  async function handlePrint() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (window as unknown as any).ordersApi.print()
+  }
+
   return (
     <div className="flex justify-center items-center w-svw h-svh overflow-y-hidden">
+      <button type="button" onClick={handlePrint}>
+        print test
+      </button>
       <Card className="max-w-[360px] w-full gap-2">
         <CardHeader>
           <CardTitle>Gofer</CardTitle>

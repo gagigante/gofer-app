@@ -1,0 +1,59 @@
+<!-- print_template.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .order-summary {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .order-header,
+    .order-items,
+    .order-total {
+      margin-top: 20px;
+    }
+
+    .order-header h1 {
+      font-size: 24px;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+    }
+
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="order-summary">
+    <div class="order-header">
+      <h1>Order #{{orderId}}</h1>
+      <p>Date: {{orderDate}}</p>
+      <p>Customer: {{customerName}}</p>
+    </div>
+    <div class="order-items">
+      {{items}}
+    </div>
+    <div class="order-total total">
+      Total: ${{total}}
+    </div>
+  </div>
+</body>
+
+</html>
