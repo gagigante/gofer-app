@@ -22,7 +22,7 @@ const api = {
   list: async (data) => await ipcRenderer.invoke('orders:list', data),
   get: async (data) => await ipcRenderer.invoke('orders:get', data),
   create: async (data) => await ipcRenderer.invoke('orders:create', data),
-  print: async (data) => await ipcRenderer.invoke('orders:print', data),
+  print: async (data) => await ipcRenderer.invoke('orders:download-file', data),
 } satisfies OrdersApi
 
 export function ordersApi() {

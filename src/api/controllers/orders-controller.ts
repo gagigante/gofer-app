@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
-import { OrdersRepository } from '../repositories/orders-repository'
+import { type OrderResponse, OrdersRepository } from '../repositories/orders-repository'
 import { ProductsRepository } from '../repositories/products-repository'
+
+import { getOrderTemplate as getTemplateFile } from '../templates/order-template'
 
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { NotFoundError } from '../errors/NotFoundError'
@@ -40,6 +42,13 @@ export type GetOrderResponse = Response<{
     barCode: string | null
   }>
 }>
+
+export interface GetOrderTemplateRequest {
+  loggedUserId: string
+  orderId: string
+}
+
+export type GetOrderTemplateResponse = Response<{ template: string; order: OrderResponse }>
 
 export interface CreateOrderRequest {
   loggedUserId: string
@@ -96,6 +105,31 @@ export class OrdersController {
     }
 
     return { data: order, err: null }
+  }
+
+  public async getOrderTemplate({ loggedUserId, orderId }: GetOrderTemplateRequest): Promise<GetOrderTemplateResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const order = await this.ordersRepository.getOrderById(orderId)
+
+    if (!order) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    const { data: template, err } = await getTemplateFile(order)
+
+    if (err) {
+      return { data: null, err }
+    }
+
+    return { data: { template, order }, err: null }
   }
 
   public async createOrder({ loggedUserId, products }: CreateOrderRequest): Promise<CreateOrderResponse> {
