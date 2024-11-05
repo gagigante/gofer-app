@@ -22,50 +22,75 @@ ipcMain.handle('orders:get', async (_event, data: GetOrderRequest) => await orde
 ipcMain.handle('orders:create', async (_event, data: CreateOrderRequest) => await ordersController.createOrder(data))
 
 export const ordersHandler = (window: BrowserWindow) => {
-  ipcMain.handle('orders:download-file', async (_event, data: GetOrderTemplateRequest): Promise<Response<null>> => {
-    const { data: response, err } = await ordersController.getOrderTemplate(data)
+  ipcMain.handle(
+    'orders:download-file',
+    async (_event, data: GetOrderTemplateRequest): Promise<Response<{ is_canceled: boolean }>> => {
+      const { data: response, err } = await ordersController.getOrderTemplate(data)
 
-    if (err) {
-      return { data: null, err: new FailToGenerateFileError() }
-    }
+      if (err) {
+        return { data: null, err: new FailToGenerateFileError() }
+      }
 
-    const printWindow = new BrowserWindow({ show: false })
+      const printWindow = new BrowserWindow({ show: false })
 
-    try {
-      await printWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(response.template)}`)
-    } catch {
-      return { data: null, err: new FailToGenerateFileError() }
-    }
+      try {
+        await printWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(response.template)}`)
+      } catch {
+        return { data: null, err: new FailToGenerateFileError() }
+      }
 
-    let documentsDir = ''
+      let documentsDir = ''
 
-    try {
-      documentsDir = app.getPath('documents')
-    } catch {
-      return { data: null, err: new FailToGenerateFileError() }
-    }
+      try {
+        documentsDir = app.getPath('documents')
+      } catch {
+        return { data: null, err: new FailToGenerateFileError() }
+      }
 
-    const reducedOrderId = response.order.id.split('-')[0]
-    const { filePath, canceled } = await dialog.showSaveDialog(window, {
-      defaultPath: `${documentsDir}/pedido-${reducedOrderId}.pdf`,
-      message: 'Salvar comprovante de vend',
-      showsTagField: false,
-      properties: ['createDirectory', 'showOverwriteConfirmation', 'dontAddToRecent'],
-    })
-
-    if (canceled) return { data: null, err: null }
-
-    try {
-      const pdfBuffer = await printWindow.webContents.printToPDF({
-        // TODO
-        pageSize: 'A5',
+      const reducedOrderId = response.order.id.split('-')[0]
+      const { filePath, canceled } = await dialog.showSaveDialog(window, {
+        defaultPath: `${documentsDir}/pedido-${reducedOrderId}.pdf`,
+        message: 'Salvar comprovante de vend',
+        showsTagField: false,
+        properties: ['createDirectory', 'showOverwriteConfirmation', 'dontAddToRecent'],
       })
 
-      await writeFile(filePath, pdfBuffer)
+      if (canceled) return { data: { is_canceled: false }, err: null }
 
-      // TODO: success feedback
-    } catch {
-      return { data: null, err: new FailToGenerateFileError() }
-    }
-  })
+      try {
+        const pdfBuffer = await printWindow.webContents.printToPDF({
+          pageSize: 'A5',
+          landscape: true,
+          displayHeaderFooter: true,
+          headerTemplate: '<div></div>',
+          footerTemplate: `
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+
+              .container {
+                width: 100%;
+                padding: 12px 40px 0;
+                font-size: 14px !important;
+                color: #000;
+              }
+            </style>
+
+            <div id="header-template" class="container">
+              <p>Página <span class="pageNumber"></span> de <span class="totalPages"></span></p>
+            </div>
+          `,
+        })
+
+        await writeFile(filePath, pdfBuffer)
+
+        return { data: { is_canceled: false }, err: null }
+      } catch {
+        return { data: null, err: new FailToGenerateFileError() }
+      }
+    },
+  )
 }

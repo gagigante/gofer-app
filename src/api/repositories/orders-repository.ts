@@ -14,6 +14,7 @@ export interface OrderResponse {
     price: number | null
     name: string | null
     barCode: string | null
+    fastId: number | null
   }>
 }
 
@@ -45,6 +46,7 @@ export class OrdersRepository {
           price: ordersProducts.productPrice,
           name: productsSchema.name,
           barCode: productsSchema.barCode,
+          fastId: productsSchema.fastId,
         },
       })
       .from(orders)
