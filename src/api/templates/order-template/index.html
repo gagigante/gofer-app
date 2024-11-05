@@ -1,58 +1,133 @@
-<!-- print_template.html -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Order Summary</title>
+  <title>Documento auxiliar de pedido</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      padding: 2px;
     }
 
-    .order-summary {
-      max-width: 600px;
-      margin: auto;
-    }
-
-    .order-header,
-    .order-items,
-    .order-total {
-      margin-top: 20px;
+    .order-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      padding: 0.5rem 0;
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+      text-align: center; 
     }
 
     .order-header h1 {
-      font-size: 24px;
+      font-size: 10px;
     }
 
-    .item-row {
+    .order-header h2 {
+      font-size: 8px;
+    }
+
+    .company {
       display: flex;
       justify-content: space-between;
-      padding: 5px 0;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #000;
     }
 
-    .total {
+    .company strong, p {
+      font-size: 12px;
+    }
+
+    .order-products {
+      margin-bottom: 1rem;
+    }
+
+    .order-products table {
+      width: 100%;
+      border: 1px solid #000;
+      border-collapse: collapse;
+    }
+
+    .order-products table th, td {
+      padding: 4px;
+      text-align: left;
+      border-top: 1px solid #000;
+      border-bottom: 1px solid #000;
+      font-size: 0.75rem;
+    }
+
+    .order-products table th {
       font-weight: bold;
-      font-size: 18px;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: flex-end;
     }
   </style>
 </head>
 
 <body>
-  <div class="order-summary">
-    <div class="order-header">
-      <h1>Order #{{orderId}}</h1>
-      <p>Date: {{orderDate}}</p>
-      <p>Customer: {{customerName}}</p>
+  <div class="order-header">
+    <h1>DOCUMENTO AUXILIAR DE PEDIDO</h1>
+    <h2>NÃO É DOCUMENTO FISCAL - NÃO É VÁLIDO COMO RECIBO E COMO GARANTIA DE MERCADORIA - NÃO COMPROVA PAGAMENTO</h2>
+  </div>
+
+  <div class="company">
+    <div>
+      <strong>GOFER MADEIRAS LTDA.</strong>
+      <p>CNPJ: 46.481.711/0001-26 - Insc. Estadual: 600.260.416.110</p>
+      <p>Avenida Nações Unidas, 1584 - Bairro Panorama</p>
+      <p>13329-350 - Salto - SP</p>
     </div>
-    <div class="order-items">
-      {{items}}
+
+    <div>
+      <p>Fone: (11) 97062-2089</p>
     </div>
-    <div class="order-total total">
-      Total: ${{total}}
-    </div>
+  </div>
+
+  <div class="order-products">
+    <table>
+      <thead>
+        <tr>
+          <th>Identificador rápido</th>
+          <th>Cód. barras</th>
+          <th>Nome</th>
+          <th>Qtd.</th>
+          <th>Preço un.</th>
+          <th>Preço total</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{#products}}
+        <tr>
+          <td>{{fastId}}</td>
+          <td>{{barCode}}</td>
+          <td>{{name}}</td>
+          <td>{{quantity}}</td>
+          <td>{{price}}</td>
+          <td>{{total}}</td>
+        </tr>
+        {{/products}}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    Total: {{orderTotal}}
   </div>
 </body>
 
