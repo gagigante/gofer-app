@@ -55,7 +55,7 @@ export const ordersHandler = (window: BrowserWindow) => {
         properties: ['createDirectory', 'showOverwriteConfirmation', 'dontAddToRecent'],
       })
 
-      if (canceled) return { data: { is_canceled: false }, err: null }
+      if (canceled) return { data: { is_canceled: true }, err: null }
 
       try {
         const pdfBuffer = await printWindow.webContents.printToPDF({
