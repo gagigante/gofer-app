@@ -1,4 +1,4 @@
-import React, { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/view/components/ui/card'

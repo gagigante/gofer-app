@@ -4,7 +4,7 @@ import { db } from '@/api/db/client'
 
 import { type NewOrder, type Order, orders, ordersProducts, products as productsSchema } from '@/api/db/schema'
 
-interface OrderResponse {
+export interface OrderResponse {
   id: string
   totalPrice: number | null
   createdAt: string | null
@@ -14,6 +14,7 @@ interface OrderResponse {
     price: number | null
     name: string | null
     barCode: string | null
+    fastId: number | null
   }>
 }
 
@@ -45,6 +46,7 @@ export class OrdersRepository {
           price: ordersProducts.productPrice,
           name: productsSchema.name,
           barCode: productsSchema.barCode,
+          fastId: productsSchema.fastId,
         },
       })
       .from(orders)
