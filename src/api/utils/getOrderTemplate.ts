@@ -5,6 +5,7 @@ import Handlebars from 'handlebars'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
+import { isElectronInDev } from './isElectronInDev'
 
 import { type Response } from '@/api/types/response'
 
@@ -23,7 +24,10 @@ interface Data {
 }
 
 export async function getOrderTemplate(data: Data): Promise<Response<string>> {
-  const templatePath = path.join(app.getAppPath(), 'src', 'api', 'templates', 'order-template', 'index.html')
+  const isDev = isElectronInDev()
+  const templatePath = isDev
+    ? path.join(app.getAppPath(), 'src', 'api', 'templates', 'order-template.html')
+    : path.join(process.resourcesPath, 'templates', 'order-template.html')
 
   try {
     const file = await open(templatePath)
@@ -45,6 +49,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
       err: null,
     }
   } catch (err) {
+    console.log({ err })
     return { data: null, err: err as Error }
   }
 }

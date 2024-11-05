@@ -4,7 +4,7 @@ import { UsersRepository } from '../repositories/users-repository'
 import { type OrderResponse, OrdersRepository } from '../repositories/orders-repository'
 import { ProductsRepository } from '../repositories/products-repository'
 
-import { getOrderTemplate as getTemplateFile } from '../templates/order-template'
+import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
 
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { NotFoundError } from '../errors/NotFoundError'
