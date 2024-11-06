@@ -110,4 +110,12 @@ export class OrdersRepository {
 
     return response!
   }
+
+  public async deleteOrder(orderId: string): Promise<void> {
+    await db.transaction(async (tx) => {
+      await tx.delete(ordersProducts).where(eq(ordersProducts.orderId, orderId))
+
+      await tx.delete(orders).where(eq(orders.id, orderId))
+    })
+  }
 }

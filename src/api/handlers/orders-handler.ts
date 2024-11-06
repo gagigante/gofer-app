@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises'
 
 import {
   type CreateOrderRequest,
+  type DeleteOrderRequest,
   type GetOrderRequest,
   type GetOrderTemplateRequest,
   type ListOrdersRequest,
@@ -20,6 +21,8 @@ ipcMain.handle('orders:list', async (_event, data: ListOrdersRequest) => await o
 ipcMain.handle('orders:get', async (_event, data: GetOrderRequest) => await ordersController.getOrder(data))
 
 ipcMain.handle('orders:create', async (_event, data: CreateOrderRequest) => await ordersController.createOrder(data))
+
+ipcMain.handle('orders:delete', async (_event, data: DeleteOrderRequest) => await ordersController.deleteOrder(data))
 
 export const ordersHandler = (window: BrowserWindow) => {
   ipcMain.handle(
