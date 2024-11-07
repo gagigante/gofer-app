@@ -57,6 +57,13 @@ export interface CreateOrderRequest {
 
 export type CreateOrderResponse = Response<Order>
 
+export interface DeleteOrderRequest {
+  loggedUserId: string
+  orderId: string
+}
+
+export type DeleteOrderResponse = Response<null>
+
 export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
@@ -173,5 +180,26 @@ export class OrdersController {
     })
 
     return { data: response, err: null }
+  }
+
+  public async deleteOrder({ loggedUserId, orderId }: DeleteOrderRequest): Promise<DeleteOrderResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const orderToDelete = await this.ordersRepository.getOrderById(orderId)
+
+    if (!orderToDelete) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    await this.ordersRepository.deleteOrder(orderId)
+
+    return { data: null, err: null }
   }
 }
