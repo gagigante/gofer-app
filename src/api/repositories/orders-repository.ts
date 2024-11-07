@@ -2,7 +2,14 @@ import { count, desc, eq } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
-import { type NewOrder, type Order, orders, ordersProducts, products as productsSchema } from '@/api/db/schema'
+import {
+  type NewOrder,
+  type Order,
+  orders,
+  ordersProducts,
+  products,
+  products as productsSchema,
+} from '@/api/db/schema'
 
 export interface OrderResponse {
   id: string
@@ -113,6 +120,24 @@ export class OrdersRepository {
 
   public async deleteOrder(orderId: string): Promise<void> {
     await db.transaction(async (tx) => {
+      const orderProducts = await tx.select().from(ordersProducts).where(eq(ordersProducts.orderId, orderId))
+
+      for (const { productId, quantity } of orderProducts) {
+        if (!productId) continue
+
+        const productToBeUpdated = await tx.select().from(productsSchema).where(eq(productsSchema.id, productId)).get()
+
+        if (!productToBeUpdated) {
+          tx.rollback()
+          return
+        }
+
+        await tx
+          .update(products)
+          .set({ availableQuantity: (productToBeUpdated.availableQuantity ?? 0) + (quantity ?? 0) })
+          .where(eq(products.id, productToBeUpdated.id))
+      }
+
       await tx.delete(ordersProducts).where(eq(ordersProducts.orderId, orderId))
 
       await tx.delete(orders).where(eq(orders.id, orderId))
