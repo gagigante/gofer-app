@@ -52,6 +52,8 @@ export function BrandDetails({ brandId, isOpen, onClose }: BrandDetailsProps) {
 
           <TableHeader>
             <TableRow>
+              <TableHead>ID. rápido</TableHead>
+              <TableHead>Cód. de barras</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead>Preço</TableHead>
               <TableHead>Qtd. disponível em estoque</TableHead>
@@ -59,8 +61,16 @@ export function BrandDetails({ brandId, isOpen, onClose }: BrandDetailsProps) {
           </TableHeader>
 
           <TableBody>
-            {products.map(({ id, name, price, availableQuantity }) => (
+            {products.map(({ id, fastId, barCode, name, price, availableQuantity }) => (
               <TableRow key={id}>
+                <TableCell>
+                  <p className="font-medium">{fastId}</p>
+                </TableCell>
+
+                <TableCell>
+                  <p className="font-medium">{barCode || 'N/A'}</p>
+                </TableCell>
+
                 <TableCell>
                   <p className="font-medium">{name}</p>
                 </TableCell>
