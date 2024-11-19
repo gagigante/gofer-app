@@ -1,6 +1,11 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
 
-import { type ListProductsRequest, type ListProductsResponse } from '@/api/controllers/products-controller'
+import {
+  type GetByBarcodeRequest,
+  type GetByBarcodeResponse,
+  type ListProductsRequest,
+  type ListProductsResponse,
+} from '@/api/controllers/products-controller'
 import { type apiName, type ProductsApi } from '@/api/exposes/products-api'
 
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
@@ -19,6 +24,30 @@ export function useProducts(
         name,
         page,
         itemsPerPage,
+      })
+
+      if (err) {
+        throw err
+      }
+
+      return data
+    },
+    ...options,
+  })
+}
+
+export function useProductByBarcode(
+  { loggedUserId, barcode }: GetByBarcodeRequest,
+  options?: Omit<UseQueryOptions<GetByBarcodeResponse['data']>, 'queryKey'>,
+) {
+  const key = ['products', barcode]
+
+  return useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      const { data, err } = await (window as unknown as Record<typeof apiName, ProductsApi>).productsApi.getByBarcode({
+        loggedUserId,
+        barcode,
       })
 
       if (err) {

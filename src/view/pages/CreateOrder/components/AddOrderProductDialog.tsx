@@ -8,15 +8,17 @@ import { useProducts } from '@/view/hooks/queries/products'
 import { useAuth } from '@/view/hooks/useAuth'
 
 import { type Product } from '@/api/db/schema'
+import { type ProductWithCategoryAndBrand } from '@/api/repositories/products-repository'
 
 interface AddOrderProductDialogProps {
+  preSelectedProduct: ProductWithCategoryAndBrand | null
   isOpen: boolean
   onClose: () => void
   onSubmit: (product: Product, quantity: number) => void
 }
 
 // TODO: deve validar se ha quantidade suficiente
-export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderProductDialogProps) {
+export function AddOrderProductDialog({ preSelectedProduct, isOpen, onClose, onSubmit }: AddOrderProductDialogProps) {
   const { user } = useAuth()
 
   const [filter, setFilter] = useState('')
@@ -37,8 +39,17 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
   const products = (productsResponse?.products ?? []).map((item) => ({ label: item.name!, value: item.id }))
 
   useEffect(() => {
-    setProduct(undefined)
-    setQuantity(0)
+    if (preSelectedProduct) {
+      setProduct({ label: preSelectedProduct.name ?? '', value: preSelectedProduct.id })
+      setQuantity(1)
+    }
+  }, [preSelectedProduct])
+
+  useEffect(() => {
+    if (!preSelectedProduct || !isOpen) {
+      setProduct(undefined)
+      setQuantity(0)
+    }
   }, [isOpen])
 
   function handleSubmit() {

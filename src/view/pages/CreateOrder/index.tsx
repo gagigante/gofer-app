@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FaTrash } from 'react-icons/fa'
+import { FaInfoCircle, FaTrash } from 'react-icons/fa'
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductDialog } from './components/AddOrderProductDialog'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
+import { useBarcode } from '@/view/hooks/useBarcode'
+import { useProductByBarcode } from '@/view/hooks/queries/products'
 import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
 import { formatCurrency } from '@/view/utils/formatters'
@@ -25,10 +28,37 @@ export function CreateOrder() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
+  const { barcode, clearBarcodeState } = useBarcode()
   const { mutateAsync } = useMutateOnCreateOrder()
 
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
   const [isAddOrderProductDialogOpen, setIsAddOrderProductDialogOpen] = useState(false)
+
+  const { data, error } = useProductByBarcode(
+    { loggedUserId: user?.id ?? '', barcode: barcode },
+    {
+      enabled: !!user?.id && !!barcode,
+      retry: false,
+    },
+  )
+
+  useEffect(() => {
+    if (data) {
+      setIsAddOrderProductDialogOpen(true)
+    }
+  }, [data])
+
+  useEffect(() => {
+    if (error) {
+      if (error.message === 'NotFoundError') {
+        toast({
+          title: 'Não foi possível encontrar um produto com este código de barras.',
+          duration: 3000,
+        })
+        clearBarcodeState()
+      }
+    }
+  }, [error])
 
   async function handleSubmit() {
     mutateAsync(
@@ -65,6 +95,12 @@ export function CreateOrder() {
     <div className="h-full flex flex-col">
       <div className="flex-1 px-3 py-6 overflow-auto">
         <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Criar novo pedido</h2>
+
+        <Alert>
+          <FaInfoCircle className="h-4 w-4" />
+          <AlertTitle>Busca de produtos por código de barra</AlertTitle>
+          <AlertDescription>Você pode escanear o código de barras de um produto para exibir detalhes.</AlertDescription>
+        </Alert>
 
         <div className="flex justify-end my-4">
           <Button onClick={() => setIsAddOrderProductDialogOpen(true)}>Adicionar produto</Button>
@@ -140,8 +176,12 @@ export function CreateOrder() {
 
       <AddOrderProductDialog
         isOpen={isAddOrderProductDialogOpen}
-        onClose={() => setIsAddOrderProductDialogOpen(false)}
-        onSubmit={({ id, name, price }, quantity) =>
+        preSelectedProduct={data ?? null}
+        onClose={() => {
+          setIsAddOrderProductDialogOpen(false)
+          clearBarcodeState()
+        }}
+        onSubmit={({ id, name, price }, quantity) => {
           setOrderProducts((prevState) => {
             if (prevState.length === 0) {
               return [
@@ -179,7 +219,8 @@ export function CreateOrder() {
               return item
             })
           })
-        }
+          clearBarcodeState()
+        }}
       />
     </div>
   )
