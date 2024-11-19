@@ -4,12 +4,10 @@ import { db } from '../db/client'
 
 import { type Brand, type Category, NewProduct, type Product, brands, categories, products } from '../db/schema'
 
+export type ProductWithCategoryAndBrand = Product & { category: Category | null } & { brand: Brand | null }
+
 export class ProductsRepository {
-  public async getProducts(
-    name = '',
-    page = 1,
-    itemsPerPage = 15,
-  ): Promise<Array<Product & { category: Category | null } & { brand: Brand | null }>> {
+  public async getProducts(name = '', page = 1, itemsPerPage = 15): Promise<Array<ProductWithCategoryAndBrand>> {
     const response = await db
       .select()
       .from(products)
@@ -68,10 +66,22 @@ export class ProductsRepository {
     return response ?? null
   }
 
-  public async getProductByBarCode(productBarCode: string): Promise<Product | null> {
-    const response = await db.select().from(products).where(eq(products.barCode, productBarCode)).get()
+  public async getProductByBarCode(productBarCode: string): Promise<ProductWithCategoryAndBrand | null> {
+    const response = await db
+      .select()
+      .from(products)
+      .leftJoin(categories, eq(products.categoryId, categories.id))
+      .leftJoin(brands, eq(products.brandId, brands.id))
+      .where(eq(products.barCode, productBarCode))
+      .get()
 
-    return response ?? null
+    if (!response) return null
+
+    return {
+      ...response.products,
+      category: response.categories,
+      brand: response.brands,
+    }
   }
 
   public async getLastProductCreated(): Promise<Product | null> {
