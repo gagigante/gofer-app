@@ -49,14 +49,14 @@ export function Combobox({
 
   return (
     <Popover open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild onKeyDown={(e) => e.stopPropagation()}>
         <Button variant="outline" role="combobox" aria-expanded={isOpen} className="w-full justify-between">
           {!value ? placeholder : (options.find((item) => item.value === value.value)?.label ?? '')}
 
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] p-0">
+      <PopoverContent className="w-[320px] p-0" onKeyDown={(e) => e.stopPropagation()}>
         <Command shouldFilter={false}>
           <CommandInput placeholder={searchPlaceholder} value={inputValue} onValueChange={setInputValue} />
           <CommandList>
