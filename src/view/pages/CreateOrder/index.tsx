@@ -5,7 +5,7 @@ import { FaInfoCircle, FaTrash } from 'react-icons/fa'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
-import { AddOrderProductDialog } from './components/AddOrderProductDialog'
+import { AddOrderProductForm } from './components/AddOrderProductForm'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -15,6 +15,8 @@ import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
+
+import { type Product } from '@/api/db/schema'
 
 interface OrderProduct {
   id: string
@@ -32,7 +34,6 @@ export function CreateOrder() {
   const { mutateAsync } = useMutateOnCreateOrder()
 
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
-  const [isAddOrderProductDialogOpen, setIsAddOrderProductDialogOpen] = useState(false)
 
   const { data, error } = useProductByBarcode(
     { loggedUserId: user?.id ?? '', barcode: barcode },
@@ -41,12 +42,6 @@ export function CreateOrder() {
       retry: false,
     },
   )
-
-  useEffect(() => {
-    if (data) {
-      setIsAddOrderProductDialogOpen(true)
-    }
-  }, [data])
 
   useEffect(() => {
     if (error) {
@@ -60,7 +55,48 @@ export function CreateOrder() {
     }
   }, [error])
 
-  async function handleSubmit() {
+  function handleAddProductToOrder({ id, name, price }: Product, quantity: number) {
+    setOrderProducts((prevState) => {
+      if (prevState.length === 0) {
+        return [
+          {
+            id,
+            name: name ?? '',
+            unityPrice: price ?? 0,
+            quantity,
+            totalPrice: (price ?? 0) * quantity,
+          },
+          ...prevState,
+        ]
+      }
+
+      const alreadyInOrder = prevState.find((item) => item.id === id)
+
+      if (!alreadyInOrder) {
+        return [
+          {
+            id,
+            name: name ?? '',
+            unityPrice: price ?? 0,
+            quantity,
+            totalPrice: (price ?? 0) * quantity,
+          },
+          ...prevState,
+        ]
+      }
+
+      return prevState.map((item) => {
+        if (item.id === id) {
+          return { ...item, quantity: item.quantity + quantity }
+        }
+
+        return item
+      })
+    })
+    clearBarcodeState()
+  }
+
+  async function handleCreateOrder() {
     mutateAsync(
       {
         loggedUserId: user?.id ?? '',
@@ -102,8 +138,8 @@ export function CreateOrder() {
           <AlertDescription>Você pode escanear o código de barras de um produto para exibir detalhes.</AlertDescription>
         </Alert>
 
-        <div className="flex justify-end my-4">
-          <Button onClick={() => setIsAddOrderProductDialogOpen(true)}>Adicionar produto</Button>
+        <div className="flex my-4">
+          <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
         </div>
 
         <Table>
@@ -162,7 +198,7 @@ export function CreateOrder() {
         </p>
 
         <div className="flex gap-2 ml-auto">
-          <Button onClick={handleSubmit} disabled={orderProducts.length === 0}>
+          <Button onClick={handleCreateOrder} disabled={orderProducts.length === 0}>
             Criar pedido
           </Button>
 
@@ -173,55 +209,6 @@ export function CreateOrder() {
           </Button>
         </div>
       </footer>
-
-      <AddOrderProductDialog
-        isOpen={isAddOrderProductDialogOpen}
-        preSelectedProduct={data ?? null}
-        onClose={() => {
-          setIsAddOrderProductDialogOpen(false)
-          clearBarcodeState()
-        }}
-        onSubmit={({ id, name, price }, quantity) => {
-          setOrderProducts((prevState) => {
-            if (prevState.length === 0) {
-              return [
-                {
-                  id,
-                  name: name ?? '',
-                  unityPrice: price ?? 0,
-                  quantity,
-                  totalPrice: (price ?? 0) * quantity,
-                },
-                ...prevState,
-              ]
-            }
-
-            const alreadyInOrder = prevState.find((item) => item.id === id)
-
-            if (!alreadyInOrder) {
-              return [
-                {
-                  id,
-                  name: name ?? '',
-                  unityPrice: price ?? 0,
-                  quantity,
-                  totalPrice: (price ?? 0) * quantity,
-                },
-                ...prevState,
-              ]
-            }
-
-            return prevState.map((item) => {
-              if (item.id === id) {
-                return { ...item, quantity: item.quantity + quantity }
-              }
-
-              return item
-            })
-          })
-          clearBarcodeState()
-        }}
-      />
     </div>
   )
 }
