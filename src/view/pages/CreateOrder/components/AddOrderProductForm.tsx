@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { Dialog } from '@/view/components/Dialog'
 import { Input } from '@/view/components/ui/input'
 import { Combobox } from '@/view/components/Combobox'
 
@@ -8,19 +7,26 @@ import { useProducts } from '@/view/hooks/queries/products'
 import { useAuth } from '@/view/hooks/useAuth'
 
 import { type Product } from '@/api/db/schema'
+import { type ProductWithCategoryAndBrand } from '@/api/repositories/products-repository'
+import { Button } from '@/view/components/ui/button'
+import { Label } from '@radix-ui/react-label'
 
-interface AddOrderProductDialogProps {
-  isOpen: boolean
-  onClose: () => void
+interface ProductOption {
+  label: string
+  value: string
+}
+
+interface AddOrderProductFormProps {
+  preSelectedProduct: ProductWithCategoryAndBrand | null
   onSubmit: (product: Product, quantity: number) => void
 }
 
-// TODO: deve validar se ha quantidade suficiente
-export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderProductDialogProps) {
+export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderProductFormProps) {
   const { user } = useAuth()
+  const quantityInputRef = useRef<HTMLInputElement>(null)
 
   const [filter, setFilter] = useState('')
-  const [product, setProduct] = useState<{ label: string; value: string }>()
+  const [product, setProduct] = useState<ProductOption>()
   const [quantity, setQuantity] = useState(0)
 
   const { data: productsResponse } = useProducts(
@@ -37,34 +43,31 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
   const products = (productsResponse?.products ?? []).map((item) => ({ label: item.name!, value: item.id }))
 
   useEffect(() => {
-    setProduct(undefined)
-    setQuantity(0)
-  }, [isOpen])
+    if (preSelectedProduct) {
+      setProduct({ label: preSelectedProduct.name ?? '', value: preSelectedProduct.id })
+      setQuantity(1)
+      quantityInputRef.current?.focus()
+    }
+  }, [preSelectedProduct])
 
-  function handleSubmit() {
-    if (!product) return
+  function handleAddProduct(product: ProductOption | undefined, quantity: number) {
+    if (!product || quantity === 0) return
 
     const selectedProduct = productsResponse?.products.find((item) => item.id === product.value)
 
     if (selectedProduct) {
       onSubmit(selectedProduct, quantity)
-      onClose()
+      setFilter('')
+      setProduct(undefined)
+      setQuantity(1)
     }
   }
 
   return (
-    <Dialog
-      title="Adicionar produto ao pedido"
-      onProceed={handleSubmit}
-      proceedButtonLabel="Adicionar produto"
-      isProceedButtonDisabled={quantity === 0 || !product}
-      cancelButtonLabel="Cancelar"
-      open={isOpen}
-      onClose={() => {
-        onClose()
-      }}
-    >
-      <div className="flex items-center gap-2">
+    <div className="w-full flex gap-4 items-end">
+      <div className="flex-1 w-full flex flex-col gap-2">
+        <Label>Produto</Label>
+
         <Combobox
           placeholder="Selecione um produto"
           searchPlaceholder="Pesquisar por nome de produto"
@@ -74,8 +77,13 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
           onSelectOption={setProduct}
           onChangeFilter={setFilter}
         />
+      </div>
+
+      <div className="w-[140px] flex flex-col gap-2">
+        <Label>Quantidade</Label>
 
         <Input
+          ref={quantityInputRef}
           className="w-full"
           type="number"
           min={0}
@@ -83,6 +91,10 @@ export function AddOrderProductDialog({ isOpen, onClose, onSubmit }: AddOrderPro
           onChange={(e) => setQuantity(Number(e.target.value))}
         />
       </div>
-    </Dialog>
+
+      <Button onClick={() => handleAddProduct(product, quantity)} disabled={!product || quantity === 0}>
+        Adicionar produto
+      </Button>
+    </div>
   )
 }

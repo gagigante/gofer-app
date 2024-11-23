@@ -1,21 +1,18 @@
 import { Button } from '@/view/components/ui/button'
 import { Alert } from '@/view/components/Alert'
 
-interface DeleteCategoryActionProps {
+interface DeleteOrderActionProps {
   isOpen: boolean
   onDelete: () => Promise<void>
   onClose: () => void
 }
 
-export const DeleteCategoryAction = ({ isOpen, onDelete, onClose }: DeleteCategoryActionProps) => {
+export function DeleteOrderAction({ isOpen, onDelete, onClose }: DeleteOrderActionProps) {
   return (
     <Alert
       isOpen={isOpen}
-      title="Apagar categoria"
-      description={`
-        Deseja mesmo apagar esta categoria?
-        Ao remover a categoria, os produtos associados a ela deixarão de ter uma categoria associada.
-      `}
+      title="Apagar pedido"
+      description="Deseja mesmo apagar este pedido?"
       cancelButton={<Button variant="outline">Cancelar</Button>}
       proceedButton={
         <Button

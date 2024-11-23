@@ -5,6 +5,7 @@ import {
   type ListProductsRequest,
   type UpdateProductRequest,
   type GetLastProductRequest,
+  type GetByBarcodeRequest,
   ProductsController,
 } from '../controllers/products-controller'
 
@@ -16,6 +17,10 @@ ipcMain.handle('products:list', async (_event, data: ListProductsRequest) => {
 
 ipcMain.handle('products:getLast', async (_event, data: GetLastProductRequest) => {
   return await productsController.getLastProduct(data)
+})
+
+ipcMain.handle('products:getByBarcode', async (_event, data: GetByBarcodeRequest) => {
+  return await productsController.getByBarCode(data)
 })
 
 ipcMain.handle(

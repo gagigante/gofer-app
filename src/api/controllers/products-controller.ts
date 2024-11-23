@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import { ProductsRepository } from '../repositories/products-repository'
+import { ProductsRepository, type ProductWithCategoryAndBrand } from '../repositories/products-repository'
 import { UsersRepository } from '../repositories/users-repository'
 
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
@@ -8,7 +8,7 @@ import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
 
-import { type Brand, type Category, type Product } from '@/api/db/schema'
+import { type Product } from '@/api/db/schema'
 import { type Response } from '@/api/types/response'
 
 export interface ListProductsRequest {
@@ -19,7 +19,7 @@ export interface ListProductsRequest {
 }
 
 export type ListProductsResponse = Response<{
-  products: Array<Product & { category: Category | null } & { brand: Brand | null }>
+  products: Array<ProductWithCategoryAndBrand>
   page: number
   itemsPerPage: number
   total: number
@@ -30,6 +30,13 @@ export interface GetLastProductRequest {
 }
 
 export type GetLastProductResponse = Response<Product | null>
+
+export interface GetByBarcodeRequest {
+  loggedUserId: string
+  barcode: string
+}
+
+export type GetByBarcodeResponse = Response<ProductWithCategoryAndBrand | null>
 
 export interface CreateProductRequest {
   loggedUserId: string
@@ -111,6 +118,25 @@ export class ProductsController {
     }
 
     const response = await this.productsRepository.getLastProductCreated()
+
+    return { data: response, err: null }
+  }
+
+  public async getByBarCode({ loggedUserId, barcode }: GetByBarcodeRequest): Promise<GetLastProductResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+      return { data: null, err }
+    }
+
+    const response = await this.productsRepository.getProductByBarCode(barcode)
+
+    if (!response) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
 
     return { data: response, err: null }
   }
