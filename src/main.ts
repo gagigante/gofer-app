@@ -49,6 +49,7 @@ app.on('ready', async () => {
   import('@/api/handlers/categories-handler')
   import('@/api/handlers/brands-handler')
   import('@/api/handlers/products-handler')
+  import('@/api/handlers/customers-handler')
 
   ordersHandler(mainWindow)
 })
