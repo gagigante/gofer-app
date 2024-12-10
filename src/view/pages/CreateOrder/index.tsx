@@ -135,7 +135,9 @@ export function CreateOrder() {
         <Alert>
           <FaInfoCircle className="h-4 w-4" />
           <AlertTitle>Busca de produtos por código de barra</AlertTitle>
-          <AlertDescription>Você pode escanear o código de barras de um produto para exibir detalhes.</AlertDescription>
+          <AlertDescription>
+            Você pode escanear o código de barras de um produto para adiciona-lo ao pedido.
+          </AlertDescription>
         </Alert>
 
         <div className="flex my-4">
