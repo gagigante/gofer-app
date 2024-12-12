@@ -1,24 +1,29 @@
-import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type * as z from 'zod'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Form } from '@/view/components/ui/form'
 import { Button } from '@/view/components/ui/button'
-import { CustomerForm } from './components/CustomerForm'
+import { CustomerForm } from '../CreateCustomer/components/CustomerForm'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
-import { useMutateOnCreateCustomer } from '@/view/hooks/mutations/customers'
+import { useToast } from '@/view/components/ui/use-toast'
+import { useMutateOnUpdateCustomer } from '@/view/hooks/mutations/customers'
 
-import { createCustomerSchema } from './schema'
+import { createCustomerSchema } from '../CreateCustomer/schema'
 
-export function CreateCustomer() {
+import { type Customer } from '@/api/db/schema'
+
+export function UpdateCustomer() {
+  const {
+    state: { selectedCustomer },
+  } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync } = useMutateOnCreateCustomer()
+  const { mutateAsync } = useMutateOnUpdateCustomer()
 
   const form = useForm<z.infer<typeof createCustomerSchema>>({
     resolver: zodResolver(createCustomerSchema),
@@ -38,15 +43,17 @@ export function CreateCustomer() {
     },
   })
 
-  async function onSubmit(value: z.infer<typeof createCustomerSchema>) {
+  const customer = selectedCustomer as Customer
+
+  async function onSubmit(values: z.infer<typeof createCustomerSchema>) {
     if (!user) return
 
     await mutateAsync(
-      { loggedUserId: user.id, ...value },
+      { loggedUserId: user.id, id: customer.id, ...values },
       {
         onSuccess: () => {
           toast({
-            title: 'Cliente cadastrado com sucesso.',
+            title: 'Cliente atualizado com sucesso.',
             duration: 3000,
           })
 
@@ -54,7 +61,7 @@ export function CreateCustomer() {
         },
         onError: () => {
           toast({
-            title: 'Houve um erro ao criar o cliente. Tente novamente.',
+            title: 'Houve um erro ao atualizar este cliente. Tente novamente.',
             duration: 3000,
           })
         },
@@ -66,14 +73,14 @@ export function CreateCustomer() {
     <Form {...form}>
       <form className="h-full flex flex-col" onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex-1 px-3 py-6 overflow-auto">
-          <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Criar cliente</h2>
+          <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Atualizar cliente</h2>
 
-          <CustomerForm form={form} />
+          <CustomerForm form={form} defaultValue={customer} />
         </div>
 
         <footer className="flex px-3 py-4 border-t border-border">
           <div className="flex gap-2 ml-auto">
-            <Button type="submit">Adicionar cliente</Button>
+            <Button type="submit">Atualizar cliente</Button>
 
             <Button variant="outline" asChild>
               <Link to=".." relative="path">
