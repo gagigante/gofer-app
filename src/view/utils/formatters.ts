@@ -13,6 +13,45 @@ export function formatCEST(value: string) {
   return `${a}.${b}.${c}`
 }
 
+export function formatCPF(value: string) {
+  if (!value) return ''
+
+  const docDigits = value.replace(/\D/g, '')
+  const formatted = docDigits.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4')
+
+  return formatted
+}
+
+export function formatCNPJ(cnpj: string) {
+  if (!cnpj) return ''
+
+  const docDigits = cnpj.replace(/\D/g, '')
+  const formatted = docDigits.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')
+
+  return formatted
+}
+
+export function formatRG(rg: string) {
+  if (!rg) return ''
+
+  const docDigits = rg.replace(/\D/g, '')
+  const formatted = docDigits.replace(/^(\d{2})(\d{3})(\d{3})(\d)$/, '$1.$2.$3-$4')
+
+  return formatted
+}
+
+export function formatPhone(phone: string) {
+  if (!phone) return ''
+
+  const docDigits = phone.replace(/\D/g, '')
+
+  if (docDigits.length === 11) {
+    return docDigits.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
+  }
+
+  return docDigits.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3')
+}
+
 export function formatNCM(value: string) {
   const digits = value.replace(/\D/g, '')
   const match = digits.match(/^(\d{0,4})(\d{0,2})(\d{0,2})/)
