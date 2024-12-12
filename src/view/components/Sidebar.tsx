@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { FiHome, FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiShoppingCart, FiBox, FiArchive } from 'react-icons/fi'
 
@@ -60,7 +60,11 @@ export function Sidebar() {
 
             <Separator className="my-4" />
 
-            <Button asChild variant="ghost" className="w-full justify-start">
+            <Button
+              asChild
+              variant={pathname.includes('/home/customers') ? 'default' : 'ghost'}
+              className="w-full justify-start"
+            >
               <Link to="/home/customers">
                 <FiUsers className="w-4 h-4 mr-3" />
                 Clientes
