@@ -16,16 +16,13 @@ export const mainConfig: Configuration = {
     rules,
   },
   externals: {
-    '@libsql/client': 'commonjs @libsql/client'
+    'drizzle-orm/libsql': 'commonjs drizzle-orm/libsql',
   },
-  plugins: [
-    new Dotenv(),
-    ...plugins
-  ],
+  plugins: [new Dotenv(), ...plugins],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      '@': path.resolve(__dirname, 'src'),
     },
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
-};
+}
