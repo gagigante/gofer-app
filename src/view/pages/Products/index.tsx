@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { Button } from '@/view/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/view/components/ui/tabs'
+import { Button } from '@/view/components/ui/button'
+import { Footer } from '@/view/components/Footer'
 import { BrandsTab } from './components/BrandsTab'
 import { CategoriesTab } from './components/CategoriesTab'
 import { ProductsTab } from './components/ProductsTab'
-import { Footer } from '@/view/components/Footer'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useCategories } from '@/view/hooks/queries/categories'
@@ -29,7 +29,7 @@ export function Products() {
 
   const [brandsNameFilter, setBrandsNameFilter] = useState('')
   const { data: brandsResponse } = useBrands(
-    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: categoriesPagination },
+    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: brandsPagination },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -61,6 +61,16 @@ export function Products() {
   )
   const products = productsResponse?.products ?? []
 
+  function updatePagination(page: number) {
+    const states = {
+      products: setProductsPagination,
+      categories: setCategoriesPagination,
+      brands: setBrandsPagination,
+    }
+
+    states[activeTab](page)
+  }
+
   const page = (() => {
     const TABS_PAGE = {
       products: productsPagination,
@@ -89,7 +99,7 @@ export function Products() {
         <Tabs
           defaultValue="products"
           onValueChange={(tab) => {
-            setActiveTab(tab as 'categories' | 'products')
+            setActiveTab(tab as 'categories' | 'products' | 'brands')
           }}
           className="w-full"
         >
@@ -131,18 +141,7 @@ export function Products() {
         </Tabs>
       </div>
 
-      <Footer
-        page={page}
-        total={total}
-        onChange={(page) => {
-          if (activeTab === 'products') {
-            setProductsPagination(page)
-            return
-          }
-
-          setCategoriesPagination(page)
-        }}
-      >
+      <Footer page={page} total={total} onChange={updatePagination}>
         <div className="flex gap-2">
           <Button asChild>
             <Link to="new">Adicionar produto</Link>
