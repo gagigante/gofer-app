@@ -29,7 +29,7 @@ export function Products() {
 
   const [brandsNameFilter, setBrandsNameFilter] = useState('')
   const { data: brandsResponse } = useBrands(
-    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: categoriesPagination },
+    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: brandsPagination },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -61,6 +61,16 @@ export function Products() {
   )
   const products = productsResponse?.products ?? []
 
+  function updatePagination(page: number) {
+    const states = {
+      products: setProductsPagination,
+      categories: setCategoriesPagination,
+      brands: setBrandsPagination,
+    }
+
+    states[activeTab](page)
+  }
+
   const page = (() => {
     const TABS_PAGE = {
       products: productsPagination,
@@ -89,7 +99,7 @@ export function Products() {
         <Tabs
           defaultValue="products"
           onValueChange={(tab) => {
-            setActiveTab(tab as 'categories' | 'products')
+            setActiveTab(tab as 'categories' | 'products' | 'brands')
           }}
           className="w-full"
         >
