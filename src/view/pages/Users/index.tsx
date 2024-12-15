@@ -6,7 +6,6 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
 import { Button } from '@/view/components/ui/button'
-import { Footer } from './components/Footer'
 import { DeleteUserAction } from './components/DeleteUserAction'
 import { UpdateUserAction } from './components/UpdateUserAction'
 import { CreateUserAction } from './components/CreateUserAction'
@@ -22,6 +21,7 @@ import { type createUserSchema } from './components/CreateUserAction/schema'
 import { type updateUserSchema } from './components/UpdateUserAction/schema'
 
 import { ROLES } from '@/view/constants/ROLES'
+import { Footer } from '@/view/components/Footer'
 
 export function Users() {
   const { user } = useAuth()
@@ -244,15 +244,11 @@ export function Users() {
         </Table>
       </div>
 
-      <Footer
-        role={user?.role}
-        page={pagination}
-        total={data?.total ?? 0}
-        onChange={setPagination}
-        onRequestCreateUser={() => {
-          setIsCreateUserDialogOpen(true)
-        }}
-      />
+      <Footer page={pagination} total={data?.total ?? 0} onChange={setPagination}>
+        {user?.role !== 'operator' && (
+          <Button onClick={() => setIsCreateUserDialogOpen(true)}>Adicionar usuário</Button>
+        )}
+      </Footer>
 
       <CreateUserAction
         isOpen={isCreateUserDialogOpen}

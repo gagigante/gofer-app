@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { Tabs, TabsList, TabsTrigger } from '@/view/components/ui/tabs'
+import { Button } from '@/view/components/ui/button'
+import { Footer } from '@/view/components/Footer'
 import { BrandsTab } from './components/BrandsTab'
 import { CategoriesTab } from './components/CategoriesTab'
 import { ProductsTab } from './components/ProductsTab'
-import { Footer } from './components/Footer'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useCategories } from '@/view/hooks/queries/categories'
@@ -129,18 +131,13 @@ export function Products() {
         </Tabs>
       </div>
 
-      <Footer
-        page={page}
-        total={total}
-        onChange={(page) => {
-          if (activeTab === 'products') {
-            setProductsPagination(page)
-            return
-          }
-
-          setCategoriesPagination(page)
-        }}
-      />
+      <Footer page={page} total={total} onChange={updatePagination}>
+        <div className="flex gap-2">
+          <Button asChild>
+            <Link to="new">Adicionar produto</Link>
+          </Button>
+        </div>
+      </Footer>
     </div>
   )
 }

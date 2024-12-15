@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
+import { Button } from '@/view/components/ui/button'
+import { Footer } from '@/view/components/Footer'
 import { OrdersTable } from './components/OrdersTable'
-import { Footer } from './components/Footer'
 
 import { useOrders } from '@/view/hooks/queries/orders'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -28,7 +30,11 @@ export function Orders() {
         <OrdersTable orders={orders} />
       </div>
 
-      <Footer page={pagination} total={data?.total ?? 0} onChange={setPagination} />
+      <Footer page={pagination} total={data?.total ?? 0} onChange={setPagination}>
+        <Button asChild>
+          <Link to="new">Adicionar novo pedido</Link>
+        </Button>
+      </Footer>
     </div>
   )
 }
