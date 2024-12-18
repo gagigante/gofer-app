@@ -9,7 +9,7 @@ import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplat
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { NotFoundError } from '../errors/NotFoundError'
 
-import { type Order } from '@/api/db/schema'
+import { type Customer, type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
 
 export interface ListOrdersRequest {
@@ -34,6 +34,7 @@ export type GetOrderResponse = Response<{
   id: string
   totalPrice: number | null
   createdAt: string | null
+  customer: Customer | null
   products: Array<{
     productId: string | null
     quantity: number | null
