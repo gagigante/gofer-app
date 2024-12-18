@@ -50,6 +50,21 @@
       font-size: 12px;
     }
 
+    .address {
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #000;
+    }
+
+    .address strong {
+      font-size: 12px;
+    }
+
+    .address .content {
+      display: flex;
+      gap: 1rem; 
+    }
+
     .order-products {
       margin-bottom: 1rem;
     }
@@ -97,6 +112,35 @@
       <p>Fone: (11) 97062-2089</p>
     </div>
   </div>
+
+  {{#if customer}}
+  <div class="address">
+    <strong>Cliente</strong>
+    
+    <div class="content">
+      <div>
+        <p>Nome: {{customer.name}}</p>
+        <p>Telefone: {{customer.phone}}</p>
+        <p>E-mail: {{customer.email}}</p>
+      </div>
+  
+      <div>
+        <p>RG: {{customer.rg}}</p>
+        <p>CPF: {{customer.cpf}}</p>
+        <p>CNPJ: {{customer.cnpj}}</p>
+        <p>IE: {{customer.ie}}</p>
+      </div>
+      
+      <div>
+        <p>CEP: {{customer.zipcode}}</p>
+        <p>Cidade: {{customer.city}}</p>
+        <p>Bairro: {{customer.neighborhood}}</p>
+        <p>Logradouro: {{customer.street}}</p>
+        <p>Complemento: {{customer.complement}}</p>
+      </div>
+    </div>
+  </div>
+  {{/if}}
 
   <div class="order-products">
     <table>

@@ -7,6 +7,7 @@ import { categoriesApi } from './api/exposes/categories-api'
 import { brandsApi } from './api/exposes/brands-api'
 import { productsApi } from './api/exposes/products-api'
 import { ordersApi } from './api/exposes/orders-api'
+import { customersApi } from './api/exposes/customers-api'
 
 loginApi()
 usersApi()
@@ -14,3 +15,4 @@ categoriesApi()
 brandsApi()
 productsApi()
 ordersApi()
+customersApi()

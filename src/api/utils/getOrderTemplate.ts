@@ -8,11 +8,13 @@ import { parseCentsToDecimal } from '@/view/utils/parsers'
 import { isElectronInDev } from './isElectronInDev'
 
 import { type Response } from '@/api/types/response'
+import { type Customer } from '../db/schema'
 
 interface Data {
   id: string
   totalPrice: number | null
   createdAt: string | null
+  customer: Customer | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -35,6 +37,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
 
     const template = fileBuf.toString()
     const handlebarsTemplate = Handlebars.compile<{
+      customer: Customer | null
       products: ReturnType<typeof formatProducts>
       orderTotal: string
     }>(template)
@@ -44,8 +47,21 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
     const formattedProducts = formatProducts(data.products)
     const formattedOrderTotal = formatCurrency(parseCentsToDecimal(data.totalPrice ?? 0))
 
+    const formattedCustomer = data.customer
+      ? Object.entries(data.customer).reduce<Customer>((acc, [key, value]) => {
+          return {
+            ...acc,
+            [key]: value ?? 'N/A',
+          }
+        }, {} as Customer)
+      : null
+
     return {
-      data: handlebarsTemplate({ products: formattedProducts, orderTotal: formattedOrderTotal }),
+      data: handlebarsTemplate({
+        customer: formattedCustomer,
+        products: formattedProducts,
+        orderTotal: formattedOrderTotal,
+      }),
       err: null,
     }
   } catch (err) {

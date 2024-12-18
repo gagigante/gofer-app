@@ -14,10 +14,10 @@ import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
 import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
-import { type Order } from '@/api/db/schema'
+import { type OrderWithCustomer } from '@/api/repositories/orders-repository'
 
 interface OrdersTableProps {
-  orders: Order[]
+  orders: OrderWithCustomer[]
 }
 
 const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' })
@@ -93,6 +93,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
 
         <TableHeader>
           <TableRow>
+            <TableHead>Cliente</TableHead>
             <TableHead>Preço do pedido</TableHead>
             <TableHead>Data do pedido</TableHead>
             <TableHead></TableHead>
@@ -100,8 +101,12 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         </TableHeader>
 
         <TableBody>
-          {orders.map(({ id, totalPrice, createdAt }) => (
+          {orders.map(({ id, customer, totalPrice, createdAt }) => (
             <TableRow key={id}>
+              <TableCell>
+                <p className="font-medium">{customer?.name ?? 'N/A'}</p>
+              </TableCell>
+
               <TableCell>
                 <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
               </TableCell>

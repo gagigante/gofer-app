@@ -46,7 +46,7 @@
 
 "@drizzle-team/brocli@^0.10.2":
   version "0.10.2"
-  resolved "https://registry.yarnpkg.com/@drizzle-team/brocli/-/brocli-0.10.2.tgz#9757c006a43daaa6f45512e6cf5fabed36fb9da7"
+  resolved "https://registry.npmjs.org/@drizzle-team/brocli/-/brocli-0.10.2.tgz#9757c006a43daaa6f45512e6cf5fabed36fb9da7"
   integrity sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==
 
 "@electron-forge/cli@^7.5.0":
@@ -989,7 +989,7 @@
 
 "@libsql/client@^0.14.0":
   version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@libsql/client/-/client-0.14.0.tgz#df30cfb21e84797398afdd268e153cf1594c68a1"
+  resolved "https://registry.npmjs.org/@libsql/client/-/client-0.14.0.tgz#df30cfb21e84797398afdd268e153cf1594c68a1"
   integrity sha512-/9HEKfn6fwXB5aTEEoMeFh4CtG0ZzbncBb1e++OCdVpgKZ/xyMsIVYXm0w7Pv4RUel803vE6LwniB3PqD72R0Q==
   dependencies:
     "@libsql/core" "^0.14.0"
@@ -3495,7 +3495,7 @@ dotenv@^8.2.0:
 
 drizzle-kit@^0.28.1:
   version "0.28.1"
-  resolved "https://registry.yarnpkg.com/drizzle-kit/-/drizzle-kit-0.28.1.tgz#8bb92aa99319446b7158769ec605788f8fa23504"
+  resolved "https://registry.npmjs.org/drizzle-kit/-/drizzle-kit-0.28.1.tgz#8bb92aa99319446b7158769ec605788f8fa23504"
   integrity sha512-JimOV+ystXTWMgZkLHYHf2w3oS28hxiH1FR0dkmJLc7GHzdGJoJAQtQS5DRppnabsRZwE2U1F6CuezVBgmsBBQ==
   dependencies:
     "@drizzle-team/brocli" "^0.10.2"
@@ -3505,7 +3505,7 @@ drizzle-kit@^0.28.1:
 
 drizzle-orm@^0.36.4:
   version "0.36.4"
-  resolved "https://registry.yarnpkg.com/drizzle-orm/-/drizzle-orm-0.36.4.tgz#f296848e94534f318cba4cfa56634694c14742ca"
+  resolved "https://registry.npmjs.org/drizzle-orm/-/drizzle-orm-0.36.4.tgz#f296848e94534f318cba4cfa56634694c14742ca"
   integrity sha512-1OZY3PXD7BR00Gl61UUOFihslDldfH4NFRH2MbP54Yxi0G/PKn4HfO65JYZ7c16DeP3SpM3Aw+VXVG9j6CRSXA==
 
 eastasianwidth@^0.2.0:
@@ -7848,7 +7848,7 @@ tsutils@^3.21.0:
 
 tsx@^4.19.2:
   version "4.19.2"
-  resolved "https://registry.yarnpkg.com/tsx/-/tsx-4.19.2.tgz#2d7814783440e0ae42354d0417d9c2989a2ae92c"
+  resolved "https://registry.npmjs.org/tsx/-/tsx-4.19.2.tgz#2d7814783440e0ae42354d0417d9c2989a2ae92c"
   integrity sha512-pOUl6Vo2LUq/bSa8S5q7b91cgNSjctn9ugq/+Mvow99qW6x/UZYwzxy/3NmqoT66eHYfCVvFvACC58UBPFf28g==
   dependencies:
     esbuild "~0.23.0"

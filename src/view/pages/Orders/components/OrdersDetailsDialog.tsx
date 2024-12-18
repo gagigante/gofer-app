@@ -41,6 +41,9 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
       {data && (
         <div className="mb-4 gap-4">
           <p className="font-medium">
+            <b>Cliente:</b> {data.customer?.name ?? 'N/A'}
+          </p>
+          <p className="font-medium">
             <b>Preço total:</b> {formatCurrency(parseCentsToDecimal(data.totalPrice ?? 0))}
           </p>
           <p className="font-medium">
