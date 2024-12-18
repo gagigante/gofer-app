@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
-import { type OrderResponse, OrdersRepository } from '../repositories/orders-repository'
+import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
 import { ProductsRepository } from '../repositories/products-repository'
 
 import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
@@ -19,7 +19,7 @@ export interface ListOrdersRequest {
 }
 
 export type ListOrdersResponse = Response<{
-  orders: Order[]
+  orders: OrderWithCustomer[]
   page: number
   itemsPerPage: number
   total: number

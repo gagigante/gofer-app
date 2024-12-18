@@ -3,11 +3,12 @@ import { count, desc, eq } from 'drizzle-orm'
 import { db } from '@/api/db/client'
 
 import {
+  type Customer,
   type NewOrder,
   type Order,
   orders,
   ordersProducts,
-  products,
+  customers,
   products as productsSchema,
 } from '@/api/db/schema'
 
@@ -25,16 +26,24 @@ export interface OrderResponse {
   }>
 }
 
+export type OrderWithCustomer = Order & { customer: Customer | null }
+
 export class OrdersRepository {
-  public async getOrders(page = 1, itemsPerPage = 15): Promise<Order[]> {
+  public async getOrders(page = 1, itemsPerPage = 15): Promise<OrderWithCustomer[]> {
     const response = await db
       .select()
       .from(orders)
+      .leftJoin(customers, eq(orders.customerId, customers.id))
       .orderBy(desc(orders.createdAt))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
 
-    return response
+    return response.map((item) => {
+      return {
+        ...item.orders,
+        customer: item.customers,
+      }
+    })
   }
 
   public async countOrders(): Promise<number> {
@@ -133,9 +142,9 @@ export class OrdersRepository {
         }
 
         await tx
-          .update(products)
+          .update(productsSchema)
           .set({ availableQuantity: (productToBeUpdated.availableQuantity ?? 0) + (quantity ?? 0) })
-          .where(eq(products.id, productToBeUpdated.id))
+          .where(eq(productsSchema.id, productToBeUpdated.id))
       }
 
       await tx.delete(ordersProducts).where(eq(ordersProducts.orderId, orderId))
