@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { UsersRepository } from '../repositories/users-repository'
 import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
 import { ProductsRepository } from '../repositories/products-repository'
+import { CustomersRepository } from '../repositories/customers-repository'
 
 import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
 
@@ -54,6 +55,7 @@ export type GetOrderTemplateResponse = Response<{ template: string; order: Order
 export interface CreateOrderRequest {
   loggedUserId: string
   products: Array<{ id: string; quantity: number }>
+  customerId?: string
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -69,11 +71,13 @@ export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
   private readonly productsRepository: ProductsRepository
+  private readonly customersRepository: CustomersRepository
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
     this.productsRepository = new ProductsRepository()
+    this.customersRepository = new CustomersRepository()
   }
 
   public async listOrders({
@@ -140,12 +144,20 @@ export class OrdersController {
     return { data: { template, order }, err: null }
   }
 
-  public async createOrder({ loggedUserId, products }: CreateOrderRequest): Promise<CreateOrderResponse> {
+  public async createOrder({ loggedUserId, products, customerId }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
       const err = new WithoutPermissionError()
       return { data: null, err }
+    }
+
+    if (customerId) {
+      const customer = await this.customersRepository.getCustomerById(customerId)
+
+      if (!customer) {
+        return { data: null, err: new NotFoundError() }
+      }
     }
 
     const mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number }>>((acc, item) => {
@@ -178,6 +190,7 @@ export class OrdersController {
       id: randomUUID(),
       products: Array.from(mergedProductsMap.values()),
       totalPrice,
+      customerId,
     })
 
     return { data: response, err: null }
