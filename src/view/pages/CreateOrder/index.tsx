@@ -6,11 +6,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCap
 import { Button } from '@/view/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
+import { Combobox } from '@/view/components/Combobox'
+import { Label } from '@/view/components/ui/label'
+import { CreateCustomerPopover } from './components/CreateCustomerPopover'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useBarcode } from '@/view/hooks/useBarcode'
 import { useProductByBarcode } from '@/view/hooks/queries/products'
+import { useCustomers } from '@/view/hooks/queries/customers'
 import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
 import { formatCurrency } from '@/view/utils/formatters'
@@ -33,7 +37,22 @@ export function CreateOrder() {
   const { barcode, clearBarcodeState } = useBarcode()
   const { mutateAsync } = useMutateOnCreateOrder()
 
+  const [customersFilter, setCustomersFilter] = useState('')
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>()
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
+
+  const { data: customersResponse } = useCustomers(
+    {
+      loggedUserId: user?.id ?? '',
+      name: customersFilter,
+      page: 1,
+    },
+    {
+      enabled: !!user,
+      placeholderData: (previousData) => previousData,
+    },
+  )
+  const customers = (customersResponse?.customers ?? []).map((item) => ({ label: item.name!, value: item.id }))
 
   const { data, error } = useProductByBarcode(
     { loggedUserId: user?.id ?? '', barcode: barcode },
@@ -101,6 +120,7 @@ export function CreateOrder() {
       {
         loggedUserId: user?.id ?? '',
         products: orderProducts.map(({ id, quantity }) => ({ id, quantity })),
+        customerId: selectedCustomerId,
       },
       {
         onError: () => {
@@ -135,8 +155,29 @@ export function CreateOrder() {
         <Alert>
           <FaInfoCircle className="h-4 w-4" />
           <AlertTitle>Busca de produtos por código de barra</AlertTitle>
-          <AlertDescription>Você pode escanear o código de barras de um produto para exibir detalhes.</AlertDescription>
+          <AlertDescription>
+            Você pode escanear o código de barras de um produto para adiciona-lo ao pedido.
+          </AlertDescription>
         </Alert>
+
+        <div className="flex my-4">
+          <div className="flex flex-1 items-end gap-2">
+            <div className="flex flex-1 flex-col gap-3">
+              <Label>Cliente</Label>
+              <Combobox
+                placeholder="Selecione um cliente"
+                searchPlaceholder="Busque pelo nome do cliente"
+                emptyPlaceholder="Nenhum cliente encontrado."
+                options={customers}
+                onChangeFilter={setCustomersFilter}
+                value={customers.find((item) => item.value === selectedCustomerId)}
+                onSelectOption={({ value }) => setSelectedCustomerId(value)}
+              />
+            </div>
+
+            <CreateCustomerPopover />
+          </div>
+        </div>
 
         <div className="flex my-4">
           <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
