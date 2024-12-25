@@ -15,6 +15,7 @@ import { type Response } from '../types/response'
 
 export interface ListOrdersRequest {
   loggedUserId: string
+  customerId?: string
   page?: number
   itemsPerPage?: number
 }
@@ -82,6 +83,7 @@ export class OrdersController {
 
   public async listOrders({
     loggedUserId,
+    customerId,
     page = 1,
     itemsPerPage = 15,
   }: ListOrdersRequest): Promise<ListOrdersResponse> {
@@ -92,8 +94,16 @@ export class OrdersController {
       return { data: null, err }
     }
 
-    const total = await this.ordersRepository.countOrders()
-    const orders = await this.ordersRepository.getOrders(page, itemsPerPage)
+    if (customerId) {
+      const customer = await this.customersRepository.getCustomerById(customerId)
+
+      if (!customer) {
+        return { data: null, err: new NotFoundError() }
+      }
+    }
+
+    const total = await this.ordersRepository.countOrders(customerId)
+    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, customerId)
 
     const data = { orders, total, page, itemsPerPage }
 

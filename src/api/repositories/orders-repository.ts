@@ -30,11 +30,12 @@ export interface OrderResponse {
 export type OrderWithCustomer = Order & { customer: Customer | null }
 
 export class OrdersRepository {
-  public async getOrders(page = 1, itemsPerPage = 15): Promise<OrderWithCustomer[]> {
+  public async getOrders(page = 1, itemsPerPage = 15, customerId?: string): Promise<OrderWithCustomer[]> {
     const response = await db
       .select()
       .from(orders)
       .leftJoin(customers, eq(orders.customerId, customers.id))
+      .where(customerId ? eq(orders.customerId, customerId) : undefined)
       .orderBy(desc(orders.createdAt))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
@@ -47,8 +48,11 @@ export class OrdersRepository {
     })
   }
 
-  public async countOrders(): Promise<number> {
-    const [response] = await db.select({ count: count() }).from(orders)
+  public async countOrders(customerId?: string): Promise<number> {
+    const [response] = await db
+      .select({ count: count() })
+      .from(orders)
+      .where(customerId ? eq(orders.customerId, customerId) : undefined)
 
     return response.count
   }
