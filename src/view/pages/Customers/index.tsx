@@ -83,7 +83,7 @@ export function Customers() {
 
         <Input
           className="mb-4"
-          placeholder="Buscar por nome de usuário"
+          placeholder="Buscar por nome do cliente"
           value={nameFilter}
           onChange={(e) => {
             setNameFilter(e.target.value)
