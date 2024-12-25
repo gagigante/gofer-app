@@ -23,6 +23,13 @@ export type ListCustomersResponse = Response<{
   total: number
 }>
 
+export interface GetCustomerRequest {
+  loggedUserId: string
+  customerId: string
+}
+
+export type GetCustomerResponse = Response<Customer>
+
 export type CreateCustomerRequest = {
   loggedUserId: string
 } & Omit<NewCustomer, 'id'>
@@ -71,6 +78,26 @@ export class CustomersController {
     const data = { customers, total, page, itemsPerPage }
 
     return { data, err: null }
+  }
+
+  public async getCustomer({ loggedUserId, customerId }: GetCustomerRequest): Promise<GetCustomerResponse> {
+    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+
+    if (!loggedUser) {
+      const err = new WithoutPermissionError()
+
+      return { data: null, err }
+    }
+
+    const customer = await this.customersRepository.getCustomerById(customerId)
+
+    if (!customer) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    return { data: customer, err: null }
   }
 
   public async createCustomer({

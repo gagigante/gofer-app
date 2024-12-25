@@ -43,6 +43,10 @@ export function Customers() {
     setIsDeleteCustomerDialogOpen(true)
   }
 
+  function handleRequestCustomerDetails(customer: Customer) {
+    navigate(customer.id)
+  }
+
   function handleRequestCustomerUpdate(customer: Customer) {
     navigate('update', { state: { selectedCustomer: customer } })
   }
@@ -136,7 +140,17 @@ export function Customers() {
                   </TableCell>
 
                   <TableCell className="text-right space-x-1.5">
-                    <Button variant="outline" size="sm" onClick={() => {}}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const customer = customers.find((item) => item.id === id)
+
+                        if (customer) {
+                          handleRequestCustomerDetails(customer)
+                        }
+                      }}
+                    >
                       <FaEye className="w-3 h-3" />
                     </Button>
 

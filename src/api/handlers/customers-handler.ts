@@ -6,6 +6,7 @@ import {
   type UpdateCustomerRequest,
   type ListCustomersRequest,
   type DeleteCustomerRequest,
+  type GetCustomerRequest,
 } from '@/api/controllers/customers-controller'
 
 const customerController = new CustomersController()
@@ -14,6 +15,8 @@ ipcMain.handle(
   'customers:list',
   async (_event, data: ListCustomersRequest) => await customerController.listCustomers(data),
 )
+
+ipcMain.handle('customers:get', async (_event, data: GetCustomerRequest) => await customerController.getCustomer(data))
 
 ipcMain.handle(
   'customers:create',
