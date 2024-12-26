@@ -63,11 +63,19 @@ export const productsRelations = relations(products, ({ one }) => ({
 
 export const orders = sqliteTable('orders', {
   id: text('id').primaryKey(),
+  customerId: text('customer_id'),
   totalPrice: integer('total_price'),
   createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
 })
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
+
+export const ordersRelations = relations(orders, ({ one }) => ({
+  customer: one(customers, {
+    fields: [orders.customerId],
+    references: [customers.id],
+  }),
+}))
 
 export const ordersProducts = sqliteTable(
   'orders_products',
@@ -83,3 +91,21 @@ export const ordersProducts = sqliteTable(
     }
   },
 )
+
+export const customers = sqliteTable('customers', {
+  id: text('id').primaryKey(),
+  cpf: text('cpf'),
+  rg: text('rg'),
+  cnpj: text('cnpj'),
+  ie: text('ie'),
+  name: text('name'),
+  email: text('email'),
+  phone: text('phone'),
+  zipcode: text('zipcode'),
+  city: text('city'),
+  street: text('street'),
+  neighborhood: text('neighborhood'),
+  complement: text('complement'),
+})
+export type Customer = typeof customers.$inferSelect
+export type NewCustomer = typeof customers.$inferInsert

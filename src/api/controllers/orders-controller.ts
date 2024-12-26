@@ -1,25 +1,27 @@
 import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
-import { type OrderResponse, OrdersRepository } from '../repositories/orders-repository'
+import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
 import { ProductsRepository } from '../repositories/products-repository'
+import { CustomersRepository } from '../repositories/customers-repository'
 
 import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
 
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { NotFoundError } from '../errors/NotFoundError'
 
-import { type Order } from '@/api/db/schema'
+import { type Customer, type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
 
 export interface ListOrdersRequest {
   loggedUserId: string
+  customerId?: string
   page?: number
   itemsPerPage?: number
 }
 
 export type ListOrdersResponse = Response<{
-  orders: Order[]
+  orders: OrderWithCustomer[]
   page: number
   itemsPerPage: number
   total: number
@@ -34,6 +36,7 @@ export type GetOrderResponse = Response<{
   id: string
   totalPrice: number | null
   createdAt: string | null
+  customer: Customer | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -53,6 +56,7 @@ export type GetOrderTemplateResponse = Response<{ template: string; order: Order
 export interface CreateOrderRequest {
   loggedUserId: string
   products: Array<{ id: string; quantity: number }>
+  customerId?: string
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -68,15 +72,18 @@ export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
   private readonly productsRepository: ProductsRepository
+  private readonly customersRepository: CustomersRepository
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
     this.productsRepository = new ProductsRepository()
+    this.customersRepository = new CustomersRepository()
   }
 
   public async listOrders({
     loggedUserId,
+    customerId,
     page = 1,
     itemsPerPage = 15,
   }: ListOrdersRequest): Promise<ListOrdersResponse> {
@@ -87,8 +94,16 @@ export class OrdersController {
       return { data: null, err }
     }
 
-    const total = await this.ordersRepository.countOrders()
-    const orders = await this.ordersRepository.getOrders(page, itemsPerPage)
+    if (customerId) {
+      const customer = await this.customersRepository.getCustomerById(customerId)
+
+      if (!customer) {
+        return { data: null, err: new NotFoundError() }
+      }
+    }
+
+    const total = await this.ordersRepository.countOrders(customerId)
+    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, customerId)
 
     const data = { orders, total, page, itemsPerPage }
 
@@ -139,12 +154,20 @@ export class OrdersController {
     return { data: { template, order }, err: null }
   }
 
-  public async createOrder({ loggedUserId, products }: CreateOrderRequest): Promise<CreateOrderResponse> {
+  public async createOrder({ loggedUserId, products, customerId }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
       const err = new WithoutPermissionError()
       return { data: null, err }
+    }
+
+    if (customerId) {
+      const customer = await this.customersRepository.getCustomerById(customerId)
+
+      if (!customer) {
+        return { data: null, err: new NotFoundError() }
+      }
     }
 
     const mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number }>>((acc, item) => {
@@ -177,6 +200,7 @@ export class OrdersController {
       id: randomUUID(),
       products: Array.from(mergedProductsMap.values()),
       totalPrice,
+      customerId,
     })
 
     return { data: response, err: null }

@@ -3,11 +3,12 @@ import { count, desc, eq } from 'drizzle-orm'
 import { db } from '@/api/db/client'
 
 import {
+  type Customer,
   type NewOrder,
   type Order,
   orders,
   ordersProducts,
-  products,
+  customers,
   products as productsSchema,
 } from '@/api/db/schema'
 
@@ -15,6 +16,7 @@ export interface OrderResponse {
   id: string
   totalPrice: number | null
   createdAt: string | null
+  customer: Customer | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -25,20 +27,32 @@ export interface OrderResponse {
   }>
 }
 
+export type OrderWithCustomer = Order & { customer: Customer | null }
+
 export class OrdersRepository {
-  public async getOrders(page = 1, itemsPerPage = 15): Promise<Order[]> {
+  public async getOrders(page = 1, itemsPerPage = 15, customerId?: string): Promise<OrderWithCustomer[]> {
     const response = await db
       .select()
       .from(orders)
+      .leftJoin(customers, eq(orders.customerId, customers.id))
+      .where(customerId ? eq(orders.customerId, customerId) : undefined)
       .orderBy(desc(orders.createdAt))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
 
-    return response
+    return response.map((item) => {
+      return {
+        ...item.orders,
+        customer: item.customers,
+      }
+    })
   }
 
-  public async countOrders(): Promise<number> {
-    const [response] = await db.select({ count: count() }).from(orders)
+  public async countOrders(customerId?: string): Promise<number> {
+    const [response] = await db
+      .select({ count: count() })
+      .from(orders)
+      .where(customerId ? eq(orders.customerId, customerId) : undefined)
 
     return response.count
   }
@@ -47,6 +61,7 @@ export class OrdersRepository {
     const response = await db
       .select({
         order: orders,
+        customer: customers,
         orderProduct: {
           productId: ordersProducts.productId,
           quantity: ordersProducts.quantity,
@@ -57,6 +72,7 @@ export class OrdersRepository {
         },
       })
       .from(orders)
+      .leftJoin(customers, eq(orders.customerId, customers.id))
       .leftJoin(ordersProducts, eq(orders.id, ordersProducts.orderId))
       .leftJoin(productsSchema, eq(ordersProducts.productId, productsSchema.id))
       .where(eq(orders.id, orderId))
@@ -69,6 +85,7 @@ export class OrdersRepository {
       return {
         ...acc,
         ...order,
+        customer: item.customer,
         products: [...(acc.products ?? []), orderProduct],
       }
     }, {} as OrderResponse)
@@ -80,11 +97,15 @@ export class OrdersRepository {
     id,
     totalPrice,
     products,
-  }: Omit<NewOrder, 'createdAt'> & { products: Array<{ id: string; quantity: number }> }): Promise<Order> {
+    customerId,
+  }: Omit<NewOrder, 'createdAt'> & {
+    products: Array<{ id: string; quantity: number }>
+    customerId?: string
+  }): Promise<Order> {
     const response = await db.transaction(async (tx) => {
       const [{ insertedOrderId }] = await tx
         .insert(orders)
-        .values({ id, totalPrice })
+        .values({ id, totalPrice, customerId })
         .returning({ insertedOrderId: orders.id })
 
       for (const { id, quantity } of products) {
@@ -133,9 +154,9 @@ export class OrdersRepository {
         }
 
         await tx
-          .update(products)
+          .update(productsSchema)
           .set({ availableQuantity: (productToBeUpdated.availableQuantity ?? 0) + (quantity ?? 0) })
-          .where(eq(products.id, productToBeUpdated.id))
+          .where(eq(productsSchema.id, productToBeUpdated.id))
       }
 
       await tx.delete(ordersProducts).where(eq(ordersProducts.orderId, orderId))
