@@ -65,7 +65,6 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
       err: null,
     }
   } catch (err) {
-    console.log({ err })
     return { data: null, err: err as Error }
   }
 }
