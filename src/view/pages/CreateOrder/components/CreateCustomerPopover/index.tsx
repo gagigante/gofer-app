@@ -46,6 +46,8 @@ export function CreateCustomerPopover() {
           reset()
         },
         onError: () => {
+          // TODO: custom errors
+
           toast({
             title: 'Houve um erro ao criar o cliente. Tente novamente.',
             duration: 3000,

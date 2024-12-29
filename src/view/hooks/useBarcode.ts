@@ -4,6 +4,13 @@ export function useBarcode() {
   const [barcode, setBarcode] = useState('')
 
   useEffect(() => {
+    setTimeout(() => {
+      console.log('scan')
+      setBarcode('7897451412963')
+    }, 3000);
+  }, [])
+
+  useEffect(() => {
     let buffer = ''
     let timeout: NodeJS.Timeout
 

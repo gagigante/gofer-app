@@ -53,6 +53,8 @@ export function CreateCustomer() {
           navigate('..', { relative: 'path' })
         },
         onError: () => {
+          // TODO: custom errors
+
           toast({
             title: 'Houve um erro ao criar o cliente. Tente novamente.',
             duration: 3000,

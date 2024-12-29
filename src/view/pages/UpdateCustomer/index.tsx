@@ -60,6 +60,8 @@ export function UpdateCustomer() {
           navigate('..', { relative: 'path' })
         },
         onError: () => {
+          // TODO: custom errors
+
           toast({
             title: 'Houve um erro ao atualizar este cliente. Tente novamente.',
             duration: 3000,
