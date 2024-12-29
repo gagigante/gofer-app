@@ -26,7 +26,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
   const quantityInputRef = useRef<HTMLInputElement>(null)
 
   const [filter, setFilter] = useState('')
-  const [product, setProduct] = useState<ProductOption>()
+  const [selectedProduct, setSelectedProduct] = useState<ProductOption>()
   const [quantity, setQuantity] = useState(0)
 
   const { data: productsResponse } = useProducts(
@@ -40,11 +40,29 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
       placeholderData: (previousData) => previousData,
     },
   )
-  const products = (productsResponse?.products ?? []).map((item) => ({ label: item.name!, value: item.id }))
+
+  const products = (() => {
+    const formattedProducts = (productsResponse?.products ?? []).map((item) => ({ label: item.name!, value: item.id }))
+
+    if (!selectedProduct) {
+      return formattedProducts
+    }
+    
+    const selectedProductIndex = formattedProducts.findIndex(item => item.value === selectedProduct.value)
+
+    if (selectedProductIndex === -1) {
+      return [selectedProduct, ...formattedProducts]
+    }
+
+    const selectedProductOption = formattedProducts[selectedProductIndex]
+
+    return [selectedProductOption, ...formattedProducts.filter(item => item.value !== selectedProductOption.value)]
+  })()
 
   useEffect(() => {
     if (preSelectedProduct) {
-      setProduct({ label: preSelectedProduct.name ?? '', value: preSelectedProduct.id })
+      setFilter(preSelectedProduct?.name ?? '')
+      setSelectedProduct({ label: preSelectedProduct.name ?? '', value: preSelectedProduct.id })
       setQuantity(1)
       quantityInputRef.current?.focus()
     }
@@ -58,7 +76,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
     if (selectedProduct) {
       onSubmit(selectedProduct, quantity)
       setFilter('')
-      setProduct(undefined)
+      setSelectedProduct(undefined)
       setQuantity(1)
     }
   }
@@ -73,8 +91,8 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
           searchPlaceholder="Pesquisar por nome de produto"
           emptyPlaceholder="Nenhum produto encontrado."
           options={products}
-          value={product}
-          onSelectOption={setProduct}
+          value={selectedProduct}
+          onSelectOption={setSelectedProduct}
           onChangeFilter={setFilter}
         />
       </div>
@@ -92,7 +110,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
         />
       </div>
 
-      <Button onClick={() => handleAddProduct(product, quantity)} disabled={!product || quantity === 0}>
+      <Button onClick={() => handleAddProduct(selectedProduct, quantity)} disabled={!selectedProduct || quantity === 0}>
         Adicionar produto
       </Button>
     </div>

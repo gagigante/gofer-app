@@ -27,7 +27,7 @@ export function useMutateOnCreateCustomer() {
       return data
     },
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['customers'] })
+      await queryClient.invalidateQueries({ queryKey: ['customers', 'orders'] })
 
       return response
     },
@@ -50,7 +50,7 @@ export function useMutateOnUpdateCustomer() {
       return data
     },
     onSuccess: async (response) => {
-      await Promise.all([queryClient.invalidateQueries({ queryKey: ['customers'] })])
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ['customers', 'orders'] })])
 
       return response
     },

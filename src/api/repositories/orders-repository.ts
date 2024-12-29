@@ -98,10 +98,7 @@ export class OrdersRepository {
     totalPrice,
     products,
     customerId,
-  }: Omit<NewOrder, 'createdAt'> & {
-    products: Array<{ id: string; quantity: number }>
-    customerId?: string
-  }): Promise<Order> {
+  }: Omit<NewOrder, 'createdAt'> & { products: Array<{ id: string; quantity: number }> }): Promise<Order> {
     const response = await db.transaction(async (tx) => {
       const [{ insertedOrderId }] = await tx
         .insert(orders)
