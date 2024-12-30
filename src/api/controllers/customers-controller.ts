@@ -112,6 +112,8 @@ export class CustomersController {
       return { data: null, err }
     }
 
+    // TODO: validate unique fields -
+
     const createdCustomer = await this.customersRepository.createCustomer({
       id: randomUUID(),
       ...newCustomer,
@@ -153,6 +155,8 @@ export class CustomersController {
 
       return { data: null, err }
     }
+
+    // TODO: validate unique fields -
 
     const response = await this.customersRepository.updateCustomer(updatedCustomer)
 
