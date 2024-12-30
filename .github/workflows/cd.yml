@@ -34,8 +34,9 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ steps.nvm.outputs.NVMRC }}'
-      - run: yarn install --frozen-lockfile
+          node-version: '${{ steps.nvm.outputs.NVMRC }}'          
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
 
       - name: Publish app
         env:
