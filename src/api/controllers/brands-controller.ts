@@ -110,10 +110,8 @@ export class BrandsController {
   }
 
   public async createBrand({ loggedUserId, name }: CreateBrandRequest): Promise<CreateBrandResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 

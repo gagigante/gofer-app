@@ -39,6 +39,9 @@ jobs:
       - name: Run linter
         run: pnpm lint
 
+      - name: Integration tests
+        run: pnpm test -- --coverage
+
       # DEPENDENCY ANALISYS npm audit --production npm outdated
       # SEC CHECKS
       # UNITY TESTS/INTEGRATION TESTS
