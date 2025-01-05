@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/libsql'
 
 import { env } from '@/api/env'
