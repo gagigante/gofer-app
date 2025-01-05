@@ -84,3 +84,5 @@ typings/
 
 # Electron-Forge
 out/
+
+test.db

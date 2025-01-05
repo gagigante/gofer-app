@@ -16,7 +16,7 @@
     "publish": "electron-forge publish",
     "type-check": "tsc --noEmit",
     "lint": "eslint ./src --fix",
-    "pretest": "pnpm db:migrate",
+    "pretest": "NODE_ENV=test pnpm db:migrate",
     "test": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
