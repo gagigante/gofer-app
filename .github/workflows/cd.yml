@@ -44,7 +44,7 @@ jobs:
 
           envkey_TEST_TURSO_DATABASE_URL: ${{ secrets.TEST_TURSO_DATABASE_URL }}
           envkey_TEST_DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.TEST_DEFAULT_SUPER_ADMIN_USERNAME }}
-          envkey_TEST_DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_DEFAULT_SUPER_ADMIN_PASSWORD }}        
+          envkey_TEST_DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_DEFAULT_SUPER_ADMIN_PASSWORD }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
