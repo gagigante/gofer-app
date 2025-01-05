@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto'
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { BrandsRepository } from '@/api/repositories/brands-repository'
 
+import { AuthMiddleware } from '../middlewares/auth'
+
 import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { BrandAlreadyExistsError } from '@/api/errors/BrandAlreadyExistsError'
@@ -58,11 +60,13 @@ export class BrandsController {
   private readonly usersRepository: UsersRepository
   private readonly brandsRepository: BrandsRepository
   private readonly productsRepository: ProductsRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.brandsRepository = new BrandsRepository()
     this.productsRepository = new ProductsRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listBrands({
@@ -71,10 +75,8 @@ export class BrandsController {
     page = 1,
     itemsPerPage = 15,
   }: ListBrandsRequest): Promise<ListBrandsResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
