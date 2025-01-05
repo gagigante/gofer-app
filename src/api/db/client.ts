@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/libsql/web'
 
 import { env } from '@/api/env'
@@ -7,6 +8,4 @@ const connection = {
   authToken: env.TURSO_AUTH_TOKEN,
 }
 
-export const db = drizzle({
-  connection,
-})
+export const db = drizzle({ connection })

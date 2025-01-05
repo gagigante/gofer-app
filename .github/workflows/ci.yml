@@ -24,6 +24,23 @@ jobs:
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_OUTPUT
         id: nvm
 
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v2.0.3
+        with:
+          envkey_PROD_TURSO_DATABASE_URL: ${{ secrets.PROD_TURSO_DATABASE_URL }}
+          envkey_PROD_TURSO_AUTH_TOKEN: ${{ secrets.PROD_TURSO_AUTH_TOKEN }}
+          envkey_PROD_DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.PROD_DEFAULT_SUPER_ADMIN_USERNAME }}
+          envkey_PROD_DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.PROD_DEFAULT_SUPER_ADMIN_PASSWORD }}
+
+          envkey_DEV_TURSO_DATABASE_URL: ${{ secrets.DEV_TURSO_DATABASE_URL }}
+          envkey_DEV_TURSO_AUTH_TOKEN: ${{ secrets.DEV_TURSO_AUTH_TOKEN }}
+          envkey_DEV_DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.DEV_DEFAULT_SUPER_ADMIN_USERNAME }}
+          envkey_DEV_DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.DEV_DEFAULT_SUPER_ADMIN_PASSWORD }}
+
+          envkey_TEST_TURSO_DATABASE_URL: ${{ secrets.TEST_TURSO_DATABASE_URL }}
+          envkey_TEST_DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.TEST_DEFAULT_SUPER_ADMIN_USERNAME }}
+          envkey_TEST_DEFAULT_SUPER_ADMIN_PASSWORD: ${{ secrets.TEST_DEFAULT_SUPER_ADMIN_PASSWORD }}        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
