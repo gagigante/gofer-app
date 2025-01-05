@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-type Env = 'production' | 'development' | 'test'
+const envOptions = z.enum(['production', 'development', 'test'])
+type Env = z.infer<typeof envOptions>
 
 const envsSchema = z.object({
   TURSO_DATABASE_URL: z.string().min(1),
@@ -9,7 +10,14 @@ const envsSchema = z.object({
   DEFAULT_SUPER_ADMIN_PASSWORD: z.string().min(1),
 })
 
-const currentEnv = process.env.NODE_ENV as Env // TODO: ensure type
+const parsedEnv = envOptions.safeParse(process.env.NODE_ENV)
+
+if (!parsedEnv.success) {
+  console.error('Invalid NODE_ENV:', parsedEnv.error.message)
+  throw new Error('Invalid NODE_ENV')
+}
+
+const currentEnv = parsedEnv.data
 
 const variables: Record<Env, Record<string, string | undefined>> = {
   production: {
