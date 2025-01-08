@@ -2,7 +2,7 @@
   "name": "gofer-app",
   "productName": "gofer-app",
   "description": "Gofer app",
-  "version": "1.11.1",
+  "version": "1.12.0",
   "author": {
     "name": "Gabriel Gigante",
     "email": "gabrielgigante29@gmail.com"
@@ -31,6 +31,7 @@
     "@electron-forge/plugin-fuses": "^7.5.0",
     "@electron-forge/plugin-webpack": "^7.5.0",
     "@electron-forge/publisher-github": "^7.5.0",
+    "@electron-forge/shared-types": "^7.6.0",
     "@electron/fuses": "^1.8.0",
     "@eslint/js": "^9.13.0",
     "@types/bcryptjs": "^2.4.6",
@@ -66,7 +67,8 @@
     "tsx": "^4.19.2",
     "typescript": "^5.6.2",
     "typescript-eslint": "^8.12.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "webpack": "^5.97.1"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

@@ -135,6 +135,9 @@ importers:
       '@electron-forge/publisher-github':
         specifier: ^7.5.0
         version: 7.6.0(encoding@0.1.13)
+      '@electron-forge/shared-types':
+        specifier: ^7.6.0
+        version: 7.6.0
       '@electron/fuses':
         specifier: ^1.8.0
         version: 1.8.0
@@ -243,6 +246,9 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.8(@types/node@22.10.2)(terser@5.37.0)
+      webpack:
+        specifier: ^5.97.1
+        version: 5.97.1(esbuild@0.19.12)
 
 packages:
 
