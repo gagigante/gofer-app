@@ -5,7 +5,6 @@ import { BrandsRepository } from '@/api/repositories/brands-repository'
 
 import { AuthMiddleware } from '../middlewares/auth'
 
-import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { BrandAlreadyExistsError } from '@/api/errors/BrandAlreadyExistsError'
 
@@ -89,10 +88,8 @@ export class BrandsController {
   }
 
   public async getBrand({ loggedUserId, brandId }: GetBrandRequest) {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -132,10 +129,8 @@ export class BrandsController {
   }
 
   public async deleteBrand({ loggedUserId, brandId }: DeleteBrandRequest): Promise<DeleteBrandResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -153,10 +148,8 @@ export class BrandsController {
   }
 
   public async updateBrand({ loggedUserId, brandId, updatedName }: UpdateBrandRequest): Promise<UpdateBrandResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
