@@ -72,4 +72,69 @@ describe('brands-controller', () => {
       expect(anotherBrandWithSameName.err).toBeInstanceOf(BrandAlreadyExistsError)
     })
   })
+
+  describe('deleteBrand', () => {
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
+      const response = await brandsController.deleteBrand({
+        loggedUserId: 'non-existing-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw NotFoundError if the provided brand id does not correspond to an existing brand', async () => {
+      const response = await brandsController.deleteBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotFoundError)
+    })
+
+    test('should be able to delete a brand', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      const response = await brandsController.deleteBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeNull()
+
+      const brand = await db.select().from(brands).where(eq(brands.id, 'brand-id')).get()
+
+      expect(brand).toBeUndefined()
+    })
+
+    test('should be able to delete a brand associated to a product', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      await db.insert(products).values({
+        id: 'product-id',
+        brandId: 'brand-id',
+      })
+
+      const response = await brandsController.deleteBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeNull()
+
+      const product = await db.select().from(products).where(eq(products.id, 'product-id')).get()
+
+      expect(product?.brandId).toBeNull()
+    })
+  })
 })

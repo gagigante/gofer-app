@@ -9,7 +9,7 @@ import { env } from '@/api/env'
 export async function seed() {
   const id = randomUUID()
   const name = env.DEFAULT_SUPER_ADMIN_USERNAME
-  const hashedPassword = await hash(env.DEFAULT_SUPER_ADMIN_USERNAME, 10)
+  const hashedPassword = await hash(env.DEFAULT_SUPER_ADMIN_PASSWORD, 10)
   const role = 'super-admin'
 
   const superAdmins = await db.select().from(users).all()
