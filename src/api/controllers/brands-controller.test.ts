@@ -1,10 +1,26 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect, beforeEach } from 'vitest'
+import { eq } from 'drizzle-orm'
+
+import { db } from '../db/client'
+import { brands, products, users } from '../db/schema'
+
 import { BrandsController } from './brands-controller'
+
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { BrandAlreadyExistsError } from '../errors/BrandAlreadyExistsError'
+import { NotFoundError } from '../errors/NotFoundError'
 
 describe('brands-controller', () => {
   const brandsController = new BrandsController()
+
+  beforeEach(async () => {
+    await db.insert(users).values({
+      id: 'test-user-id',
+      name: 'test-user',
+      password: 'test-user-password',
+      role: 'super-admin',
+    })
+  })
 
   describe('listBrands', () => {
     test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {

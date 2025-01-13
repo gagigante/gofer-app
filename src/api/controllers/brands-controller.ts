@@ -2,15 +2,15 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { BrandsRepository } from '@/api/repositories/brands-repository'
+import { ProductsRepository } from '@/api/repositories/products-repository'
 
-import { AuthMiddleware } from '../middlewares/auth'
+import { AuthMiddleware } from '@/api/middlewares/auth'
 
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { BrandAlreadyExistsError } from '@/api/errors/BrandAlreadyExistsError'
 
 import { type Response } from '@/api/types/response'
 import { Product, type Brand } from '@/api/db/schema'
-import { ProductsRepository } from '../repositories/products-repository'
 
 export interface ListBrandsRequest {
   loggedUserId: string
