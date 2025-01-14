@@ -87,7 +87,7 @@ export class BrandsController {
     return { data, err: null }
   }
 
-  public async getBrand({ loggedUserId, brandId }: GetBrandRequest) {
+  public async getBrand({ loggedUserId, brandId }: GetBrandRequest): Promise<GetBrandResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
       return { data: null, err }

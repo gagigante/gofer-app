@@ -33,6 +33,90 @@ describe('brands-controller', () => {
     })
   })
 
+  describe('getBrand', () => {
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
+      const response = await brandsController.getBrand({
+        loggedUserId: 'non-existing-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw NotFoundError if the provided brand id does not correspond to an existing brand', async () => {
+      const response = await brandsController.getBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'non-existing-brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotFoundError)
+    })
+
+    test('should be able to get a brand by its ID', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      const response = await brandsController.getBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toStrictEqual({
+        id: 'brand-id',
+        name: 'brand name',
+        products: [],
+      })
+      expect(response.err).toBeNull()
+    })
+
+    test('should be able to get a brand by its ID and list the products associated', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      await db.insert(products).values({
+        id: 'product-id',
+        brandId: 'brand-id',
+      })
+
+      const response = await brandsController.getBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+      })
+
+      expect(response.data).toStrictEqual({
+        id: 'brand-id',
+        name: 'brand name',
+        products: [
+          {
+            id: 'product-id',
+            availableQuantity: 0,
+            barCode: null,
+            brandId: 'brand-id',
+            categoryId: null,
+            cest: null,
+            cestDescription: null,
+            cestSegment: null,
+            costPrice: null,
+            description: null,
+            fastId: null,
+            icms: null,
+            minimumQuantity: 0,
+            name: null,
+            ncm: null,
+            price: null,
+          },
+        ],
+      })
+      expect(response.err).toBeNull()
+    })
+  })
+
   describe('createBrand', () => {
     test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
       const response = await brandsController.createBrand({
@@ -143,7 +227,7 @@ describe('brands-controller', () => {
       const response = await brandsController.updateBrand({
         loggedUserId: 'non-existing-user-id',
         brandId: 'brand-id',
-        updatedName: 'updated-brand-name'
+        updatedName: 'updated-brand-name',
       })
 
       expect(response.data).toBeNull()
@@ -154,7 +238,7 @@ describe('brands-controller', () => {
       const response = await brandsController.updateBrand({
         loggedUserId: 'test-user-id',
         brandId: 'brand-id',
-        updatedName: 'updated-brand-name'
+        updatedName: 'updated-brand-name',
       })
 
       expect(response.data).toBeNull()
@@ -170,7 +254,7 @@ describe('brands-controller', () => {
         {
           id: 'brand-id-2',
           name: 'brand name 2',
-        }
+        },
       ])
 
       const response = await brandsController.updateBrand({
@@ -192,12 +276,12 @@ describe('brands-controller', () => {
       const response = await brandsController.updateBrand({
         loggedUserId: 'test-user-id',
         brandId: 'brand-id',
-        updatedName: 'updated brand name'
+        updatedName: 'updated brand name',
       })
 
       expect(response.data).toStrictEqual({
         id: 'brand-id',
-        name: 'updated brand name'
+        name: 'updated brand name',
       })
       expect(response.err).toBeNull()
     })
