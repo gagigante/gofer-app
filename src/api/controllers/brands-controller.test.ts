@@ -31,6 +31,134 @@ describe('brands-controller', () => {
       expect(response.data).toBeNull()
       expect(response.err).toBeInstanceOf(WithoutPermissionError)
     })
+
+    test('should be able to list brands', async () => {
+      const BRANDS = [
+        {
+          id: 'brand-1',
+          name: 'a brand',
+        },
+        {
+          id: 'brand-2',
+          name: 'b brand',
+        },
+        {
+          id: 'brand-3',
+          name: 'c brand',
+        },
+        {
+          id: 'brand-4',
+          name: 'd brand',
+        },
+        {
+          id: 'brand-5',
+          name: 'e brand',
+        },
+      ]
+
+      await db.insert(brands).values(BRANDS)
+
+      let response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+      })
+
+      expect(response.data?.brands).length(5)
+      expect(response.data?.brands).toStrictEqual(BRANDS.map((item) => ({ ...item, products: 0 })))
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(15)
+      expect(response.err).toBeNull()
+
+      response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        page: 1,
+        itemsPerPage: 2,
+      })
+
+      expect(response.data?.brands).length(2)
+      expect(response.data?.brands).toStrictEqual(BRANDS.slice(0, 2).map((item) => ({ ...item, products: 0 })))
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(2)
+      expect(response.err).toBeNull()
+
+      response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        page: 2,
+        itemsPerPage: 2,
+      })
+
+      expect(response.data?.brands).length(2)
+      expect(response.data?.brands).toStrictEqual(BRANDS.slice(2, 4).map((item) => ({ ...item, products: 0 })))
+      expect(response.data?.page).toBe(2)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(2)
+      expect(response.err).toBeNull()
+    })
+
+    test('should be able to list brands with filter by name', async () => {
+      const BRANDS = [
+        {
+          id: 'brand-1',
+          name: 'a brand',
+        },
+        {
+          id: 'brand-2',
+          name: 'b brand',
+        },
+      ]
+
+      await db.insert(brands).values(BRANDS)
+
+      const response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        name: 'a bra',
+      })
+
+      expect(response.data?.brands).length(1)
+      expect(response.data?.brands).toStrictEqual([{ ...BRANDS[0], products: 0 }])
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(1)
+      expect(response.data?.itemsPerPage).toBe(15)
+      expect(response.err).toBeNull()
+    })
+
+    test('should be able to list brands and count the products associated to each one', async () => {
+      const BRANDS = [
+        {
+          id: 'brand-1',
+          name: 'a brand',
+        },
+        {
+          id: 'brand-2',
+          name: 'b brand',
+        },
+      ]
+
+      await db.insert(brands).values(BRANDS)
+
+      await db.insert(products).values([
+        {
+          id: 'product-id',
+          brandId: 'brand-1',
+        },
+        {
+          id: 'product-id-2',
+          brandId: 'brand-2',
+        },
+      ])
+
+      const response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+      })
+
+      expect(response.data?.brands).length(2)
+      expect(response.data?.brands).toStrictEqual(BRANDS.map((item) => ({ ...item, products: 1 })))
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(2)
+      expect(response.data?.itemsPerPage).toBe(15)
+      expect(response.err).toBeNull()
+    })
   })
 
   describe('getBrand', () => {
