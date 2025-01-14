@@ -137,4 +137,69 @@ describe('brands-controller', () => {
       expect(product?.brandId).toBeNull()
     })
   })
+
+  describe('updateBrand', () => {
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
+      const response = await brandsController.updateBrand({
+        loggedUserId: 'non-existing-user-id',
+        brandId: 'brand-id',
+        updatedName: 'updated-brand-name'
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw NotFoundError if the provided brand id does not correspond to an existing brand', async () => {
+      const response = await brandsController.updateBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+        updatedName: 'updated-brand-name'
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotFoundError)
+    })
+
+    test('should throw BrandAlreadyExistsError if the updated brand name is already in use by another brand', async () => {
+      await db.insert(brands).values([
+        {
+          id: 'brand-id',
+          name: 'brand name',
+        },
+        {
+          id: 'brand-id-2',
+          name: 'brand name 2',
+        }
+      ])
+
+      const response = await brandsController.updateBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+        updatedName: 'brand name 2',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(BrandAlreadyExistsError)
+    })
+
+    test('should be able to update a brand', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      const response = await brandsController.updateBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+        updatedName: 'updated brand name'
+      })
+
+      expect(response.data).toStrictEqual({
+        id: 'brand-id',
+        name: 'updated brand name'
+      })
+      expect(response.err).toBeNull()
+    })
+  })
 })
