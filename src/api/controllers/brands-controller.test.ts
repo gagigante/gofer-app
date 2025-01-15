@@ -9,6 +9,7 @@ import { BrandsController } from './brands-controller'
 import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { BrandAlreadyExistsError } from '../errors/BrandAlreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 describe('brands-controller', () => {
   const brandsController = new BrandsController()
@@ -91,6 +92,19 @@ describe('brands-controller', () => {
       expect(response.data?.brands).length(2)
       expect(response.data?.brands).toStrictEqual(BRANDS.slice(2, 4).map((item) => ({ ...item, products: 0 })))
       expect(response.data?.page).toBe(2)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(2)
+      expect(response.err).toBeNull()
+
+      response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        page: 3,
+        itemsPerPage: 2,
+      })
+
+      expect(response.data?.brands).length(1)
+      expect(response.data?.brands).toStrictEqual(BRANDS.slice(4, 5).map((item) => ({ ...item, products: 0 })))
+      expect(response.data?.page).toBe(3)
       expect(response.data?.total).toBe(5)
       expect(response.data?.itemsPerPage).toBe(2)
       expect(response.err).toBeNull()
@@ -266,6 +280,21 @@ describe('brands-controller', () => {
       expect(response.err).toBeNull()
     })
 
+    test('should reject empty brand names', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      const response = await brandsController.createBrand({
+        loggedUserId: 'test-user-id',
+        name: '',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(InvalidParamsError)
+    })
+
     test('should throw BrandAlreadyExistsError if the provided brand name already exists', async () => {
       const response = await brandsController.createBrand({
         loggedUserId: 'test-user-id',
@@ -411,6 +440,38 @@ describe('brands-controller', () => {
         id: 'brand-id',
         name: 'updated brand name',
       })
+      expect(response.err).toBeNull()
+    })
+
+    test('should reject empty brand names', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      const response = await brandsController.updateBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+        updatedName: '',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(InvalidParamsError)
+    })
+
+    test('should allow updating to the same name', async () => {
+      await db.insert(brands).values({
+        id: 'brand-id',
+        name: 'brand name',
+      })
+
+      const response = await brandsController.updateBrand({
+        loggedUserId: 'test-user-id',
+        brandId: 'brand-id',
+        updatedName: 'brand name',
+      })
+
+      expect(response.data?.name).toBe('brand name')
       expect(response.err).toBeNull()
     })
   })

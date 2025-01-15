@@ -8,6 +8,7 @@ import { AuthMiddleware } from '@/api/middlewares/auth'
 
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { BrandAlreadyExistsError } from '@/api/errors/BrandAlreadyExistsError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Response } from '@/api/types/response'
 import { Product, type Brand } from '@/api/db/schema'
@@ -112,6 +113,12 @@ export class BrandsController {
       return { data: null, err }
     }
 
+    if (name === '') {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
     const response = await this.brandsRepository.getBrandByName(name)
 
     if (response) {
@@ -150,6 +157,12 @@ export class BrandsController {
   public async updateBrand({ loggedUserId, brandId, updatedName }: UpdateBrandRequest): Promise<UpdateBrandResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
+      return { data: null, err }
+    }
+
+    if (updatedName === '') {
+      const err = new InvalidParamsError()
+
       return { data: null, err }
     }
 

@@ -13,11 +13,4 @@ afterEach(async () => {
     db.delete(categories),
     db.delete(ordersProducts),
   ])
-
-  // Truncate all tables
-  // const tables = await db.execute(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';`)
-  // for (const { name } of tables) {
-  //   await db.execute(`DELETE FROM ${name};`)
-  // }
-  // db.close() // Close the database after each test
 })
