@@ -40,7 +40,7 @@ export const products = sqliteTable('products', {
   availableQuantity: integer('available_quantity').default(0),
   minimumQuantity: integer('minimum_quantity').default(0),
   categoryId: text('category_id'),
-  brandId: text('brand_id'),
+  brandId: text('brand_id').references(() => brands.id, { onDelete: 'set null' }),
   icms: integer('icms'),
   ncm: text('ncm'),
   cest: text('cest'),

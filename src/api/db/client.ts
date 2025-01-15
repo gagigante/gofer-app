@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { drizzle } from 'drizzle-orm/libsql/web'
+import { drizzle } from 'drizzle-orm/libsql'
 
 import { env } from '@/api/env'
 

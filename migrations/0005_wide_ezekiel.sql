@@ -1,0 +1,1 @@
+ALTER TABLE `products` ALTER COLUMN "brand_id" TO "brand_id" text REFERENCES brands(id) ON DELETE set null ON UPDATE no action;

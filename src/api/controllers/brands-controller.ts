@@ -2,14 +2,16 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { BrandsRepository } from '@/api/repositories/brands-repository'
+import { ProductsRepository } from '@/api/repositories/products-repository'
 
-import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
+import { AuthMiddleware } from '@/api/middlewares/auth'
+
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { BrandAlreadyExistsError } from '@/api/errors/BrandAlreadyExistsError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Response } from '@/api/types/response'
 import { Product, type Brand } from '@/api/db/schema'
-import { ProductsRepository } from '../repositories/products-repository'
 
 export interface ListBrandsRequest {
   loggedUserId: string
@@ -58,11 +60,13 @@ export class BrandsController {
   private readonly usersRepository: UsersRepository
   private readonly brandsRepository: BrandsRepository
   private readonly productsRepository: ProductsRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.brandsRepository = new BrandsRepository()
     this.productsRepository = new ProductsRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listBrands({
@@ -71,10 +75,8 @@ export class BrandsController {
     page = 1,
     itemsPerPage = 15,
   }: ListBrandsRequest): Promise<ListBrandsResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -86,11 +88,9 @@ export class BrandsController {
     return { data, err: null }
   }
 
-  public async getBrand({ loggedUserId, brandId }: GetBrandRequest) {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+  public async getBrand({ loggedUserId, brandId }: GetBrandRequest): Promise<GetBrandResponse> {
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -108,10 +108,14 @@ export class BrandsController {
   }
 
   public async createBrand({ loggedUserId, name }: CreateBrandRequest): Promise<CreateBrandResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
+      return { data: null, err }
+    }
 
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    if (name === '') {
+      const err = new InvalidParamsError()
+
       return { data: null, err }
     }
 
@@ -132,10 +136,8 @@ export class BrandsController {
   }
 
   public async deleteBrand({ loggedUserId, brandId }: DeleteBrandRequest): Promise<DeleteBrandResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -153,10 +155,14 @@ export class BrandsController {
   }
 
   public async updateBrand({ loggedUserId, brandId, updatedName }: UpdateBrandRequest): Promise<UpdateBrandResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
+      return { data: null, err }
+    }
 
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    if (updatedName === '') {
+      const err = new InvalidParamsError()
+
       return { data: null, err }
     }
 
