@@ -5,9 +5,10 @@ import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '..
 import { ProductsRepository } from '../repositories/products-repository'
 import { CustomersRepository } from '../repositories/customers-repository'
 
+import { AuthMiddleware } from '../middlewares/auth'
+
 import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
 
-import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { NotFoundError } from '../errors/NotFoundError'
 
 import { type Customer, type Order } from '@/api/db/schema'
@@ -73,12 +74,14 @@ export class OrdersController {
   private readonly ordersRepository: OrdersRepository
   private readonly productsRepository: ProductsRepository
   private readonly customersRepository: CustomersRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
     this.productsRepository = new ProductsRepository()
     this.customersRepository = new CustomersRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listOrders({
@@ -87,10 +90,8 @@ export class OrdersController {
     page = 1,
     itemsPerPage = 15,
   }: ListOrdersRequest): Promise<ListOrdersResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -111,10 +112,8 @@ export class OrdersController {
   }
 
   public async getOrder({ loggedUserId, orderId }: GetOrderRequest): Promise<GetOrderResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -130,11 +129,9 @@ export class OrdersController {
   }
 
   public async getOrderTemplate({ loggedUserId, orderId }: GetOrderTemplateRequest): Promise<GetOrderTemplateResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
-      return { data: null, err }
+    const { err: authErr } = await this.authMiddleware.handle(loggedUserId)
+    if (authErr) {
+      return { data: null, err: authErr }
     }
 
     const order = await this.ordersRepository.getOrderById(orderId)
@@ -155,10 +152,8 @@ export class OrdersController {
   }
 
   public async createOrder({ loggedUserId, products, customerId }: CreateOrderRequest): Promise<CreateOrderResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -207,10 +202,8 @@ export class OrdersController {
   }
 
   public async deleteOrder({ loggedUserId, orderId }: DeleteOrderRequest): Promise<DeleteOrderResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
