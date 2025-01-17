@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FaInfoCircle, FaTrash } from 'react-icons/fa'
+import { FaInfoCircle, FaTrash, FaInfo } from 'react-icons/fa'
 
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
+import { Input } from '@/view/components/ui/input'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { Combobox } from '@/view/components/Combobox'
 import { Label } from '@/view/components/ui/label'
 import { CreateCustomerPopover } from './components/CreateCustomerPopover'
+import { QuantityPicker } from './components/QuantityPicker'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -17,7 +20,7 @@ import { useProductByBarcode } from '@/view/hooks/queries/products'
 import { useCustomers } from '@/view/hooks/queries/customers'
 import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
-import { formatCurrency } from '@/view/utils/formatters'
+import { formatCurrency, formatDecimal } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
 import { type Product } from '@/api/db/schema'
@@ -26,6 +29,7 @@ interface OrderProduct {
   id: string
   name: string
   unityPrice: number
+  customPrice: number
   quantity: number
   totalPrice: number
 }
@@ -82,6 +86,7 @@ export function CreateOrder() {
             id,
             name: name ?? '',
             unityPrice: price ?? 0,
+            customPrice: price ?? 0,
             quantity,
             totalPrice: (price ?? 0) * quantity,
           },
@@ -97,6 +102,7 @@ export function CreateOrder() {
             id,
             name: name ?? '',
             unityPrice: price ?? 0,
+            customPrice: price ?? 0,
             quantity,
             totalPrice: (price ?? 0) * quantity,
           },
@@ -115,11 +121,39 @@ export function CreateOrder() {
     clearBarcodeState()
   }
 
+  function handleUpdateProductPrice(id: string, price: number) {
+    setOrderProducts((prevState) =>
+      prevState.map((product) => {
+        if (product.id === id) {
+          return { ...product, customPrice: price, totalPrice: price * product.quantity }
+        }
+
+        return product
+      }),
+    )
+  }
+
+  function handleUpdateProductQuantity(id: string, quantity: number) {
+    setOrderProducts((prevState) =>
+      prevState.map((product) => {
+        if (product.id === id) {
+          return { ...product, quantity, totalPrice: product.customPrice * quantity }
+        }
+
+        return product
+      }),
+    )
+  }
+
   async function handleCreateOrder() {
     mutateAsync(
       {
         loggedUserId: user?.id ?? '',
-        products: orderProducts.map(({ id, quantity }) => ({ id, quantity })),
+        products: orderProducts.map(({ id, quantity, customPrice }) => ({
+          id,
+          quantity,
+          customProductPrice: customPrice,
+        })),
         customerId: selectedCustomerId,
       },
       {
@@ -189,15 +223,40 @@ export function CreateOrder() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>Preço unitário</TableHead>
+              <TableHead>
+                Preço unitário
+                <Tooltip>
+                  <TooltipTrigger tabIndex={-1}>
+                    <div className="ml-2 rounded-full border p-[2px]">
+                      <FaInfo className="w-2 h-2" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Preço unitário original para o produto</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TableHead>
+              <TableHead>
+                Preço unitário para o pedido
+                <Tooltip>
+                  <TooltipTrigger tabIndex={-1}>
+                    <div className="ml-2 rounded-full border p-[2px]">
+                      <FaInfo className="w-2 h-2" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Preço unitário do produto para este pedido</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TableHead>
               <TableHead>Qtd.</TableHead>
               <TableHead>Preço total</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
 
-          <TableBody>
-            {orderProducts.map(({ id, name, unityPrice, quantity, totalPrice }) => (
+          <TableBody onKeyDown={(e) => e.stopPropagation()}>
+            {orderProducts.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
               <TableRow key={id}>
                 <TableCell>
                   <p className="font-medium">{name}</p>
@@ -208,7 +267,25 @@ export function CreateOrder() {
                 </TableCell>
 
                 <TableCell>
-                  <p className="font-medium">{quantity}</p>
+                  <Input
+                    value={formatDecimal(customPrice / 100)}
+                    onChange={(e) => {
+                      const number = Number(e.target.value.replace(',', ''))
+                      if (Number.isNaN(number)) {
+                        e.target.value = '0,00'
+                        handleUpdateProductPrice(id, 0)
+                        return
+                      }
+
+                      const formatted = formatDecimal(number / 100)
+                      e.target.value = formatted
+                      handleUpdateProductPrice(id, number)
+                    }}
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <QuantityPicker onChange={(value) => handleUpdateProductQuantity(id, value)} value={quantity} />
                 </TableCell>
 
                 <TableCell>
