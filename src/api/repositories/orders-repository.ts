@@ -20,7 +20,9 @@ export interface OrderResponse {
   products: Array<{
     productId: string | null
     quantity: number | null
+    currentPrice: number | null
     price: number | null
+    customPrice: number | null
     name: string | null
     barCode: string | null
     fastId: number | null
@@ -66,6 +68,8 @@ export class OrdersRepository {
           productId: ordersProducts.productId,
           quantity: ordersProducts.quantity,
           price: ordersProducts.productPrice,
+          customPrice: ordersProducts.customProductPrice,
+          currentPrice: productsSchema.price,
           name: productsSchema.name,
           barCode: productsSchema.barCode,
           fastId: productsSchema.fastId,

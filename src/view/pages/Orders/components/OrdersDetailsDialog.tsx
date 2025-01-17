@@ -1,3 +1,6 @@
+import { FaInfo } from 'react-icons/fa'
+
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Dialog } from '@/view/components/Dialog'
 
@@ -30,7 +33,6 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
 
   return (
     <Dialog
-      className="max-w-[780px]"
       title="Detalhes do pedido"
       cancelButtonLabel="Fechar"
       open={isOpen}
@@ -57,13 +59,51 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead>Código de barras</TableHead>
-            <TableHead>Preço unitário</TableHead>
+            <TableHead>
+              Preço unitário atual
+              <Tooltip>
+                <TooltipTrigger tabIndex={-1}>
+                  <div className="ml-2 rounded-full border p-[2px]">
+                    <FaInfo className="w-2 h-2" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>O preço de um produto pode variar. Esta coluna representa o preço atual de um produto</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableHead>
+            <TableHead>
+              Preço unitário
+              <Tooltip>
+                <TooltipTrigger tabIndex={-1}>
+                  <div className="ml-2 rounded-full border p-[2px]">
+                    <FaInfo className="w-2 h-2" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Esta coluna representa o preço original de um produto no momento da venda</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableHead>
+            <TableHead>
+              Preço unitário para o pedido
+              <Tooltip>
+                <TooltipTrigger tabIndex={-1}>
+                  <div className="ml-2 rounded-full border p-[2px]">
+                    <FaInfo className="w-2 h-2" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Esta coluna representa o preço de um produto praticado no momento da venda</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableHead>
             <TableHead>Quantidade</TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {data?.products.map(({ productId, name, barCode, price, quantity }) => (
+          {data?.products.map(({ productId, name, barCode, currentPrice, price, customPrice, quantity }) => (
             <TableRow key={productId}>
               <TableCell>
                 <p className="font-medium">{name}</p>
@@ -74,7 +114,15 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
               </TableCell>
 
               <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentPrice ?? 0))}</p>
+              </TableCell>
+
+              <TableCell>
                 <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
               </TableCell>
 
               <TableCell>

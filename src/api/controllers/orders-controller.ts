@@ -40,7 +40,9 @@ export type GetOrderResponse = Response<{
   products: Array<{
     productId: string | null
     quantity: number | null
+    currentPrice: number | null
     price: number | null
+    customPrice: number | null
     name: string | null
     barCode: string | null
   }>
