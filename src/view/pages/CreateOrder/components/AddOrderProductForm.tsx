@@ -27,7 +27,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
 
   const [filter, setFilter] = useState('')
   const [selectedProduct, setSelectedProduct] = useState<ProductOption>()
-  const [quantity, setQuantity] = useState(0)
+  const [quantity, setQuantity] = useState(1)
 
   const { data: productsResponse } = useProducts(
     {
@@ -47,8 +47,8 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
     if (!selectedProduct) {
       return formattedProducts
     }
-    
-    const selectedProductIndex = formattedProducts.findIndex(item => item.value === selectedProduct.value)
+
+    const selectedProductIndex = formattedProducts.findIndex((item) => item.value === selectedProduct.value)
 
     if (selectedProductIndex === -1) {
       return [selectedProduct, ...formattedProducts]
@@ -56,7 +56,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
 
     const selectedProductOption = formattedProducts[selectedProductIndex]
 
-    return [selectedProductOption, ...formattedProducts.filter(item => item.value !== selectedProductOption.value)]
+    return [selectedProductOption, ...formattedProducts.filter((item) => item.value !== selectedProductOption.value)]
   })()
 
   useEffect(() => {
