@@ -80,9 +80,10 @@ export const ordersRelations = relations(orders, ({ one }) => ({
 export const ordersProducts = sqliteTable(
   'orders_products',
   {
-    orderId: text('order_id').references(() => orders.id),
+    orderId: text('order_id').references(() => orders.id, { onDelete: 'cascade' }),
     productId: text('product_id').references(() => products.id),
     productPrice: integer('product_price'),
+    customProductPrice: integer('custom_product_price'),
     quantity: integer('quantity'),
   },
   (table) => {
