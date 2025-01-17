@@ -1,4 +1,4 @@
-import { asc, count, eq, inArray, like, max } from 'drizzle-orm'
+import { asc, count, eq, like, max } from 'drizzle-orm'
 
 import { db } from '../db/client'
 
@@ -25,12 +25,6 @@ export class ProductsRepository {
         brand: item.brands,
       }
     })
-  }
-
-  public async getProductsByIds(productIds: string[]): Promise<Product[]> {
-    const response = await db.select().from(products).where(inArray(products.id, productIds))
-
-    return response
   }
 
   public async getProductsByCategoryId(categoryId: string): Promise<Product[]> {

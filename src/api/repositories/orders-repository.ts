@@ -98,14 +98,16 @@ export class OrdersRepository {
     totalPrice,
     products,
     customerId,
-  }: Omit<NewOrder, 'createdAt'> & { products: Array<{ id: string; quantity: number }> }): Promise<Order> {
+  }: Omit<NewOrder, 'createdAt'> & {
+    products: Array<{ id: string; quantity: number; customProductPrice: number }>
+  }): Promise<Order> {
     const response = await db.transaction(async (tx) => {
       const [{ insertedOrderId }] = await tx
         .insert(orders)
         .values({ id, totalPrice, customerId })
         .returning({ insertedOrderId: orders.id })
 
-      for (const { id, quantity } of products) {
+      for (const { id, quantity, customProductPrice } of products) {
         const product = await tx.select().from(productsSchema).where(eq(productsSchema.id, id)).get()
 
         if (!product) {
@@ -124,7 +126,8 @@ export class OrdersRepository {
           orderId: insertedOrderId,
           productId: product.id,
           productPrice: product.price,
-          quantity: quantity,
+          customProductPrice,
+          quantity,
         })
       }
 

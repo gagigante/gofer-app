@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
 import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
-import { ProductsRepository } from '../repositories/products-repository'
 import { CustomersRepository } from '../repositories/customers-repository'
 
 import { AuthMiddleware } from '../middlewares/auth'
@@ -56,7 +55,7 @@ export type GetOrderTemplateResponse = Response<{ template: string; order: Order
 
 export interface CreateOrderRequest {
   loggedUserId: string
-  products: Array<{ id: string; quantity: number }>
+  products: Array<{ id: string; quantity: number; customProductPrice: number }>
   customerId?: string
 }
 
@@ -72,14 +71,12 @@ export type DeleteOrderResponse = Response<null>
 export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
-  private readonly productsRepository: ProductsRepository
   private readonly customersRepository: CustomersRepository
   private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
-    this.productsRepository = new ProductsRepository()
     this.customersRepository = new CustomersRepository()
     this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
@@ -165,30 +162,26 @@ export class OrdersController {
       }
     }
 
-    const mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number }>>((acc, item) => {
+    const mergedProductsMap = products.reduce<
+      Map<string, { id: string; quantity: number; customProductPrice: number }>
+    >((acc, item) => {
       const existingProduct = acc.get(item.id)
 
       if (existingProduct) {
         existingProduct.quantity += item.quantity
       } else {
-        acc.set(item.id, { id: item.id, quantity: item.quantity })
+        acc.set(item.id, {
+          id: item.id,
+          quantity: item.quantity,
+          customProductPrice: item.customProductPrice,
+        })
       }
 
       return acc
     }, new Map())
 
-    const orderProducts = await this.productsRepository.getProductsByIds(
-      Array.from(mergedProductsMap.values()).map((item) => item.id),
-    )
-
-    const totalPrice = orderProducts.reduce((acc, item) => {
-      const product = mergedProductsMap.get(item.id)
-
-      if (product) {
-        return acc + item.price! * product.quantity
-      }
-
-      return acc
+    const totalPrice = mergedProductsMap.entries().reduce((acc, [, item]) => {
+      return acc + item.customProductPrice * item.quantity
     }, 0)
 
     const response = await this.ordersRepository.createOrder({
