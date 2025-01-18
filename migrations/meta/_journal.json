@@ -50,6 +50,13 @@
       "when": 1736990724746,
       "tag": "0006_busy_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1737165094457,
+      "tag": "0007_chemical_hairball",
+      "breakpoints": true
     }
   ]
 }
