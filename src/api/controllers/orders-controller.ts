@@ -2,13 +2,14 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
 import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
-import { ProductsRepository } from '../repositories/products-repository'
 import { CustomersRepository } from '../repositories/customers-repository'
+
+import { AuthMiddleware } from '../middlewares/auth'
 
 import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
 
-import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { NotFoundError } from '../errors/NotFoundError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Customer, type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
@@ -40,7 +41,9 @@ export type GetOrderResponse = Response<{
   products: Array<{
     productId: string | null
     quantity: number | null
+    currentPrice: number | null
     price: number | null
+    customPrice: number | null
     name: string | null
     barCode: string | null
   }>
@@ -55,7 +58,7 @@ export type GetOrderTemplateResponse = Response<{ template: string; order: Order
 
 export interface CreateOrderRequest {
   loggedUserId: string
-  products: Array<{ id: string; quantity: number }>
+  products: Array<{ id: string; quantity: number; customProductPrice: number }>
   customerId?: string
 }
 
@@ -71,14 +74,14 @@ export type DeleteOrderResponse = Response<null>
 export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
-  private readonly productsRepository: ProductsRepository
   private readonly customersRepository: CustomersRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
-    this.productsRepository = new ProductsRepository()
     this.customersRepository = new CustomersRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listOrders({
@@ -87,10 +90,8 @@ export class OrdersController {
     page = 1,
     itemsPerPage = 15,
   }: ListOrdersRequest): Promise<ListOrdersResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -111,10 +112,8 @@ export class OrdersController {
   }
 
   public async getOrder({ loggedUserId, orderId }: GetOrderRequest): Promise<GetOrderResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -130,11 +129,9 @@ export class OrdersController {
   }
 
   public async getOrderTemplate({ loggedUserId, orderId }: GetOrderTemplateRequest): Promise<GetOrderTemplateResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
-      return { data: null, err }
+    const { err: authErr } = await this.authMiddleware.handle(loggedUserId)
+    if (authErr) {
+      return { data: null, err: authErr }
     }
 
     const order = await this.ordersRepository.getOrderById(orderId)
@@ -155,10 +152,8 @@ export class OrdersController {
   }
 
   public async createOrder({ loggedUserId, products, customerId }: CreateOrderRequest): Promise<CreateOrderResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -170,31 +165,51 @@ export class OrdersController {
       }
     }
 
-    const mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number }>>((acc, item) => {
-      const existingProduct = acc.get(item.id)
+    let mergedProductsMap: Map<string, { id: string; quantity: number; customProductPrice: number }>
 
-      if (existingProduct) {
-        existingProduct.quantity += item.quantity
-      } else {
-        acc.set(item.id, { id: item.id, quantity: item.quantity })
-      }
+    try {
+      mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number; customProductPrice: number }>>(
+        (acc, item) => {
+          const existingProduct = acc.get(item.id)
 
-      return acc
-    }, new Map())
+          if (existingProduct) {
+            if (existingProduct.customProductPrice !== item.customProductPrice) {
+              throw new InvalidParamsError()
+            }
 
-    const orderProducts = await this.productsRepository.getProductsByIds(
-      Array.from(mergedProductsMap.values()).map((item) => item.id),
-    )
+            existingProduct.quantity += item.quantity
+          } else {
+            acc.set(item.id, {
+              id: item.id,
+              quantity: item.quantity,
+              customProductPrice: item.customProductPrice,
+            })
+          }
 
-    const totalPrice = orderProducts.reduce((acc, item) => {
-      const product = mergedProductsMap.get(item.id)
+          return acc
+        },
+        new Map(),
+      )
+    } catch (err) {
+      return { data: null, err: err as InvalidParamsError }
+    }
 
-      if (product) {
-        return acc + item.price! * product.quantity
-      }
+    let totalPrice = 0
 
-      return acc
-    }, 0)
+    try {
+      totalPrice = mergedProductsMap.entries().reduce((acc, [, item]) => {
+        const price = Number(item.customProductPrice)
+        const quantity = Number(item.quantity)
+
+        if (isNaN(price) || isNaN(quantity)) {
+          throw new InvalidParamsError()
+        }
+
+        return acc + price * quantity
+      }, 0)
+    } catch (err) {
+      return { data: null, err: err as InvalidParamsError }
+    }
 
     const response = await this.ordersRepository.createOrder({
       id: randomUUID(),
@@ -207,10 +222,8 @@ export class OrdersController {
   }
 
   public async deleteOrder({ loggedUserId, orderId }: DeleteOrderRequest): Promise<DeleteOrderResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 

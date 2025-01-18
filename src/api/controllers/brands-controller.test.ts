@@ -251,7 +251,7 @@ describe('brands-controller', () => {
             minimumQuantity: 0,
             name: null,
             ncm: null,
-            price: null,
+            price: 0,
           },
         ],
       })

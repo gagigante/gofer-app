@@ -1,0 +1,1 @@
+ALTER TABLE `orders` ALTER COLUMN "customer_id" TO "customer_id" text REFERENCES customers(id) ON DELETE set null ON UPDATE no action;

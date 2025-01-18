@@ -19,6 +19,7 @@ interface Data {
     productId: string | null
     quantity: number | null
     price: number | null
+    customPrice: number | null
     name: string | null
     barCode: string | null
     fastId: number | null
@@ -74,8 +75,8 @@ function formatProducts(data: Data['products']) {
     return {
       ...item,
       barCode: item.barCode || 'N/A',
-      price: formatCurrency(parseCentsToDecimal(item.price ?? 0)),
-      total: formatCurrency(parseCentsToDecimal((item.price ?? 0) * (item.quantity ?? 0))),
+      price: formatCurrency(parseCentsToDecimal(item.customPrice ?? item.price ?? 0)),
+      total: formatCurrency(parseCentsToDecimal((item.customPrice ?? item.price ?? 0) * (item.quantity ?? 0))),
     }
   })
 }

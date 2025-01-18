@@ -35,7 +35,7 @@ export const products = sqliteTable('products', {
   barCode: text('bar_code'),
   name: text('name').unique(),
   description: text('description'),
-  price: integer('price'),
+  price: integer('price').notNull().default(0),
   costPrice: integer('cost_price'),
   availableQuantity: integer('available_quantity').default(0),
   minimumQuantity: integer('minimum_quantity').default(0),
@@ -63,26 +63,20 @@ export const productsRelations = relations(products, ({ one }) => ({
 
 export const orders = sqliteTable('orders', {
   id: text('id').primaryKey(),
-  customerId: text('customer_id'),
-  totalPrice: integer('total_price'),
+  customerId: text('customer_id').references(() => customers.id, { onDelete: 'set null' }),
+  totalPrice: integer('total_price').notNull().default(0),
   createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
 })
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
 
-export const ordersRelations = relations(orders, ({ one }) => ({
-  customer: one(customers, {
-    fields: [orders.customerId],
-    references: [customers.id],
-  }),
-}))
-
 export const ordersProducts = sqliteTable(
   'orders_products',
   {
-    orderId: text('order_id').references(() => orders.id),
+    orderId: text('order_id').references(() => orders.id, { onDelete: 'cascade' }),
     productId: text('product_id').references(() => products.id),
-    productPrice: integer('product_price'),
+    productPrice: integer('product_price').notNull().default(0),
+    customProductPrice: integer('custom_product_price').notNull().default(0),
     quantity: integer('quantity'),
   },
   (table) => {

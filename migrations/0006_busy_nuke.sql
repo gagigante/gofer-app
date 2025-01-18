@@ -1,0 +1,1 @@
+ALTER TABLE `orders_products` ADD `custom_product_price` integer;
