@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { CategoriesRepository } from '@/api/repositories/categories-repository'
+import { AuthMiddleware } from '@/api/middlewares/auth'
 
-import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsError'
 
@@ -60,11 +60,13 @@ export class CategoriesController {
   private readonly usersRepository: UsersRepository
   private readonly categoriesRepository: CategoriesRepository
   private readonly productsRepository: ProductsRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.categoriesRepository = new CategoriesRepository()
     this.productsRepository = new ProductsRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listCategories({
@@ -73,10 +75,8 @@ export class CategoriesController {
     page = 1,
     itemsPerPage = 15,
   }: ListCategoriesRequest): Promise<ListCategoriesResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -89,10 +89,8 @@ export class CategoriesController {
   }
 
   public async getCategory({ loggedUserId, categoryId }: GetCategoryRequest) {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -114,10 +112,8 @@ export class CategoriesController {
     name,
     description = '',
   }: CreateCategoryRequest): Promise<CreateCategoryResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -139,10 +135,8 @@ export class CategoriesController {
   }
 
   public async deleteCategory({ loggedUserId, categoryId }: DeleteCategoryRequest): Promise<DeleteCategoryResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -165,10 +159,8 @@ export class CategoriesController {
     updatedName,
     updatedDescription = '',
   }: UpdateCategoryRequest): Promise<UpdateCategoryResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
