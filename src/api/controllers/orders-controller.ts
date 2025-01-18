@@ -9,6 +9,7 @@ import { AuthMiddleware } from '../middlewares/auth'
 import { getOrderTemplate as getTemplateFile } from '@/api/utils/getOrderTemplate'
 
 import { NotFoundError } from '../errors/NotFoundError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Customer, type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
@@ -164,27 +165,51 @@ export class OrdersController {
       }
     }
 
-    const mergedProductsMap = products.reduce<
-      Map<string, { id: string; quantity: number; customProductPrice: number }>
-    >((acc, item) => {
-      const existingProduct = acc.get(item.id)
+    let mergedProductsMap: Map<string, { id: string; quantity: number; customProductPrice: number }>
 
-      if (existingProduct) {
-        existingProduct.quantity += item.quantity
-      } else {
-        acc.set(item.id, {
-          id: item.id,
-          quantity: item.quantity,
-          customProductPrice: item.customProductPrice,
-        })
-      }
+    try {
+      mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number; customProductPrice: number }>>(
+        (acc, item) => {
+          const existingProduct = acc.get(item.id)
 
-      return acc
-    }, new Map())
+          if (existingProduct) {
+            if (existingProduct.customProductPrice !== item.customProductPrice) {
+              throw new InvalidParamsError()
+            }
 
-    const totalPrice = mergedProductsMap.entries().reduce((acc, [, item]) => {
-      return acc + item.customProductPrice * item.quantity
-    }, 0)
+            existingProduct.quantity += item.quantity
+          } else {
+            acc.set(item.id, {
+              id: item.id,
+              quantity: item.quantity,
+              customProductPrice: item.customProductPrice,
+            })
+          }
+
+          return acc
+        },
+        new Map(),
+      )
+    } catch (err) {
+      return { data: null, err: err as InvalidParamsError }
+    }
+
+    let totalPrice = 0
+
+    try {
+      totalPrice = mergedProductsMap.entries().reduce((acc, [, item]) => {
+        const price = Number(item.customProductPrice)
+        const quantity = Number(item.quantity)
+
+        if (isNaN(price) || isNaN(quantity)) {
+          throw new InvalidParamsError()
+        }
+
+        return acc + item.customProductPrice * item.quantity
+      }, 0)
+    } catch (err) {
+      return { data: null, err: err as InvalidParamsError }
+    }
 
     const response = await this.ordersRepository.createOrder({
       id: randomUUID(),
