@@ -27,7 +27,7 @@ export function QuantityPicker({ value, onChange }: QuantityPickerProps) {
       />
 
       <Button className="w-10 h-10" onClick={() => onChange(value + 1)}>
-        <FiPlus size="24px" />
+        <FiPlus />
       </Button>
     </div>
   )

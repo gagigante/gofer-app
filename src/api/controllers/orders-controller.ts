@@ -205,7 +205,7 @@ export class OrdersController {
           throw new InvalidParamsError()
         }
 
-        return acc + item.customProductPrice * item.quantity
+        return acc + price * quantity
       }, 0)
     } catch (err) {
       return { data: null, err: err as InvalidParamsError }

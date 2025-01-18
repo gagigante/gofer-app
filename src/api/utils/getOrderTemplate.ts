@@ -75,8 +75,8 @@ function formatProducts(data: Data['products']) {
     return {
       ...item,
       barCode: item.barCode || 'N/A',
-      price: formatCurrency(parseCentsToDecimal(item.customPrice ?? 0)),
-      total: formatCurrency(parseCentsToDecimal((item.customPrice ?? 0) * (item.quantity ?? 0))),
+      price: formatCurrency(parseCentsToDecimal(item.customPrice ?? item.price ?? 0)),
+      total: formatCurrency(parseCentsToDecimal((item.customPrice ?? item.price ?? 0) * (item.quantity ?? 0))),
     }
   })
 }
