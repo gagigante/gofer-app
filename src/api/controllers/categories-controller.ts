@@ -2,14 +2,15 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { CategoriesRepository } from '@/api/repositories/categories-repository'
+import { ProductsRepository } from '@/api/repositories/products-repository'
+import { AuthMiddleware } from '@/api/middlewares/auth'
 
-import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Response } from '@/api/types/response'
 import { Product, type Category } from '@/api/db/schema'
-import { ProductsRepository } from '../repositories/products-repository'
 
 export interface ListCategoriesRequest {
   loggedUserId: string
@@ -60,11 +61,13 @@ export class CategoriesController {
   private readonly usersRepository: UsersRepository
   private readonly categoriesRepository: CategoriesRepository
   private readonly productsRepository: ProductsRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.categoriesRepository = new CategoriesRepository()
     this.productsRepository = new ProductsRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listCategories({
@@ -73,10 +76,8 @@ export class CategoriesController {
     page = 1,
     itemsPerPage = 15,
   }: ListCategoriesRequest): Promise<ListCategoriesResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -89,10 +90,8 @@ export class CategoriesController {
   }
 
   public async getCategory({ loggedUserId, categoryId }: GetCategoryRequest) {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -114,10 +113,14 @@ export class CategoriesController {
     name,
     description = '',
   }: CreateCategoryRequest): Promise<CreateCategoryResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
+      return { data: null, err }
+    }
 
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    if (name.trim() === '') {
+      const err = new InvalidParamsError()
+
       return { data: null, err }
     }
 
@@ -131,18 +134,16 @@ export class CategoriesController {
 
     const createdCategory = await this.categoriesRepository.createCategory({
       id: randomUUID(),
-      name,
-      description,
+      name: name.trim(),
+      description: description.trim(),
     })
 
     return { data: createdCategory, err: null }
   }
 
   public async deleteCategory({ loggedUserId, categoryId }: DeleteCategoryRequest): Promise<DeleteCategoryResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -165,10 +166,14 @@ export class CategoriesController {
     updatedName,
     updatedDescription = '',
   }: UpdateCategoryRequest): Promise<UpdateCategoryResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
+      return { data: null, err }
+    }
 
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    if (updatedName.trim() === '') {
+      const err = new InvalidParamsError()
+
       return { data: null, err }
     }
 
@@ -180,7 +185,7 @@ export class CategoriesController {
       return { data: null, err }
     }
 
-    categoryWithUpdatedName = await this.categoriesRepository.getCategoryByName(updatedName)
+    categoryWithUpdatedName = await this.categoriesRepository.getCategoryByName(updatedName.trim())
 
     if (categoryWithUpdatedName && categoryWithUpdatedName.id !== categoryId) {
       const err = new CategoryAlreadyExistsError()
@@ -190,8 +195,8 @@ export class CategoriesController {
 
     const response = await this.categoriesRepository.updateCategory({
       id: categoryId,
-      name: updatedName,
-      description: updatedDescription,
+      name: updatedName.trim(),
+      description: updatedDescription.trim(),
     })
 
     return { data: response, err: null }

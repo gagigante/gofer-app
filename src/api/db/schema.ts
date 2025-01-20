@@ -12,7 +12,7 @@ export type NewUser = typeof users.$inferInsert
 
 export const categories = sqliteTable('categories', {
   id: text('id').primaryKey(),
-  name: text('name').unique(),
+  name: text('name').notNull().unique(),
   description: text('description'),
 })
 export type Category = typeof categories.$inferSelect
@@ -20,7 +20,7 @@ export type NewCategory = typeof categories.$inferInsert
 
 export const brands = sqliteTable('brands', {
   id: text('id').primaryKey(),
-  name: text('name').unique(),
+  name: text('name').notNull().unique(),
 })
 export type Brand = typeof brands.$inferSelect
 export type NewBrand = typeof brands.$inferInsert
@@ -39,7 +39,7 @@ export const products = sqliteTable('products', {
   costPrice: integer('cost_price'),
   availableQuantity: integer('available_quantity').default(0),
   minimumQuantity: integer('minimum_quantity').default(0),
-  categoryId: text('category_id'),
+  categoryId: text('category_id').references(() => categories.id, { onDelete: 'set null' }),
   brandId: text('brand_id').references(() => brands.id, { onDelete: 'set null' }),
   icms: integer('icms'),
   ncm: text('ncm'),
@@ -49,17 +49,6 @@ export const products = sqliteTable('products', {
 })
 export type Product = typeof products.$inferSelect
 export type NewProduct = typeof products.$inferInsert
-
-export const productsRelations = relations(products, ({ one }) => ({
-  category: one(categories, {
-    fields: [products.categoryId],
-    references: [categories.id],
-  }),
-  brand: one(brands, {
-    fields: [products.brandId],
-    references: [brands.id],
-  }),
-}))
 
 export const orders = sqliteTable('orders', {
   id: text('id').primaryKey(),
