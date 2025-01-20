@@ -433,9 +433,10 @@ describe('categories-controller', () => {
     })
 
     test('should throw InvalidParamsError if the provided category name is an empty string', async () => {
-      const response = await categoriesController.createCategory({
+      const response = await categoriesController.updateCategory({
         loggedUserId: 'test-user-id',
-        name: '',
+        categoryId: 'category-id',
+        updatedName: '',
       })
 
       expect(response.data).toBeNull()
