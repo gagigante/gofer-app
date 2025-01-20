@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach } from 'vitest'
 import { eq } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
-import { brands, products, users } from '../db/schema'
+import { brands, products, users } from '@/api/db/schema'
 
 import { BrandsController } from './brands-controller'
 

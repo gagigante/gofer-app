@@ -2,14 +2,15 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { CategoriesRepository } from '@/api/repositories/categories-repository'
+import { ProductsRepository } from '@/api/repositories/products-repository'
 import { AuthMiddleware } from '@/api/middlewares/auth'
 
 import { NotFoundError } from '@/api/errors/NotFoundError'
 import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Response } from '@/api/types/response'
 import { Product, type Category } from '@/api/db/schema'
-import { ProductsRepository } from '../repositories/products-repository'
 
 export interface ListCategoriesRequest {
   loggedUserId: string
@@ -117,6 +118,12 @@ export class CategoriesController {
       return { data: null, err }
     }
 
+    if (name.trim() === '') {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
     const response = await this.categoriesRepository.getCategoryByName(name)
 
     if (response) {
@@ -127,8 +134,8 @@ export class CategoriesController {
 
     const createdCategory = await this.categoriesRepository.createCategory({
       id: randomUUID(),
-      name,
-      description,
+      name: name.trim(),
+      description: description.trim(),
     })
 
     return { data: createdCategory, err: null }
@@ -164,6 +171,12 @@ export class CategoriesController {
       return { data: null, err }
     }
 
+    if (updatedName.trim() === '') {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
     let categoryWithUpdatedName = await this.categoriesRepository.getCategoryById(categoryId)
 
     if (!categoryWithUpdatedName) {
@@ -172,7 +185,7 @@ export class CategoriesController {
       return { data: null, err }
     }
 
-    categoryWithUpdatedName = await this.categoriesRepository.getCategoryByName(updatedName)
+    categoryWithUpdatedName = await this.categoriesRepository.getCategoryByName(updatedName.trim())
 
     if (categoryWithUpdatedName && categoryWithUpdatedName.id !== categoryId) {
       const err = new CategoryAlreadyExistsError()
@@ -182,8 +195,8 @@ export class CategoriesController {
 
     const response = await this.categoriesRepository.updateCategory({
       id: categoryId,
-      name: updatedName,
-      description: updatedDescription,
+      name: updatedName.trim(),
+      description: updatedDescription.trim(),
     })
 
     return { data: response, err: null }
