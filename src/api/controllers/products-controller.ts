@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 import { ProductsRepository, type ProductWithCategoryAndBrand } from '../repositories/products-repository'
 import { UsersRepository } from '../repositories/users-repository'
+import { AuthMiddleware } from '../middlewares/auth'
 
-import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
@@ -82,10 +82,12 @@ export type UpdateProductResponse = Response<Product>
 export class ProductsController {
   private readonly usersRepository: UsersRepository
   private readonly productsRepository: ProductsRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.productsRepository = new ProductsRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listProducts({
@@ -94,10 +96,8 @@ export class ProductsController {
     page = 1,
     itemsPerPage = 15,
   }: ListProductsRequest): Promise<ListProductsResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -110,10 +110,8 @@ export class ProductsController {
   }
 
   public async getLastProduct({ loggedUserId }: GetLastProductRequest): Promise<GetLastProductResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -123,10 +121,8 @@ export class ProductsController {
   }
 
   public async getByBarCode({ loggedUserId, barcode }: GetByBarcodeRequest): Promise<GetLastProductResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -158,10 +154,8 @@ export class ProductsController {
     cestSegment = '',
     cestDescription = '',
   }: CreateProductRequest): Promise<CreateProductResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
@@ -226,10 +220,8 @@ export class ProductsController {
     cestSegment = '',
     cestDescription = '',
   }: UpdateProductRequest): Promise<UpdateProductResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
       return { data: null, err }
     }
 
