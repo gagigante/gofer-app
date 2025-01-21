@@ -1,4 +1,4 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { text, sqliteTable, integer, primaryKey } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
@@ -24,10 +24,6 @@ export const brands = sqliteTable('brands', {
 })
 export type Brand = typeof brands.$inferSelect
 export type NewBrand = typeof brands.$inferInsert
-
-export const brandsRelations = relations(brands, ({ many }) => ({
-  products: many(products),
-}))
 
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(),
