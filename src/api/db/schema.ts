@@ -1,11 +1,11 @@
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
 import { text, sqliteTable, integer, primaryKey } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
-  name: text('name').unique(),
-  password: text('password'),
-  role: text('role'),
+  name: text('name').unique().notNull(),
+  password: text('password').notNull(),
+  role: text('role').notNull().default('operator'),
 })
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -24,10 +24,6 @@ export const brands = sqliteTable('brands', {
 })
 export type Brand = typeof brands.$inferSelect
 export type NewBrand = typeof brands.$inferInsert
-
-export const brandsRelations = relations(brands, ({ many }) => ({
-  products: many(products),
-}))
 
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(),
