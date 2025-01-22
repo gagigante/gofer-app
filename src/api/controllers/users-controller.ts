@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import { compare, hash } from 'bcryptjs'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
+import { AuthMiddleware } from '../middlewares/auth'
 
 import { UserAlreadyExistsError } from '@/api/errors/UserAlreadyExistsError'
 import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
@@ -35,7 +36,7 @@ export interface CreateUserRequest {
   role: UserRole
 }
 
-export type CreateUserResponse = Response<User>
+export type CreateUserResponse = Response<Omit<User, 'password'>>
 
 export interface DeleteUserRequest {
   loggedUserId: string
@@ -56,9 +57,11 @@ export type UpdateUserResponse = Response<User>
 
 export class UsersController {
   private readonly usersRepository: UsersRepository
+  private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
+    this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
   public async listUsers({
@@ -84,15 +87,12 @@ export class UsersController {
   }
 
   public async createUser({ loggedUserId, name, password, role }: CreateUserRequest): Promise<CreateUserResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser || loggedUser.role === 'operator') {
-      const err = new WithoutPermissionError()
-
+    const { err } = await this.authMiddleware.handle(loggedUserId, 'admin')
+    if (err) {
       return { data: null, err }
     }
 
-    if (name.includes(' ')) {
+    if (name.trim() === '' || name.trim().includes(' ')) {
       const err = new InvalidParamsError()
 
       return { data: null, err }
@@ -114,14 +114,21 @@ export class UsersController {
 
     const hashedPassword = await hash(password, 8)
 
-    const createdUser = await this.usersRepository.createUser({
+    const {
+      id,
+      name: createdName,
+      role: createdRole,
+    } = await this.usersRepository.createUser({
       id: randomUUID(),
       name,
       password: hashedPassword,
       role,
     })
 
-    return { data: createdUser, err: null }
+    return {
+      data: { id, name: createdName, role: createdRole },
+      err: null,
+    }
   }
 
   public async deleteUser({ loggedUserId, userId }: DeleteUserRequest): Promise<DeleteUserResponse> {
