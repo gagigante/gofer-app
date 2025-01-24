@@ -59,6 +59,11 @@ jobs:
       - name: Integration tests
         run: pnpm test -- --coverage
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       # DEPENDENCY ANALISYS npm audit --production npm outdated
       # SEC CHECKS
       # UNITY TESTS/INTEGRATION TESTS
