@@ -243,4 +243,16 @@ describe('users-controller', () => {
       expect(response.err).toBeNull()
     })
   })
+
+  describe('updateUser', () => {
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to a user', async () => {
+      const response = await usersController.updateUser({
+        loggedUserId: 'non-existing-user-id',
+        updatedName: 'new-name',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+  })
 })
