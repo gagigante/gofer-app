@@ -3,9 +3,9 @@ import { text, sqliteTable, integer, primaryKey } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
-  name: text('name').unique(),
-  password: text('password'),
-  role: text('role'),
+  name: text('name').unique().notNull(),
+  password: text('password').notNull(),
+  role: text('role').notNull().default('operator'),
 })
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
