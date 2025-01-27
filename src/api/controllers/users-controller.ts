@@ -53,7 +53,7 @@ export interface UpdateUserRequest {
   newPasswordConfirmation?: string
 }
 
-export type UpdateUserResponse = Response<User>
+export type UpdateUserResponse = Response<Omit<User, 'password'>>
 
 export class UsersController {
   private readonly usersRepository: UsersRepository
@@ -166,15 +166,18 @@ export class UsersController {
     newPassword,
     newPasswordConfirmation,
   }: UpdateUserRequest): Promise<UpdateUserResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
+    const { data: loggedUser, err } = await this.authMiddleware.handle(loggedUserId, 'admin')
+    if (err) {
+      return { data: null, err }
+    }
 
-    if (!loggedUser) {
-      const err = new WithoutPermissionError()
+    if (updatedName.trim() === '') {
+      const err = new InvalidParamsError()
 
       return { data: null, err }
     }
 
-    const userWithUpdatedName = await this.usersRepository.getUserByName(updatedName)
+    const userWithUpdatedName = await this.usersRepository.getUserByName(updatedName.trim())
 
     if (userWithUpdatedName && userWithUpdatedName.id !== loggedUser.id) {
       const err = new UserAlreadyExistsError()
@@ -198,11 +201,15 @@ export class UsersController {
       return { data: null, err: new InvalidParamsError() }
     }
 
+    if (newPassword.trim() === '') {
+      return { data: null, err: new InvalidParamsError() }
+    }
+
     if (newPassword !== newPasswordConfirmation) {
       return { data: null, err: new InvalidParamsError() }
     }
 
-    const hashedNewPassword = await hash(newPassword, 8)
+    const hashedNewPassword = await hash(newPassword.trim(), 8)
 
     const response = await this.usersRepository.updateUser({
       id: loggedUser.id,
@@ -210,6 +217,6 @@ export class UsersController {
       password: hashedNewPassword,
     })
 
-    return { data: response, err: null }
+    return { data: { id: response.id, name: response.name, role: response.role }, err: null }
   }
 }
