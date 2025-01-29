@@ -62,30 +62,9 @@ export const ordersHandler = (window: BrowserWindow) => {
 
       try {
         const pdfBuffer = await printWindow.webContents.printToPDF({
-          pageSize: 'A5',
-          landscape: true,
-          displayHeaderFooter: true,
-          headerTemplate: '<div></div>',
-          footerTemplate: `
-            <style>
-              * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-              }
-
-              .container {
-                width: 100%;
-                padding: 12px 40px 0;
-                font-size: 14px !important;
-                color: #000;
-              }
-            </style>
-
-            <div id="header-template" class="container">
-              <p>Página <span class="pageNumber"></span> de <span class="totalPages"></span></p>
-            </div>
-          `,
+          pageSize: 'A4',
+          landscape: false,
+          displayHeaderFooter: false,
         })
 
         await writeFile(filePath, pdfBuffer)
