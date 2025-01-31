@@ -32,7 +32,7 @@ export const products = sqliteTable('products', {
   name: text('name').unique(),
   description: text('description'),
   price: integer('price').notNull().default(0),
-  costPrice: integer('cost_price'),
+  costPrice: integer('cost_price').notNull().default(0),
   availableQuantity: integer('available_quantity').default(0),
   minimumQuantity: integer('minimum_quantity').default(0),
   categoryId: text('category_id').references(() => categories.id, { onDelete: 'set null' }),
@@ -60,6 +60,7 @@ export const ordersProducts = sqliteTable(
   {
     orderId: text('order_id').references(() => orders.id, { onDelete: 'cascade' }),
     productId: text('product_id').references(() => products.id),
+    productCostPrice: integer('product_cost_price').notNull().default(0),
     productPrice: integer('product_price').notNull().default(0),
     customProductPrice: integer('custom_product_price').notNull().default(0),
     quantity: integer('quantity'),
