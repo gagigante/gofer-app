@@ -244,7 +244,7 @@ describe('brands-controller', () => {
             cest: null,
             cestDescription: null,
             cestSegment: null,
-            costPrice: null,
+            costPrice: 0,
             description: null,
             fastId: null,
             icms: null,
