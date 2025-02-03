@@ -132,11 +132,8 @@ export class UsersController {
   }
 
   public async deleteUser({ loggedUserId, userId }: DeleteUserRequest): Promise<DeleteUserResponse> {
-    const loggedUser = await this.usersRepository.getUserById(loggedUserId)
-
-    if (!loggedUser || loggedUser.role === 'operator') {
-      const err = new WithoutPermissionError()
-
+    const { data: loggedUser, err } = await this.authMiddleware.handle(loggedUserId, 'admin')
+    if (err) {
       return { data: null, err }
     }
 

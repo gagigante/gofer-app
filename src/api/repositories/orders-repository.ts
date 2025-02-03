@@ -129,6 +129,7 @@ export class OrdersRepository {
         await tx.insert(ordersProducts).values({
           orderId: insertedOrderId,
           productId: product.id,
+          productCostPrice: product.costPrice,
           productPrice: product.price,
           customProductPrice,
           quantity,
