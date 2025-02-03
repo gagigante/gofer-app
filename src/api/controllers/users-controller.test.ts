@@ -12,6 +12,7 @@ import { InvalidParamsError } from '../errors/InvalidParamsError'
 import { UserAlreadyExistsError } from '../errors/UserAlreadyExistsError'
 import { NotAllowedOperationError } from '../errors/NotAllowedOperationError'
 import { IncorrectCredentialsError } from '../errors/IncorrectCredentialsError'
+import { NotFoundError } from '../errors/NotFoundError'
 
 describe('users-controller', () => {
   const usersController = new UsersController()
@@ -247,6 +248,120 @@ describe('users-controller', () => {
     })
   })
 
+  describe('deleteUser', () => {
+    beforeEach(async () => {
+      const password = await hash('test-user-password', 8)
+
+      await db.insert(users).values({
+        id: 'test-user-id',
+        name: 'test-user',
+        password,
+        role: 'super-admin',
+      })
+    })
+
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to a user', async () => {
+      const response = await usersController.deleteUser({
+        loggedUserId: 'non-existing-user-id',
+        userId: 'user-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw WithoutPermissionError if the logged user has role "operator"', async () => {
+      await db.update(users).set({ role: 'operator' }).where(eq(users.id, 'test-user-id'))
+
+      const response = await usersController.deleteUser({
+        loggedUserId: 'test-user-id',
+        userId: 'user-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw NotFoundError if the provided user id does not correspond to a user', async () => {
+      const response = await usersController.deleteUser({
+        loggedUserId: 'test-user-id',
+        userId: 'non-existing-user-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotFoundError)
+    })
+
+    test('should throw NotAllowedOperationError on try to delete a super-admin user', async () => {
+      await db.insert(users).values({
+        id: 'user-to-delete',
+        name: 'super-admin-user',
+        password: await hash('test-user-password', 8),
+        role: 'super-admin',
+      })
+
+      const response = await usersController.deleteUser({
+        loggedUserId: 'test-user-id',
+        userId: 'user-to-delete',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotAllowedOperationError)
+    })
+
+    test('should throw NotAllowedOperationError on try to delete yourself', async () => {
+      const response = await usersController.deleteUser({
+        loggedUserId: 'test-user-id',
+        userId: 'test-user-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotAllowedOperationError)
+    })
+
+    test('should be able to delete an admin user with success', async () => {
+      await db.insert(users).values({
+        id: 'user-to-delete',
+        name: 'super-admin-user',
+        password: await hash('test-user-password', 8),
+        role: 'admin',
+      })
+
+      const response = await usersController.deleteUser({
+        loggedUserId: 'test-user-id',
+        userId: 'user-to-delete',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeNull()
+
+      const user = await db.select().from(users).where(eq(users.id, 'user-to-delete')).get()
+
+      expect(user).toBeUndefined()
+    })
+
+    test('should be able to delete an operator user with success', async () => {
+      await db.insert(users).values({
+        id: 'user-to-delete',
+        name: 'super-admin-user',
+        password: await hash('test-user-password', 8),
+        role: 'operator',
+      })
+
+      const response = await usersController.deleteUser({
+        loggedUserId: 'test-user-id',
+        userId: 'user-to-delete',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeNull()
+
+      const user = await db.select().from(users).where(eq(users.id, 'user-to-delete')).get()
+
+      expect(user).toBeUndefined()
+    })
+  })
+
   describe('updateUser', () => {
     beforeEach(async () => {
       const password = await hash('test-user-password', 8)
@@ -363,7 +478,7 @@ describe('users-controller', () => {
         loggedUserId: 'test-user-id',
         updatedName: 'new-name',
         currentPassword: 'test-user-password',
-        newPassword: '',
+        newPassword: ' ',
         newPasswordConfirmation: 'different-password',
       })
 
