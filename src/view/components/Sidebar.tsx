@@ -31,11 +31,11 @@ export function Sidebar() {
               </Link>
             </Button>
 
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/home/reports">
-                <FiClipboard className="w-4 h-4 mr-3" />
-                Relatórios
-              </Link>
+            <Button variant="ghost" className="w-full justify-start" disabled>
+              {/* <Link to="/home/reports"> */}
+              <FiClipboard className="w-4 h-4 mr-3" />
+              Relatórios
+              {/* </Link> */}
             </Button>
 
             <Separator className="my-4" />
@@ -51,11 +51,11 @@ export function Sidebar() {
               </Link>
             </Button>
 
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/home/budgets">
-                <FiShoppingCart className="w-4 h-4 mr-3" />
-                Orçamentos
-              </Link>
+            <Button variant="ghost" className="w-full justify-start" disabled>
+              {/* <Link to="/home/budgets"> */}
+              <FiShoppingCart className="w-4 h-4 mr-3" />
+              Orçamentos
+              {/* </Link> */}
             </Button>
 
             <Separator className="my-4" />
@@ -82,11 +82,11 @@ export function Sidebar() {
               </Link>
             </Button>
 
-            <Button asChild variant="ghost" className="w-full justify-start">
-              <Link to="/home/stock">
-                <FiArchive className="w-4 h-4 mr-3" />
-                Estoque
-              </Link>
+            <Button variant="ghost" className="w-full justify-start" disabled>
+              {/* <Link to="/home/stock"> */}
+              <FiArchive className="w-4 h-4 mr-3" />
+              Estoque
+              {/* </Link> */}
             </Button>
 
             <Separator className="my-4" />
@@ -99,7 +99,7 @@ export function Sidebar() {
               >
                 <Link to="/home/users">
                   <FiUsers className="w-4 h-4 mr-3" />
-                  Gerenciar usuários
+                  Usuários
                 </Link>
               </Button>
             )}
