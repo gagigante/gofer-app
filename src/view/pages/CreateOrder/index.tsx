@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { Combobox } from '@/view/components/Combobox'
 import { Label } from '@/view/components/ui/label'
+import { Kbd } from '@/view/components/Kbd'
 import { CreateCustomerPopover } from './components/CreateCustomerPopover'
 import { QuantityPicker } from './components/QuantityPicker'
 
@@ -19,6 +20,7 @@ import { useBarcode } from '@/view/hooks/useBarcode'
 import { useProductByBarcode } from '@/view/hooks/queries/products'
 import { useCustomers } from '@/view/hooks/queries/customers'
 import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
+import { useHotkey } from '@/view/hooks/useHotkey'
 
 import { formatCurrency, formatDecimal } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
@@ -40,6 +42,18 @@ export function CreateOrder() {
   const { toast } = useToast()
   const { barcode, clearBarcodeState } = useBarcode()
   const { mutateAsync } = useMutateOnCreateOrder()
+
+  useHotkey('shift+escape', () => {
+    navigate('..', { relative: 'path' })
+  })
+
+  useHotkey('shift+s', (e) => {
+    if (orderProducts.length === 0) return
+
+    console.log({ e })
+
+    // handleCreateOrder()
+  })
 
   const [customersFilter, setCustomersFilter] = useState('')
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>()
@@ -146,9 +160,11 @@ export function CreateOrder() {
   }
 
   async function handleCreateOrder() {
+    if (!user) return
+
     mutateAsync(
       {
-        loggedUserId: user?.id ?? '',
+        loggedUserId: user.id,
         products: orderProducts.map(({ id, quantity, customPrice }) => ({
           id,
           quantity,
@@ -311,18 +327,20 @@ export function CreateOrder() {
 
       <footer className="flex items-center px-3 py-4 border-t border-border">
         <p>
-          <strong>Total a pagar:</strong>
+          <strong>Total a pagar: </strong>
           {formatCurrency(parseCentsToDecimal(orderTotal))}
         </p>
 
         <div className="flex gap-2 ml-auto">
           <Button onClick={handleCreateOrder} disabled={orderProducts.length === 0}>
             Criar pedido
+            <Kbd>shift</Kbd>+<Kbd>s</Kbd>
           </Button>
 
           <Button variant="outline" asChild>
             <Link to=".." relative="path">
               Cancelar
+              <Kbd>shift</Kbd>+<Kbd>esc</Kbd>
             </Link>
           </Button>
         </div>

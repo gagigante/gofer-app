@@ -68,7 +68,7 @@ export function ProductDetailsDialog({ product, isOpen, onRequestEdit, onClose }
         </div>
 
         <div className="flex-1 flex flex-col gap-4">
-          <Label>Description</Label>
+          <Label>Descrição</Label>
           <Textarea value={product?.description || 'N/A'} readOnly disabled />
         </div>
 

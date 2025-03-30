@@ -13,11 +13,11 @@ export function QuantityPicker({ value, onChange }: QuantityPickerProps) {
   return (
     <div className="flex items-center h-10">
       <Button className="w-10 h-10" onClick={() => onChange(value - 1)} disabled={value === MIN}>
-        <FiMinus />
+        <FiMinus className="w-4 h-4" />
       </Button>
 
       <input
-        className="w-14 h-10 text-center no-number-indicator"
+        className="w-14 h-10 text-center bg-background"
         type="number"
         value={value}
         min={MIN}

@@ -1,15 +1,22 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { Button } from '@/view/components/ui/button'
 import { Footer } from '@/view/components/Footer'
+import { Kbd } from '@/view/components/Kbd'
 import { OrdersTable } from './components/OrdersTable'
 
 import { useOrders } from '@/view/hooks/queries/orders'
 import { useAuth } from '@/view/hooks/useAuth'
+import { useHotkey } from '@/view/hooks/useHotkey'
 
 export function Orders() {
   const { user } = useAuth()
+  const navigate = useNavigate()
+
+  useHotkey('shift+n', () => {
+    navigate('new')
+  })
 
   const [pagination, setPagination] = useState(1)
 
@@ -32,7 +39,10 @@ export function Orders() {
 
       <Footer page={pagination} total={data?.total ?? 0} onChange={setPagination}>
         <Button asChild>
-          <Link to="new">Adicionar novo pedido</Link>
+          <Link to="new">
+            Adicionar novo pedido
+            <Kbd className="ml-2">shift</Kbd>+<Kbd>n</Kbd>
+          </Link>
         </Button>
       </Footer>
     </div>

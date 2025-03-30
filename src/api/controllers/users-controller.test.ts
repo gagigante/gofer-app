@@ -17,6 +17,8 @@ import { NotFoundError } from '../errors/NotFoundError'
 describe('users-controller', () => {
   const usersController = new UsersController()
 
+  // describe('listUsers', () => {})
+
   describe('createUser', () => {
     test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
       await db.insert(users).values({

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 

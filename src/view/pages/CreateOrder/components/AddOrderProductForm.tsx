@@ -10,6 +10,7 @@ import { type Product } from '@/api/db/schema'
 import { type ProductWithCategoryAndBrand } from '@/api/repositories/products-repository'
 import { Button } from '@/view/components/ui/button'
 import { Label } from '@radix-ui/react-label'
+import { Kbd } from '@/view/components/Kbd'
 
 interface ProductOption {
   label: string
@@ -23,6 +24,7 @@ interface AddOrderProductFormProps {
 
 export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderProductFormProps) {
   const { user } = useAuth()
+  const productInputRef = useRef<HTMLButtonElement>(null)
   const quantityInputRef = useRef<HTMLInputElement>(null)
 
   const [filter, setFilter] = useState('')
@@ -78,6 +80,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
       setFilter('')
       setSelectedProduct(undefined)
       setQuantity(1)
+      productInputRef.current?.focus()
     }
   }
 
@@ -87,12 +90,16 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
         <Label>Produto</Label>
 
         <Combobox
+          ref={productInputRef}
           placeholder="Selecione um produto"
           searchPlaceholder="Pesquisar por nome de produto"
           emptyPlaceholder="Nenhum produto encontrado."
           options={products}
           value={selectedProduct}
-          onSelectOption={setSelectedProduct}
+          onSelectOption={(option) => {
+            setSelectedProduct(option)
+            quantityInputRef.current?.focus()
+          }}
           onChangeFilter={setFilter}
         />
       </div>
@@ -106,12 +113,24 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
           type="number"
           min={0}
           value={quantity}
+          onKeyDown={(e) => {
+            e.stopPropagation()
+
+            if (e.key === 'Enter') {
+              handleAddProduct(selectedProduct, quantity)
+            }
+          }}
           onChange={(e) => setQuantity(Number(e.target.value))}
         />
       </div>
 
-      <Button onClick={() => handleAddProduct(selectedProduct, quantity)} disabled={!selectedProduct || quantity === 0}>
+      <Button
+        className="flex items-center"
+        onClick={() => handleAddProduct(selectedProduct, quantity)}
+        disabled={!selectedProduct || quantity === 0}
+      >
         Adicionar produto
+        <Kbd>enter</Kbd>
       </Button>
     </div>
   )

@@ -24,6 +24,7 @@ jobs:
         run: echo "NVMRC=$(cat .nvmrc)" >> $GITHUB_OUTPUT
         id: nvm
 
+      # TODO: CREATE REUSABLE ACTION
       - name: Create .env file
         uses: SpicyPizza/create-envfile@v2.0.3
         with:
