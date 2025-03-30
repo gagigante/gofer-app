@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { FaEye, FaFile, FaTrash } from 'react-icons/fa'
 
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Button } from '@/view/components/ui/button'
 import { OrdersDetailsDialog } from './OrdersDetailsDialog'
 import { DeleteOrderAction } from './DeleteOrderAction'
@@ -94,9 +95,9 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Cliente</TableHead>
-            <TableHead>Preço do pedido</TableHead>
-            <TableHead>Data do pedido</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="min-w-[138px]">Preço do pedido</TableHead>
+            <TableHead className="min-w-[196px]">Data do pedido</TableHead>
+            <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -104,7 +105,15 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           {orders.map(({ id, customer, totalPrice, createdAt }) => (
             <TableRow key={id}>
               <TableCell>
-                <p className="font-medium">{customer?.name ?? 'N/A'}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{customer?.name ?? 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
@@ -115,41 +124,65 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
               </TableCell>
 
-              <TableCell className="flex-nowrap text-right space-x-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedOrderId(id)
-                    setIsOrderDetailsDialogOpen(true)
-                  }}
-                >
-                  <FaEye className="w-3 h-3" />
-                </Button>
+              <TableCell className="text-right space-x-1.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedOrderId(id)
+                        setIsOrderDetailsDialogOpen(true)
+                      }}
+                    >
+                      <FaEye className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    await handleSaveOrderFile(id)
-                  }}
-                >
-                  <FaFile className="w-3 h-3" />
-                </Button>
+                  <TooltipContent>
+                    <p>Ver detalhes do pedido</p>
+                  </TooltipContent>
+                </Tooltip>
 
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    const order = orders.find((item) => item.id === id)
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        await handleSaveOrderFile(id)
+                      }}
+                    >
+                      <FaFile className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
 
-                    if (order) {
-                      handleRequestOrderDeletion(order.id)
-                    }
-                  }}
-                >
-                  <FaTrash className="w-3 h-3" />
-                </Button>
+                  <TooltipContent>
+                    <p>Salvar arquivo do pedido</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        const order = orders.find((item) => item.id === id)
+
+                        if (order) {
+                          handleRequestOrderDeletion(order.id)
+                        }
+                      }}
+                    >
+                      <FaTrash className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>Apagar pedido</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}

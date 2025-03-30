@@ -6,6 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Footer } from '@/view/components/Footer'
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { DeleteCustomerAction } from './components/DeleteCustomerAction'
 
 import { useToast } from '@/view/components/ui/use-toast'
@@ -97,11 +98,11 @@ export function Customers() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>CNPJ</TableHead>
-              <TableHead>CPF</TableHead>
-              <TableHead>RG</TableHead>
-              <TableHead></TableHead>
+              <TableHead className="min-w-[136px]">Telefone</TableHead>
+              <TableHead className="min-w-[160px]">CNPJ</TableHead>
+              <TableHead className="min-w-[132px]">CPF</TableHead>
+              <TableHead className="min-w-[116px]">RG</TableHead>
+              <TableHead className="min-w-[160px]"></TableHead>
             </TableRow>
           </TableHeader>
 
@@ -111,7 +112,15 @@ export function Customers() {
                 <TableRow key={id}>
                   <TableCell>
                     <div className="flex">
-                      <p className="font-medium">{name}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="font-medium line-clamp-1">{name}</p>
+                        </TooltipTrigger>
+
+                        <TooltipContent>
+                          <p>{name}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
 
@@ -140,47 +149,71 @@ export function Customers() {
                   </TableCell>
 
                   <TableCell className="text-right space-x-1.5">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const customer = customers.find((item) => item.id === id)
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const customer = customers.find((item) => item.id === id)
 
-                        if (customer) {
-                          handleRequestCustomerDetails(customer)
-                        }
-                      }}
-                    >
-                      <FaEye className="w-3 h-3" />
-                    </Button>
+                            if (customer) {
+                              handleRequestCustomerDetails(customer)
+                            }
+                          }}
+                        >
+                          <FaEye className="w-3 h-3" />
+                        </Button>
+                      </TooltipTrigger>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const customer = customers.find((item) => item.id === id)
+                      <TooltipContent>
+                        <p>Ver detalhes do cliente</p>
+                      </TooltipContent>
+                    </Tooltip>
 
-                        if (customer) {
-                          handleRequestCustomerUpdate(customer)
-                        }
-                      }}
-                    >
-                      <FaPencilAlt className="w-3 h-3" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const customer = customers.find((item) => item.id === id)
 
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        const customer = customers.find((item) => item.id === id)
+                            if (customer) {
+                              handleRequestCustomerUpdate(customer)
+                            }
+                          }}
+                        >
+                          <FaPencilAlt className="w-3 h-3" />
+                        </Button>
+                      </TooltipTrigger>
 
-                        if (customer) {
-                          handleRequestCustomerDeletion(customer)
-                        }
-                      }}
-                    >
-                      <FaTrash className="w-3 h-3" />
-                    </Button>
+                      <TooltipContent>
+                        <p>Editar cliente</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const customer = customers.find((item) => item.id === id)
+
+                            if (customer) {
+                              handleRequestCustomerDeletion(customer)
+                            }
+                          }}
+                        >
+                          <FaTrash className="w-3 h-3" />
+                        </Button>
+                      </TooltipTrigger>
+
+                      <TooltipContent>
+                        <p>Apagar cliente</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               )
