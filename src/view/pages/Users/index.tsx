@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Button } from '@/view/components/ui/button'
 import { Footer } from '@/view/components/Footer'
 import { DeleteUserAction } from './components/DeleteUserAction'
@@ -207,35 +208,54 @@ export function Users() {
 
                   <TableCell className="text-right space-x-1.5">
                     {isEditable && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const user = users.find((item) => item.id === id)
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const user = users.find((item) => item.id === id)
 
-                          if (user) {
-                            handleRequestUserEdition(user)
-                          }
-                        }}
-                      >
-                        <FaPencilAlt className="w-3 h-3" />
-                      </Button>
+                              if (user) {
+                                handleRequestUserEdition(user)
+                              }
+                            }}
+                          >
+                            <FaPencilAlt className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
+
+                        <TooltipContent>
+                          <p>Editar usuário</p>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
 
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={!isDeletable}
-                      onClick={() => {
-                        const user = users.find((item) => item.id === id)
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button
+                            className="pointer-events-auto"
+                            variant="destructive"
+                            size="sm"
+                            disabled={!isDeletable}
+                            onClick={() => {
+                              const user = users.find((item) => item.id === id)
 
-                        if (user) {
-                          handleRequestUserDeletion(user)
-                        }
-                      }}
-                    >
-                      <FaTrash className="w-3 h-3" />
-                    </Button>
+                              if (user) {
+                                handleRequestUserDeletion(user)
+                              }
+                            }}
+                          >
+                            <FaTrash className="w-3 h-3" />
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+
+                      <TooltipContent>
+                        <p>Apagar usuário</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               )
