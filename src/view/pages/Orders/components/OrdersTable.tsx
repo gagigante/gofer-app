@@ -95,9 +95,9 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Cliente</TableHead>
-            <TableHead>Preço do pedido</TableHead>
-            <TableHead>Data do pedido</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="min-w-[138px]">Preço do pedido</TableHead>
+            <TableHead className="min-w-[196px]">Data do pedido</TableHead>
+            <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -105,7 +105,15 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           {orders.map(({ id, customer, totalPrice, createdAt }) => (
             <TableRow key={id}>
               <TableCell>
-                <p className="font-medium">{customer?.name ?? 'N/A'}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{customer?.name ?? 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
@@ -116,7 +124,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
               </TableCell>
 
-              <TableCell className="flex-nowrap text-right space-x-1.5">
+              <TableCell className="text-right space-x-1.5">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

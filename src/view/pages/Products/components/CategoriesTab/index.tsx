@@ -3,6 +3,7 @@ import type * as z from 'zod'
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
 import { useDebounce } from 'use-debounce'
 
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
@@ -154,8 +155,8 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead>Descrição</TableHead>
-            <TableHead>Produtos associados</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="min-w-[164px]">Produtos associados</TableHead>
+            <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -163,59 +164,99 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
           {categories.map(({ id, name, description, products }) => (
             <TableRow key={id}>
               <TableCell>
-                <p className="font-medium">{name}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{name}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{name}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
-              <TableCell className="max-w-[320px]">
-                <p className="font-medium">{description || 'N/A'}</p>
+              <TableCell>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{description || 'N/A'}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{description || 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
                 <p className="font-medium">{products}</p>
               </TableCell>
 
-              <TableCell className="flex-nowrap text-right space-x-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const category = categories.find((item) => item.id === id)
-                    if (category) {
-                      setSelectedCategory(category)
-                      handleToggleDialog('categoryDetails')
-                    }
-                  }}
-                >
-                  <FaEye className="w-3 h-3" />
-                </Button>
+              <TableCell className="text-right space-x-1.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const category = categories.find((item) => item.id === id)
+                        if (category) {
+                          setSelectedCategory(category)
+                          handleToggleDialog('categoryDetails')
+                        }
+                      }}
+                    >
+                      <FaEye className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const category = categories.find((item) => item.id === id)
+                  <TooltipContent>
+                    <p>Ver detalhes da categoria</p>
+                  </TooltipContent>
+                </Tooltip>
 
-                    if (category) {
-                      handleRequestCategoryUpdate(category)
-                    }
-                  }}
-                >
-                  <FaPencilAlt className="w-3 h-3" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const category = categories.find((item) => item.id === id)
 
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => {
-                    const category = categories.find((item) => item.id === id)
+                        if (category) {
+                          handleRequestCategoryUpdate(category)
+                        }
+                      }}
+                    >
+                      <FaPencilAlt className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
 
-                    if (category) {
-                      handleRequestCategoryDeletion(category)
-                    }
-                  }}
-                >
-                  <FaTrash className="w-3 h-3" />
-                </Button>
+                  <TooltipContent>
+                    <p>Editar categoria</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        const category = categories.find((item) => item.id === id)
+
+                        if (category) {
+                          handleRequestCategoryDeletion(category)
+                        }
+                      }}
+                    >
+                      <FaTrash className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>Apagar categoria</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}
