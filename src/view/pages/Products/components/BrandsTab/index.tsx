@@ -153,8 +153,8 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Produtos associados</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="min-w-[164px]">Produtos associados</TableHead>
+            <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -162,14 +162,22 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
           {brands.map(({ id, name, products }) => (
             <TableRow key={id}>
               <TableCell>
-                <p className="font-medium">{name}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{name}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{name}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
                 <p className="font-medium">{products}</p>
               </TableCell>
 
-              <TableCell className="w-[160px] flex flex-wrap text-right space-x-1.5 space-y-1.5">
+              <TableCell className="text-right space-x-1.5">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

@@ -103,10 +103,21 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead>Marca</TableHead>
-            <TableHead>Categoria</TableHead>
+            <TableHead className="max-w-[116px]">Marca</TableHead>
+            <TableHead className="max-w-[116px]">Categoria</TableHead>
             <TableHead>Preço</TableHead>
-            <TableHead>Qtd. disponível em estoque</TableHead>
+            <TableHead className="max-w-[116px] line-clamp-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <p>Qtd. disponível em estoque</p>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  <p>Qtd. disponível em estoque</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableHead>
+            <TableHead className="min-w-[116px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -114,15 +125,39 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
           {products.map(({ id, name, category, brand, price, availableQuantity }) => (
             <TableRow key={id}>
               <TableCell>
-                <p className="font-medium">{name}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{name}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{name}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
-                <p className="font-medium">{brand?.name ?? 'N/A'}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{brand?.name ?? 'N/A'}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{brand?.name ?? 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
-              <TableCell>
-                <p className="font-medium">{category?.name ?? 'N/A'}</p>
+              <TableCell className="max-w-[100px]">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{category?.name ?? 'N/A'}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{category?.name ?? 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
@@ -133,7 +168,7 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
                 <p className="font-medium">{availableQuantity}</p>
               </TableCell>
 
-              <TableCell className="w-[160px] flex flex-nowrap text-right space-x-1.5">
+              <TableCell className="text-right space-x-1.5">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

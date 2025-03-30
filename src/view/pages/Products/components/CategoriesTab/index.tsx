@@ -155,8 +155,8 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
           <TableRow>
             <TableHead>Nome</TableHead>
             <TableHead>Descrição</TableHead>
-            <TableHead>Produtos associados</TableHead>
-            <TableHead></TableHead>
+            <TableHead className="min-w-[164px]">Produtos associados</TableHead>
+            <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
 
@@ -164,18 +164,34 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
           {categories.map(({ id, name, description, products }) => (
             <TableRow key={id}>
               <TableCell>
-                <p className="font-medium">{name}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{name}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{name}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
-              <TableCell className="max-w-[320px]">
-                <p className="font-medium">{description || 'N/A'}</p>
+              <TableCell>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{description || 'N/A'}</p>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>{description || 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
 
               <TableCell>
                 <p className="font-medium">{products}</p>
               </TableCell>
 
-              <TableCell className="w-[160px] flex flex-wrap text-right space-x-1.5">
+              <TableCell className="text-right space-x-1.5">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
