@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FaEye, FaPencilAlt, FaInfoCircle } from 'react-icons/fa'
 import { useDebounce } from 'use-debounce'
 
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
@@ -132,32 +133,48 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
                 <p className="font-medium">{availableQuantity}</p>
               </TableCell>
 
-              <TableCell className="flex-nowrap text-right space-x-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const product = products.find((item) => item.id === id)
-                    if (product) {
-                      handleRequestProductDetails(product)
-                    }
-                  }}
-                >
-                  <FaEye className="w-3 h-3" />
-                </Button>
+              <TableCell className="w-[160px] flex flex-nowrap text-right space-x-1.5">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const product = products.find((item) => item.id === id)
+                        if (product) {
+                          handleRequestProductDetails(product)
+                        }
+                      }}
+                    >
+                      <FaEye className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const product = products.find((item) => item.id === id)
-                    if (product) {
-                      handleRequestProductUpdate(product)
-                    }
-                  }}
-                >
-                  <FaPencilAlt className="w-3 h-3" />
-                </Button>
+                  <TooltipContent>
+                    <p>Ver detalhes do produto</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const product = products.find((item) => item.id === id)
+                        if (product) {
+                          handleRequestProductUpdate(product)
+                        }
+                      }}
+                    >
+                      <FaPencilAlt className="w-3 h-3" />
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent>
+                    <p>Editar produto</p>
+                  </TooltipContent>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}
