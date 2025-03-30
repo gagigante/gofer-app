@@ -210,7 +210,7 @@ export class UsersController {
 
     const response = await this.usersRepository.updateUser({
       id: loggedUser.id,
-      name: updatedName,
+      name: updatedName.trim(),
       password: hashedNewPassword,
     })
 
