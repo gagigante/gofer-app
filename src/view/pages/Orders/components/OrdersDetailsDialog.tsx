@@ -2,6 +2,8 @@ import { FaInfo } from 'react-icons/fa'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
+import { Label } from '@/view/components/ui/label'
+import { Textarea } from '@/view/components/ui/textarea'
 import { Dialog } from '@/view/components/Dialog'
 
 import { formatCurrency } from '@/view/utils/formatters'
@@ -41,17 +43,24 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
       }}
     >
       {data && (
-        <div className="mb-4 gap-4">
-          <p className="font-medium">
-            <b>Cliente:</b> {data.customer?.name ?? 'N/A'}
-          </p>
-          <p className="font-medium">
-            <b>Preço total:</b> {formatCurrency(parseCentsToDecimal(data.totalPrice ?? 0))}
-          </p>
-          <p className="font-medium">
-            <b>Data do pedido:</b> {FORMATTER.format(new Date(data.createdAt + ' UTC'))}
-          </p>
-        </div>
+        <>
+          <div className="mb-4 gap-4">
+            <p className="font-medium">
+              <b>Cliente:</b> {data.customer?.name ?? 'N/A'}
+            </p>
+            <p className="font-medium">
+              <b>Preço total:</b> {formatCurrency(parseCentsToDecimal(data.totalPrice ?? 0))}
+            </p>
+            <p className="font-medium">
+              <b>Data do pedido:</b> {FORMATTER.format(new Date(data.createdAt + ' UTC'))}
+            </p>
+          </div>
+
+          <div className="grid w-full gap-1.5 my-4">
+            <Label htmlFor="obs">Observações</Label>
+            <Textarea placeholder="Observações" id="obs" readOnly value={data.obs || 'N/A'} />
+          </div>
+        </>
       )}
 
       <Table>

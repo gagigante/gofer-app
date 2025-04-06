@@ -17,6 +17,7 @@ export interface OrderResponse {
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
+  obs: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -102,13 +103,14 @@ export class OrdersRepository {
     totalPrice,
     products,
     customerId,
+    obs,
   }: Omit<NewOrder, 'createdAt'> & {
     products: Array<{ id: string; quantity: number; customProductPrice: number }>
   }): Promise<Order> {
     const response = await db.transaction(async (tx) => {
       const [{ insertedOrderId }] = await tx
         .insert(orders)
-        .values({ id, totalPrice, customerId })
+        .values({ id, totalPrice, customerId, obs })
         .returning({ insertedOrderId: orders.id })
 
       for (const { id, quantity, customProductPrice } of products) {

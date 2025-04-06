@@ -7,6 +7,7 @@ import { AuthMiddleware } from '../middlewares/auth'
 import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Product } from '@/api/db/schema'
 import { type Response } from '@/api/types/response'
@@ -156,6 +157,12 @@ export class ProductsController {
   }: CreateProductRequest): Promise<CreateProductResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
+      return { data: null, err }
+    }
+
+    if (name.trim() === '') {
+      const err = new InvalidParamsError()
+
       return { data: null, err }
     }
 

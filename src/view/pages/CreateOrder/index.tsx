@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/to
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
+import { Textarea } from '@/view/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { Combobox } from '@/view/components/Combobox'
@@ -42,6 +43,7 @@ export function CreateOrder() {
   const { mutateAsync } = useMutateOnCreateOrder()
 
   const [customersFilter, setCustomersFilter] = useState('')
+  const [orderObs, setOrderObs] = useState('')
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>()
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
 
@@ -146,15 +148,18 @@ export function CreateOrder() {
   }
 
   async function handleCreateOrder() {
+    if (!user) return
+
     mutateAsync(
       {
-        loggedUserId: user?.id ?? '',
+        loggedUserId: user.id,
         products: orderProducts.map(({ id, quantity, customPrice }) => ({
           id,
           quantity,
           customProductPrice: customPrice,
         })),
         customerId: selectedCustomerId,
+        obs: orderObs,
       },
       {
         onError: () => {
@@ -215,6 +220,17 @@ export function CreateOrder() {
 
         <div className="flex my-4">
           <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
+        </div>
+
+        <div className="grid w-full space-y-2 my-4">
+          <Label htmlFor="obs">Observações</Label>
+          <Textarea
+            placeholder="Observações"
+            id="obs"
+            value={orderObs}
+            onChange={(e) => setOrderObs(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+          />
         </div>
 
         <Table>
@@ -311,7 +327,7 @@ export function CreateOrder() {
 
       <footer className="flex items-center px-3 py-4 border-t border-border">
         <p>
-          <strong>Total a pagar:</strong>
+          <strong>Total a pagar: </strong>
           {formatCurrency(parseCentsToDecimal(orderTotal))}
         </p>
 
