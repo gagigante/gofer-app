@@ -17,7 +17,7 @@ export function QuantityPicker({ value, onChange }: QuantityPickerProps) {
       </Button>
 
       <input
-        className="w-14 h-10 text-center no-number-indicator"
+        className="w-14 h-10 text-center bg-background"
         type="number"
         value={value}
         min={MIN}

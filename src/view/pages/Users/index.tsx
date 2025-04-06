@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
@@ -235,6 +235,7 @@ export function Users() {
                       <TooltipTrigger asChild>
                         <span>
                           <Button
+                            className="pointer-events-auto"
                             variant="destructive"
                             size="sm"
                             disabled={!isDeletable}
