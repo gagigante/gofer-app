@@ -235,6 +235,7 @@ export function Users() {
                       <TooltipTrigger asChild>
                         <span>
                           <Button
+                            className="pointer-events-auto"
                             variant="destructive"
                             size="sm"
                             disabled={!isDeletable}
