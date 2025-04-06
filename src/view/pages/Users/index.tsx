@@ -2,10 +2,10 @@ import { useState } from 'react'
 import type * as z from 'zod'
 import { FaPencilAlt, FaTrash } from 'react-icons/fa'
 
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Button } from '@/view/components/ui/button'
 import { Footer } from '@/view/components/Footer'
 import { DeleteUserAction } from './components/DeleteUserAction'
@@ -180,7 +180,7 @@ export function Users() {
             <TableRow>
               <TableHead>Usuário</TableHead>
               <TableHead>Nível de permissão</TableHead>
-              <TableHead></TableHead>
+              <TableHead className="min-w-[112px]"></TableHead>
             </TableRow>
           </TableHeader>
 

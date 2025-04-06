@@ -20,7 +20,7 @@ export function Sidebar() {
   const [isLogoutAlertOpen, setIsLogoutAlertOpen] = useState(false)
 
   return (
-    <aside className="flex flex-col min-w-[240px] max-w-[240px] w-[20%] h-svh border-r border-border">
+    <aside className="flex flex-col min-w-[200px] max-w-[200px] w-[20%] h-svh border-r border-border">
       <ScrollArea className="flex-1">
         <div className="px-3 py-4">
           <div className="space-y-[6px]">

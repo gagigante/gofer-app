@@ -98,11 +98,11 @@ export function Customers() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>CNPJ</TableHead>
-              <TableHead>CPF</TableHead>
-              <TableHead>RG</TableHead>
-              <TableHead></TableHead>
+              <TableHead className="min-w-[136px]">Telefone</TableHead>
+              <TableHead className="min-w-[160px]">CNPJ</TableHead>
+              <TableHead className="min-w-[132px]">CPF</TableHead>
+              <TableHead className="min-w-[116px]">RG</TableHead>
+              <TableHead className="min-w-[160px]"></TableHead>
             </TableRow>
           </TableHeader>
 
@@ -112,7 +112,15 @@ export function Customers() {
                 <TableRow key={id}>
                   <TableCell>
                     <div className="flex">
-                      <p className="font-medium">{name}</p>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="font-medium line-clamp-1">{name}</p>
+                        </TooltipTrigger>
+
+                        <TooltipContent>
+                          <p>{name}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
 
