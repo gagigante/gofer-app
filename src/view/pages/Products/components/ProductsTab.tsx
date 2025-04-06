@@ -106,10 +106,10 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
             <TableHead className="max-w-[116px]">Marca</TableHead>
             <TableHead className="max-w-[116px]">Categoria</TableHead>
             <TableHead>Preço</TableHead>
-            <TableHead className="max-w-[116px] line-clamp-1">
+            <TableHead className="max-w-[116px]">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <p>Qtd. disponível em estoque</p>
+                  <p className="line-clamp-1">Qtd. disponível em estoque</p>
                 </TooltipTrigger>
 
                 <TooltipContent>
