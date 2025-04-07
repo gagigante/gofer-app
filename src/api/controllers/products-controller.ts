@@ -7,6 +7,7 @@ import { AuthMiddleware } from '../middlewares/auth'
 import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Product } from '@/api/db/schema'
 import { type Response } from '@/api/types/response'

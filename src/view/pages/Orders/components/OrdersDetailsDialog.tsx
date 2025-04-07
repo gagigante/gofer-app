@@ -58,7 +58,7 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
 
           <div className="grid w-full gap-1.5 my-4">
             <Label htmlFor="obs">Observações</Label>
-            <Textarea placeholder="Observações" id="obs" disabled readOnly value={data.obs || 'N/A'} />
+            <Textarea placeholder="Observações" id="obs" readOnly value={data.obs || 'N/A'} />
           </div>
         </>
       )}

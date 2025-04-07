@@ -159,6 +159,7 @@ export function CreateOrder() {
           customProductPrice: customPrice,
         })),
         customerId: selectedCustomerId,
+        obs: orderObs,
       },
       {
         onError: () => {
