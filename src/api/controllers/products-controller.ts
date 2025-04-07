@@ -159,6 +159,12 @@ export class ProductsController {
       return { data: null, err }
     }
 
+    if (name.trim() === '') {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
     let response = await this.productsRepository.getProductByName(name)
 
     if (response) {

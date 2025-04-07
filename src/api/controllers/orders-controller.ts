@@ -38,6 +38,7 @@ export type GetOrderResponse = Response<{
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
+  obs: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -60,6 +61,7 @@ export interface CreateOrderRequest {
   loggedUserId: string
   products: Array<{ id: string; quantity: number; customProductPrice: number }>
   customerId?: string
+  obs?: string
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -151,7 +153,12 @@ export class OrdersController {
     return { data: { template, order }, err: null }
   }
 
-  public async createOrder({ loggedUserId, products, customerId }: CreateOrderRequest): Promise<CreateOrderResponse> {
+  public async createOrder({
+    loggedUserId,
+    products,
+    customerId,
+    obs,
+  }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
       return { data: null, err }
@@ -216,6 +223,7 @@ export class OrdersController {
       products: Array.from(mergedProductsMap.values()),
       totalPrice,
       customerId,
+      obs,
     })
 
     return { data: response, err: null }
