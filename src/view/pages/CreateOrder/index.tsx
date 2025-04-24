@@ -10,7 +10,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { Label } from '@/view/components/ui/label'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { Combobox } from '@/view/components/Combobox'
-import { Kbd } from '@/view/components/Kbd'
 import { CreateCustomerPopover } from './components/CreateCustomerPopover'
 import { OrderProductTableRow } from './components/OrderProductTableRow'
 
