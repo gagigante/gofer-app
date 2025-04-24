@@ -1,18 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FaInfoCircle, FaTrash, FaInfo } from 'react-icons/fa'
+import { FaInfoCircle, FaInfo } from 'react-icons/fa'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
+import { Table, TableBody, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
-import { Input } from '@/view/components/ui/input'
 import { Textarea } from '@/view/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
+import { Label } from '@/view/components/ui/label'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { Combobox } from '@/view/components/Combobox'
-import { Label } from '@/view/components/ui/label'
 import { CreateCustomerPopover } from './components/CreateCustomerPopover'
-import { QuantityPicker } from './components/QuantityPicker'
+import { OrderProductTableRow } from './components/OrderProductTableRow'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -21,7 +20,7 @@ import { useProductByBarcode } from '@/view/hooks/queries/products'
 import { useCustomers } from '@/view/hooks/queries/customers'
 import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
-import { formatCurrency, formatDecimal } from '@/view/utils/formatters'
+import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
 import { type Product } from '@/api/db/schema'
@@ -33,6 +32,7 @@ interface OrderProduct {
   customPrice: number
   quantity: number
   totalPrice: number
+  obs?: string
 }
 
 export function CreateOrder() {
@@ -147,16 +147,33 @@ export function CreateOrder() {
     )
   }
 
+  function handleUpdateProductNote(id: string, note: string) {
+    setOrderProducts((prevState) =>
+      prevState.map((item) => {
+        if (item.id === id) {
+          return { ...item, obs: note }
+        }
+
+        return item
+      }),
+    )
+  }
+
+  function handleRemoveProductFromOrder(id: string) {
+    setOrderProducts((prevState) => prevState.filter((item) => item.id !== id))
+  }
+
   async function handleCreateOrder() {
     if (!user) return
 
     mutateAsync(
       {
         loggedUserId: user.id,
-        products: orderProducts.map(({ id, quantity, customPrice }) => ({
+        products: orderProducts.map(({ id, quantity, customPrice, obs }) => ({
           id,
           quantity,
           customProductPrice: customPrice,
+          obs,
         })),
         customerId: selectedCustomerId,
         obs: orderObs,
@@ -225,8 +242,8 @@ export function CreateOrder() {
         <div className="grid w-full space-y-2 my-4">
           <Label htmlFor="obs">Observações</Label>
           <Textarea
-            placeholder="Observações"
             id="obs"
+            placeholder="Adicione observações ao pedido"
             value={orderObs}
             onChange={(e) => setOrderObs(e.target.value)}
             onKeyDown={(e) => e.stopPropagation()}
@@ -239,7 +256,7 @@ export function CreateOrder() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead>
+              <TableHead className="min-w-[96px]">
                 Preço unitário
                 <Tooltip>
                   <TooltipTrigger tabIndex={-1}>
@@ -252,7 +269,7 @@ export function CreateOrder() {
                   </TooltipContent>
                 </Tooltip>
               </TableHead>
-              <TableHead>
+              <TableHead className="min-w-[124px]">
                 Preço unitário para o pedido
                 <Tooltip>
                   <TooltipTrigger tabIndex={-1}>
@@ -266,60 +283,26 @@ export function CreateOrder() {
                 </Tooltip>
               </TableHead>
               <TableHead>Qtd.</TableHead>
-              <TableHead>Preço total</TableHead>
-              <TableHead></TableHead>
+              <TableHead className="min-w-[116px]">Preço total</TableHead>
+              <TableHead className="min-w-[116px]"></TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody onKeyDown={(e) => e.stopPropagation()}>
             {orderProducts.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
-              <TableRow key={id}>
-                <TableCell>
-                  <p className="font-medium">{name}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(unityPrice))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <Input
-                    value={formatDecimal(customPrice / 100)}
-                    onChange={(e) => {
-                      const number = Number(e.target.value.replace(',', ''))
-                      if (Number.isNaN(number)) {
-                        e.target.value = '0,00'
-                        handleUpdateProductPrice(id, 0)
-                        return
-                      }
-
-                      const formatted = formatDecimal(number / 100)
-                      e.target.value = formatted
-                      handleUpdateProductPrice(id, number)
-                    }}
-                  />
-                </TableCell>
-
-                <TableCell>
-                  <QuantityPicker onChange={(value) => handleUpdateProductQuantity(id, value)} value={quantity} />
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice))}</p>
-                </TableCell>
-
-                <TableCell className="flex items-end justify-end">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      setOrderProducts((prevState) => prevState.filter((item) => item.id !== id))
-                    }}
-                  >
-                    <FaTrash className="w-3 h-3" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+              <OrderProductTableRow
+                key={id}
+                id={id}
+                name={name}
+                unityPrice={unityPrice}
+                customPrice={customPrice}
+                quantity={quantity}
+                totalPrice={totalPrice}
+                onRequestPriceUpdate={handleUpdateProductPrice}
+                onRequestQuantityUpdate={handleUpdateProductQuantity}
+                onRequestNoteUpdate={handleUpdateProductNote}
+                onRequestRemove={handleRemoveProductFromOrder}
+              />
             ))}
           </TableBody>
         </Table>

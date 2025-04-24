@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { FaInfo } from 'react-icons/fa'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
@@ -112,32 +113,45 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
         </TableHeader>
 
         <TableBody>
-          {data?.products.map(({ productId, name, barCode, currentPrice, price, customPrice, quantity }) => (
-            <TableRow key={productId}>
-              <TableCell>
-                <p className="font-medium">{name}</p>
-              </TableCell>
+          {data?.products.map(({ productId, name, barCode, currentPrice, price, customPrice, quantity, obs }) => (
+            <Fragment key={productId}>
+              <TableRow>
+                <TableCell>
+                  <p className="font-medium">{name}</p>
+                </TableCell>
 
-              <TableCell>
-                <p className="font-medium">{barCode || 'N/A'}</p>
-              </TableCell>
+                <TableCell>
+                  <p className="font-medium">{barCode || 'N/A'}</p>
+                </TableCell>
 
-              <TableCell>
-                <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentPrice ?? 0))}</p>
-              </TableCell>
+                <TableCell>
+                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentPrice ?? 0))}</p>
+                </TableCell>
 
-              <TableCell>
-                <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
-              </TableCell>
+                <TableCell>
+                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
+                </TableCell>
 
-              <TableCell>
-                <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
-              </TableCell>
+                <TableCell>
+                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
+                </TableCell>
 
-              <TableCell>
-                <p className="font-medium">{quantity}</p>
-              </TableCell>
-            </TableRow>
+                <TableCell>
+                  <p className="font-medium">{quantity}</p>
+                </TableCell>
+              </TableRow>
+
+              {obs && (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-4">
+                    <div className="pl-4 space-y-2 border-l-2 border-border">
+                      <Label htmlFor="obs">Notas do produto</Label>
+                      <Textarea placeholder="Adicione uma nota opcional ao produto" value={obs} readOnly />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </Fragment>
           ))}
         </TableBody>
       </Table>

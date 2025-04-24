@@ -96,7 +96,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           <TableRow>
             <TableHead>Cliente</TableHead>
             <TableHead className="min-w-[138px]">Preço do pedido</TableHead>
-            <TableHead className="min-w-[196px]">Data do pedido</TableHead>
+            <TableHead className="min-w-[208px]">Data do pedido</TableHead>
             <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>

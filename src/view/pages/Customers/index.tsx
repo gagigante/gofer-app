@@ -98,10 +98,10 @@ export function Customers() {
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
-              <TableHead className="min-w-[136px]">Telefone</TableHead>
-              <TableHead className="min-w-[160px]">CNPJ</TableHead>
-              <TableHead className="min-w-[132px]">CPF</TableHead>
-              <TableHead className="min-w-[116px]">RG</TableHead>
+              <TableHead className="min-w-[156px]">Telefone</TableHead>
+              <TableHead className="min-w-[172px]">CNPJ</TableHead>
+              <TableHead className="min-w-[140px]">CPF</TableHead>
+              <TableHead className="min-w-[128px]">RG</TableHead>
               <TableHead className="min-w-[160px]"></TableHead>
             </TableRow>
           </TableHeader>
