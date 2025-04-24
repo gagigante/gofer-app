@@ -65,6 +65,7 @@ export const ordersProducts = sqliteTable(
     productPrice: integer('product_price').notNull().default(0),
     customProductPrice: integer('custom_product_price').notNull().default(0),
     quantity: integer('quantity'),
+    obs: text('obs'),
   },
   (table) => {
     return {

@@ -1,0 +1,1 @@
+ALTER TABLE `orders_products` ADD `obs` text;
