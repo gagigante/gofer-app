@@ -15,6 +15,7 @@ interface Data {
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
+  obs: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -23,6 +24,7 @@ interface Data {
     name: string | null
     barCode: string | null
     fastId: number | null
+    obs: string | null
   }>
 }
 
@@ -41,6 +43,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
       customer: Customer | null
       products: ReturnType<typeof formatProducts>
       orderTotal: string
+      orderObs: string | null
     }>(template)
 
     await file.close()
@@ -59,6 +62,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
 
     return {
       data: handlebarsTemplate({
+        orderObs: data.obs,
         customer: formattedCustomer,
         products: formattedProducts,
         orderTotal: formattedOrderTotal,

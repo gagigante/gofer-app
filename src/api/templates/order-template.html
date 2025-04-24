@@ -65,6 +65,23 @@
       gap: 1rem; 
     }
 
+    .order-obs {
+      margin-bottom: 1rem;
+    }
+
+    .order-obs strong {
+      font-size: 12px;
+    }
+
+    .order-obs > div {
+      border: 1px solid #000;
+      padding: 4px;
+    }
+
+    .order-obs textarea {
+      width: 100%;
+    }
+
     .order-products {
       margin-bottom: 1rem;
     }
@@ -81,6 +98,12 @@
       border-top: 1px solid #000;
       border-bottom: 1px solid #000;
       font-size: 0.75rem;
+    }
+
+    .order-products table td div.note {
+      margin-left: 8px;
+      padding-left: 8px;
+      border-left: 1px solid #000;
     }
 
     .order-products table th {
@@ -142,6 +165,15 @@
   </div>
   {{/if}}
 
+  {{#if orderObs}}
+  <div class="order-obs">
+    <strong>Observações</strong>
+    <div>
+      <p>{{orderObs}}</p>
+    </div>
+  </div>
+  {{/if}}
+
   <div class="order-products">
     <table>
       <thead>
@@ -165,6 +197,15 @@
           <td>{{price}}</td>
           <td>{{total}}</td>
         </tr>
+        {{#if obs}}
+        <tr>
+          <td colspan="6">
+            <div class="note">
+              {{obs}}
+            </div>
+          </td>
+        </tr>
+        {{/if}}
         {{/products}}
       </tbody>
     </table>

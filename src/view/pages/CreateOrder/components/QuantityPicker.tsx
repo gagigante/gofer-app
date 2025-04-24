@@ -12,7 +12,7 @@ const MIN = 1
 export function QuantityPicker({ value, onChange }: QuantityPickerProps) {
   return (
     <div className="flex items-center h-10">
-      <Button className="w-10 h-10" onClick={() => onChange(value - 1)} disabled={value === MIN}>
+      <Button size="sm" onClick={() => onChange(value - 1)} disabled={value === MIN}>
         <FiMinus />
       </Button>
 
@@ -26,7 +26,7 @@ export function QuantityPicker({ value, onChange }: QuantityPickerProps) {
         }}
       />
 
-      <Button className="w-10 h-10" onClick={() => onChange(value + 1)}>
+      <Button size="sm" onClick={() => onChange(value + 1)}>
         <FiPlus />
       </Button>
     </div>
