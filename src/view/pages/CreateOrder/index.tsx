@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { FaInfoCircle, FaInfo } from 'react-icons/fa'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
@@ -40,7 +41,7 @@ export function CreateOrder() {
   const { user } = useAuth()
   const { toast } = useToast()
   const { barcode, clearBarcodeState } = useBarcode()
-  const { mutateAsync } = useMutateOnCreateOrder()
+  const { mutateAsync, status } = useMutateOnCreateOrder()
 
   const [customersFilter, setCustomersFilter] = useState('')
   const [orderObs, setOrderObs] = useState('')
@@ -315,7 +316,8 @@ export function CreateOrder() {
         </p>
 
         <div className="flex gap-2 ml-auto">
-          <Button onClick={handleCreateOrder} disabled={orderProducts.length === 0}>
+          <Button onClick={handleCreateOrder} disabled={orderProducts.length === 0 || status === 'pending'}>
+            {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
             Criar pedido
           </Button>
 
