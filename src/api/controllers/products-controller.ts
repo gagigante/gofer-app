@@ -174,7 +174,12 @@ export class ProductsController {
       return { data: null, err }
     }
 
-    // INFO: this not avoid duplicated bar codes due race conditions. There is not a unique constraint because of the bar code can be NULL
+    /**
+     * INFO:
+     * This not avoid duplicated bar codes due race conditions. There is not a unique
+     * constraint because of the bar code can be NULL.
+     * POSSIBLE FIX: `CREATE UNIQUE INDEX unique_product_barcode_not_null ON products(barCode) WHERE barCode IS NOT NULL;`
+     */
     if (barCode) {
       response = await this.productsRepository.getProductByBarCode(barCode.trim())
 
@@ -207,7 +212,12 @@ export class ProductsController {
       cestDescription: cestDescription?.trim(),
     })
 
-    return { data: createdProduct, err: null }
+    if (createdProduct.err) {
+      console.error(createdProduct.err)
+      return { data: null, err: createdProduct.err }
+    }
+
+    return { data: createdProduct.data, err: null }
   }
 
   public async updateProduct({
