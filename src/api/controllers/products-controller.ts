@@ -138,6 +138,7 @@ export class ProductsController {
     return { data: response, err: null }
   }
 
+  // TODO: validate fields
   public async createProduct({
     loggedUserId,
     barCode,
@@ -198,7 +199,7 @@ export class ProductsController {
       fastId: newProductFastId,
       barCode: barCode?.trim() || null,
       name: name.trim(),
-      description: description?.trim(),
+      description: description?.trim() || null,
       price,
       costPrice,
       availableQuantity,
@@ -208,12 +209,11 @@ export class ProductsController {
       icms,
       ncm,
       cest,
-      cestSegment: cestSegment?.trim(),
-      cestDescription: cestDescription?.trim(),
+      cestSegment: cestSegment?.trim() || null,
+      cestDescription: cestDescription?.trim() || null,
     })
 
     if (createdProduct.err) {
-      console.error(createdProduct.err)
       return { data: null, err: createdProduct.err }
     }
 
