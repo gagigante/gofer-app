@@ -28,7 +28,7 @@ export type NewBrand = typeof brands.$inferInsert
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(),
   fastId: integer('fast_id').unique(),
-  barCode: text('bar_code'),
+  barCode: text('bar_code').unique(),
   name: text('name').unique(),
   description: text('description'),
   price: integer('price').notNull().default(0),
