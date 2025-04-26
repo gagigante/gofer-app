@@ -1,0 +1,1 @@
+DROP INDEX `products_bar_code_unique`;
