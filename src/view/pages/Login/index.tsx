@@ -8,6 +8,8 @@ import { Button } from '@/view/components/ui/button'
 
 import { useAuth } from '@/view/hooks/useAuth'
 
+import { version } from '@/../package.json'
+
 export function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -62,11 +64,13 @@ export function Login() {
               required
             />
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col items-end gap-1">
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
               Entrar
             </Button>
+
+            <span className="text-xs text-muted-foreground">v.{version}</span>
           </CardFooter>
         </form>
       </Card>
