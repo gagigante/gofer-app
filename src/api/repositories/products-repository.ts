@@ -1,7 +1,11 @@
 import { asc, count, eq, like, max } from 'drizzle-orm'
+import { type LibsqlError } from '@libsql/client'
 
 import { db } from '../db/client'
 
+import { RepositoryError } from '@/api/errors/RepositoryError'
+
+import { type Response } from '@/api/types/response'
 import { type Brand, type Category, NewProduct, type Product, brands, categories, products } from '../db/schema'
 
 export type ProductWithCategoryAndBrand = Product & { category: Category | null } & { brand: Brand | null }
@@ -104,30 +108,34 @@ export class ProductsRepository {
     cest,
     cestSegment,
     cestDescription,
-  }: NewProduct): Promise<Product> {
-    const [response] = await db
-      .insert(products)
-      .values({
-        id,
-        fastId,
-        barCode,
-        name,
-        description,
-        brandId,
-        price,
-        costPrice,
-        availableQuantity,
-        minimumQuantity,
-        categoryId,
-        icms,
-        ncm,
-        cest,
-        cestSegment,
-        cestDescription,
-      })
-      .returning()
+  }: NewProduct): Promise<Response<Product>> {
+    try {
+      const [response] = await db
+        .insert(products)
+        .values({
+          id,
+          fastId,
+          barCode,
+          name,
+          description,
+          brandId,
+          price,
+          costPrice,
+          availableQuantity,
+          minimumQuantity,
+          categoryId,
+          icms,
+          ncm,
+          cest,
+          cestSegment,
+          cestDescription,
+        })
+        .returning()
 
-    return response
+      return { data: response, err: null }
+    } catch (error) {
+      return { data: null, err: new RepositoryError(error as LibsqlError) }
+    }
   }
 
   public async updateProduct({ id, ...data }: Product): Promise<Product> {

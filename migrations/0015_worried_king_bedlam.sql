@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `products_bar_code_unique` ON `products` (`bar_code`);

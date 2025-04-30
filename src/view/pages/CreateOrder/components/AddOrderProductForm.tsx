@@ -92,7 +92,10 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
           emptyPlaceholder="Nenhum produto encontrado."
           options={products}
           value={selectedProduct}
-          onSelectOption={setSelectedProduct}
+          onSelectOption={(option) => {
+            setSelectedProduct(option)
+            quantityInputRef.current?.focus()
+          }}
           onChangeFilter={setFilter}
         />
       </div>
@@ -106,6 +109,13 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
           type="number"
           min={0}
           value={quantity}
+          onKeyDown={(e) => {
+            e.stopPropagation()
+
+            if (e.key === 'Enter') {
+              handleAddProduct(selectedProduct, quantity)
+            }
+          }}
           onChange={(e) => setQuantity(Number(e.target.value))}
         />
       </div>

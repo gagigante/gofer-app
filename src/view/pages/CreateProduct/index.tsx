@@ -1,8 +1,8 @@
-import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import type * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Loader2 } from 'lucide-react'
 
 import { Form } from '@/view/components/ui/form'
 
@@ -21,7 +21,7 @@ export function CreateProduct() {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync } = useMutateOnCreateProduct()
+  const { mutateAsync, status } = useMutateOnCreateProduct()
 
   const form = useForm<z.infer<typeof createProductSchema>>({
     resolver: zodResolver(createProductSchema),
@@ -109,7 +109,10 @@ export function CreateProduct() {
 
         <footer className="flex px-3 py-4 border-t border-border">
           <div className="flex gap-2 ml-auto">
-            <Button type="submit">Adicionar produto</Button>
+            <Button type="submit" disabled={status === 'pending'}>
+              {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              Adicionar produto
+            </Button>
 
             <Button variant="outline" asChild>
               <Link to=".." relative="path">

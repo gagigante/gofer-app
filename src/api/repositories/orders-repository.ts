@@ -17,12 +17,14 @@ export interface OrderResponse {
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
+  obs: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
     currentPrice: number | null
     price: number | null
     customPrice: number | null
+    obs: string | null
     name: string | null
     barCode: string | null
     fastId: number | null
@@ -69,6 +71,7 @@ export class OrdersRepository {
           quantity: ordersProducts.quantity,
           price: ordersProducts.productPrice,
           customPrice: ordersProducts.customProductPrice,
+          obs: ordersProducts.obs,
           currentPrice: productsSchema.price,
           name: productsSchema.name,
           barCode: productsSchema.barCode,
@@ -102,44 +105,44 @@ export class OrdersRepository {
     totalPrice,
     products,
     customerId,
+    obs,
   }: Omit<NewOrder, 'createdAt'> & {
-    products: Array<{ id: string; quantity: number; customProductPrice: number }>
+    products: Array<{ id: string; quantity: number; customProductPrice: number; obs?: string }>
   }): Promise<Order> {
-    const response = await db.transaction(async (tx) => {
-      const [{ insertedOrderId }] = await tx
-        .insert(orders)
-        .values({ id, totalPrice, customerId })
-        .returning({ insertedOrderId: orders.id })
+    // FIXME: Use transaction
+    const [{ insertedOrderId }] = await db
+      .insert(orders)
+      .values({ id, totalPrice, customerId, obs })
+      .returning({ insertedOrderId: orders.id })
 
-      for (const { id, quantity, customProductPrice } of products) {
-        const product = await tx.select().from(productsSchema).where(eq(productsSchema.id, id)).get()
+    for (const { id, quantity, customProductPrice, obs } of products) {
+      const product = await db.select().from(productsSchema).where(eq(productsSchema.id, id)).get()
 
-        if (!product) {
-          tx.rollback()
-          return
-        }
+      // if (!product) {
+      //   console.error('Product not found')
+      //   throw new Error('Product not found')
+      // }
 
-        const updatedProductAvailableQuantity = (product?.availableQuantity ?? 0) - quantity
+      const updatedProductAvailableQuantity = (product?.availableQuantity ?? 0) - quantity
 
-        await tx
+      await db.batch([
+        db
           .update(productsSchema)
           .set({ availableQuantity: updatedProductAvailableQuantity })
-          .where(eq(productsSchema.id, product.id))
-
-        await tx.insert(ordersProducts).values({
+          .where(eq(productsSchema.id, product!.id)),
+        db.insert(ordersProducts).values({
           orderId: insertedOrderId,
-          productId: product.id,
-          productCostPrice: product.costPrice,
-          productPrice: product.price,
+          productId: product!.id,
+          productCostPrice: product!.costPrice,
+          productPrice: product!.price,
           customProductPrice,
           quantity,
-        })
-      }
+          obs,
+        }),
+      ])
+    }
 
-      const response = await tx.select().from(orders).where(eq(orders.id, insertedOrderId)).get()
-
-      return response
-    })
+    const response = await db.select().from(orders).where(eq(orders.id, insertedOrderId)).get()
 
     return response!
   }

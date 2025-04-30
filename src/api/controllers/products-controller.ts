@@ -7,6 +7,7 @@ import { AuthMiddleware } from '../middlewares/auth'
 import { ProductAlreadyExistsError } from '../errors/ProductAlreadyExistsError'
 import { ProductWithThisBarCodeALreadyExistsError } from '../errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
+import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Product } from '@/api/db/schema'
 import { type Response } from '@/api/types/response'
@@ -40,7 +41,7 @@ export type GetByBarcodeResponse = Response<ProductWithCategoryAndBrand | null>
 
 export interface CreateProductRequest {
   loggedUserId: string
-  barCode: string
+  barCode?: string
   name: string
   description?: string
   price: number
@@ -137,6 +138,7 @@ export class ProductsController {
     return { data: response, err: null }
   }
 
+  // TODO: validate fields
   public async createProduct({
     loggedUserId,
     barCode,
@@ -159,6 +161,12 @@ export class ProductsController {
       return { data: null, err }
     }
 
+    if (name.trim() === '') {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
     let response = await this.productsRepository.getProductByName(name)
 
     if (response) {
@@ -167,8 +175,14 @@ export class ProductsController {
       return { data: null, err }
     }
 
+    /**
+     * INFO:
+     * This not avoid duplicated bar codes due race conditions. There is not a unique
+     * constraint because of the bar code can be NULL.
+     * POSSIBLE FIX: `CREATE UNIQUE INDEX unique_product_barcode_not_null ON products(barCode) WHERE barCode IS NOT NULL;`
+     */
     if (barCode) {
-      response = await this.productsRepository.getProductByBarCode(barCode)
+      response = await this.productsRepository.getProductByBarCode(barCode.trim())
 
       if (response) {
         const err = new ProductWithThisBarCodeALreadyExistsError()
@@ -183,23 +197,27 @@ export class ProductsController {
     const createdProduct = await this.productsRepository.createProduct({
       id: randomUUID(),
       fastId: newProductFastId,
-      barCode,
-      name,
-      description,
+      barCode: barCode?.trim() || null,
+      name: name.trim(),
+      description: description?.trim() || null,
       price,
       costPrice,
       availableQuantity,
       minimumQuantity,
-      categoryId: categoryId ?? null,
-      brandId: brandId ?? null,
+      categoryId: categoryId || null,
+      brandId: brandId || null,
       icms,
       ncm,
       cest,
-      cestSegment,
-      cestDescription,
+      cestSegment: cestSegment?.trim() || null,
+      cestDescription: cestDescription?.trim() || null,
     })
 
-    return { data: createdProduct, err: null }
+    if (createdProduct.err) {
+      return { data: null, err: createdProduct.err }
+    }
+
+    return { data: createdProduct.data, err: null }
   }
 
   public async updateProduct({

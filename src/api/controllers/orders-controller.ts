@@ -38,6 +38,7 @@ export type GetOrderResponse = Response<{
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
+  obs: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -46,6 +47,7 @@ export type GetOrderResponse = Response<{
     customPrice: number | null
     name: string | null
     barCode: string | null
+    obs: string | null
   }>
 }>
 
@@ -58,8 +60,9 @@ export type GetOrderTemplateResponse = Response<{ template: string; order: Order
 
 export interface CreateOrderRequest {
   loggedUserId: string
-  products: Array<{ id: string; quantity: number; customProductPrice: number }>
+  products: Array<{ id: string; quantity: number; customProductPrice: number; obs?: string }>
   customerId?: string
+  obs?: string
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -151,7 +154,12 @@ export class OrdersController {
     return { data: { template, order }, err: null }
   }
 
-  public async createOrder({ loggedUserId, products, customerId }: CreateOrderRequest): Promise<CreateOrderResponse> {
+  public async createOrder({
+    loggedUserId,
+    products,
+    customerId,
+    obs,
+  }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
       return { data: null, err }
@@ -165,31 +173,31 @@ export class OrdersController {
       }
     }
 
-    let mergedProductsMap: Map<string, { id: string; quantity: number; customProductPrice: number }>
+    let mergedProductsMap: Map<string, { id: string; quantity: number; customProductPrice: number; obs?: string }>
 
     try {
-      mergedProductsMap = products.reduce<Map<string, { id: string; quantity: number; customProductPrice: number }>>(
-        (acc, item) => {
-          const existingProduct = acc.get(item.id)
+      mergedProductsMap = products.reduce<
+        Map<string, { id: string; quantity: number; customProductPrice: number; obs?: string }>
+      >((acc, item) => {
+        const existingProduct = acc.get(item.id)
 
-          if (existingProduct) {
-            if (existingProduct.customProductPrice !== item.customProductPrice) {
-              throw new InvalidParamsError()
-            }
-
-            existingProduct.quantity += item.quantity
-          } else {
-            acc.set(item.id, {
-              id: item.id,
-              quantity: item.quantity,
-              customProductPrice: item.customProductPrice,
-            })
+        if (existingProduct) {
+          if (existingProduct.customProductPrice !== item.customProductPrice) {
+            throw new InvalidParamsError()
           }
 
-          return acc
-        },
-        new Map(),
-      )
+          existingProduct.quantity += item.quantity
+        } else {
+          acc.set(item.id, {
+            id: item.id,
+            quantity: item.quantity,
+            customProductPrice: item.customProductPrice,
+            obs: item.obs,
+          })
+        }
+
+        return acc
+      }, new Map())
     } catch (err) {
       return { data: null, err: err as InvalidParamsError }
     }
@@ -216,6 +224,7 @@ export class OrdersController {
       products: Array.from(mergedProductsMap.values()),
       totalPrice,
       customerId,
+      obs,
     })
 
     return { data: response, err: null }

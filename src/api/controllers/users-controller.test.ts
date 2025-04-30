@@ -17,6 +17,148 @@ import { NotFoundError } from '../errors/NotFoundError'
 describe('users-controller', () => {
   const usersController = new UsersController()
 
+  describe('listUsers', () => {
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
+      const response = await usersController.listUsers({
+        loggedUserId: 'non-existing-user-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw WithoutPermissionError if the logged user has role "operator"', async () => {
+      await db.insert(users).values({
+        id: 'operator-user-id',
+        name: 'operator-user',
+        password: 'operator-password',
+        role: 'operator',
+      })
+
+      const response = await usersController.listUsers({
+        loggedUserId: 'operator-user-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should be able to list users', async () => {
+      const USERS = [
+        {
+          id: 'user-1',
+          name: 'a user',
+          password: 'user-password',
+          role: 'operator',
+        },
+        {
+          id: 'user-2',
+          name: 'b user',
+          password: 'user-password',
+          role: 'admin',
+        },
+        {
+          id: 'user-3',
+          name: 'c user',
+          password: 'user-password',
+          role: 'operator',
+        },
+        {
+          id: 'user-4',
+          name: 'd user',
+          password: 'user-password',
+          role: 'admin',
+        },
+      ]
+
+      await db.insert(users).values(USERS)
+
+      await db.insert(users).values({
+        id: 'test-user-id',
+        name: 'test-user',
+        password: 'test-user-password',
+        role: 'super-admin',
+      })
+
+      let response = await usersController.listUsers({
+        loggedUserId: 'test-user-id',
+      })
+
+      expect(response.data?.users).length(5)
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(15)
+      expect(response.err).toBeNull()
+
+      response = await usersController.listUsers({
+        loggedUserId: 'test-user-id',
+        page: 1,
+        itemsPerPage: 2,
+      })
+
+      expect(response.data?.users).length(2)
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(2)
+      expect(response.err).toBeNull()
+
+      response = await usersController.listUsers({
+        loggedUserId: 'test-user-id',
+        page: 2,
+        itemsPerPage: 2,
+      })
+
+      expect(response.data?.users).length(2)
+      expect(response.data?.page).toBe(2)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(2)
+      expect(response.err).toBeNull()
+
+      response = await usersController.listUsers({
+        loggedUserId: 'test-user-id',
+        page: 3,
+        itemsPerPage: 2,
+      })
+
+      expect(response.data?.users).length(1)
+      expect(response.data?.page).toBe(3)
+      expect(response.data?.total).toBe(5)
+      expect(response.data?.itemsPerPage).toBe(2)
+      expect(response.err).toBeNull()
+    })
+
+    test('should be able to list users with filter by name', async () => {
+      const USERS = [
+        {
+          id: 'user-1',
+          name: 'a user',
+          password: 'user-password',
+          role: 'operator',
+        },
+        {
+          id: 'user-2',
+          name: 'b user',
+          password: 'user-password',
+          role: 'admin',
+        },
+      ]
+
+      await db.insert(users).values(USERS)
+
+      const response = await usersController.listUsers({
+        loggedUserId: 'user-2',
+        name: 'a us',
+      })
+
+      expect(response.data?.users).length(1)
+      expect(response.data?.users[0].name).toBe('a user')
+      expect(response.data?.page).toBe(1)
+      expect(response.data?.total).toBe(1)
+      expect(response.data?.itemsPerPage).toBe(15)
+      expect(response.err).toBeNull()
+    })
+  })
+
   describe('createUser', () => {
     test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
       await db.insert(users).values({

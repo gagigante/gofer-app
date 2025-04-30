@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/view/components/ui/card'
 import { Input } from '@/view/components/ui/input'
@@ -7,21 +8,28 @@ import { Button } from '@/view/components/ui/button'
 
 import { useAuth } from '@/view/hooks/useAuth'
 
+import { version } from '@/../package.json'
+
 export function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
 
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   async function handleLogin(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    setIsLoading(true)
 
     const user = await login(name, password)
 
     if (user) {
       navigate('/home')
     }
+
+    setIsLoading(false)
   }
 
   return (
@@ -56,10 +64,13 @@ export function Login() {
               required
             />
           </CardContent>
-          <CardFooter>
-            <Button type="submit" className="w-full">
+          <CardFooter className="flex flex-col items-end gap-1">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
               Entrar
             </Button>
+
+            <span className="text-xs text-muted-foreground">v.{version}</span>
           </CardFooter>
         </form>
       </Card>

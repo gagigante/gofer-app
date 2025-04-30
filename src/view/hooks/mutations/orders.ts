@@ -12,11 +12,12 @@ import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
 export function useMutateOnCreateOrder() {
   return useMutation<CreateOrderResponse['data'], Error, CreateOrderRequest>({
-    mutationFn: async ({ loggedUserId, products, customerId }) => {
+    mutationFn: async ({ loggedUserId, products, customerId, obs }) => {
       const { data, err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.create({
         loggedUserId,
         products,
         customerId,
+        obs,
       })
 
       if (err) {

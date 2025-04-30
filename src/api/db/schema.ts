@@ -51,6 +51,7 @@ export const orders = sqliteTable('orders', {
   customerId: text('customer_id').references(() => customers.id, { onDelete: 'set null' }),
   totalPrice: integer('total_price').notNull().default(0),
   createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+  obs: text('obs'),
 })
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
@@ -64,6 +65,7 @@ export const ordersProducts = sqliteTable(
     productPrice: integer('product_price').notNull().default(0),
     customProductPrice: integer('custom_product_price').notNull().default(0),
     quantity: integer('quantity'),
+    obs: text('obs'),
   },
   (table) => {
     return {
