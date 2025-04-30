@@ -183,7 +183,7 @@ export class UsersController {
     }
 
     if (!currentPassword) {
-      const response = await this.usersRepository.updateUser({ id: loggedUser.id, name: updatedName })
+      const response = await this.usersRepository.updateUser({ id: loggedUser.id, name: updatedName.trim() })
 
       return { data: response, err: null }
     }
@@ -210,7 +210,7 @@ export class UsersController {
 
     const response = await this.usersRepository.updateUser({
       id: loggedUser.id,
-      name: updatedName,
+      name: updatedName.trim(),
       password: hashedNewPassword,
     })
 
