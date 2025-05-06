@@ -4,8 +4,8 @@ import { FaEye, FaFile, FaTrash } from 'react-icons/fa'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Button } from '@/view/components/ui/button'
-import { OrdersDetailsDialog } from './OrdersDetailsDialog'
-import { DeleteOrderAction } from './DeleteOrderAction'
+import { OrdersDetailsDialog } from './components/OrdersDetailsDialog'
+import { DeleteOrderAction } from './components/DeleteOrderAction'
 
 import { useMutateOnDeleteBrand } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'

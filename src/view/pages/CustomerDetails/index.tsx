@@ -11,7 +11,7 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { formatCNPJ, formatCPF, formatPhone, formatRG } from '@/view/utils/formatters'
 import { useOrders } from '@/view/hooks/queries/orders'
 import { Footer } from '@/view/components/Footer'
-import { OrdersTable } from '../Orders/components/OrdersTable'
+import { OrdersTable } from '@/view/components/OrdersTable'
 
 export function CustomerDetails() {
   const { customer_id } = useParams()
