@@ -25,6 +25,7 @@ import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
 import { type Product } from '@/api/db/schema'
+import { type Draft } from '../Orders/components/DraftsTab'
 
 interface OrderProduct {
   id: string
@@ -198,6 +199,47 @@ export function CreateOrder() {
     )
   }
 
+  function handleSaveDraft() {
+    const savedDrafts = localStorage.getItem('@gofer-app/order-draft')
+    const drafts: Draft[] = []
+    let draftId = 1
+
+    if (savedDrafts) {
+      const draftData = JSON.parse(savedDrafts) as Draft[]
+
+      if (draftData.length > 0) {
+        const lastElementId = draftData[draftData.length - 1].id
+        draftId = lastElementId + 1
+      }
+
+      drafts.push(...draftData)
+    }
+
+    const customer = customers.find((item) => item.value === selectedCustomerId)
+
+    const data: Draft = {
+      id: draftId,
+      products: orderProducts.map(({ id, quantity, customPrice, obs }) => ({
+        id,
+        quantity,
+        customProductPrice: customPrice,
+        obs,
+      })),
+      customer: customer ? { id: customer.value, name: customer.label } : undefined,
+      orderTotal,
+      obs: orderObs,
+    }
+
+    localStorage.setItem('@gofer-app/order-draft', JSON.stringify([...drafts, data]))
+
+    toast({
+      title: 'Rascunho salvo com sucesso.',
+      duration: 3000,
+    })
+
+    navigate('..', { relative: 'path' })
+  }
+
   const orderTotal = (() => {
     return orderProducts.reduce((acc, item) => {
       return acc + item.totalPrice
@@ -319,6 +361,10 @@ export function CreateOrder() {
           <Button onClick={handleCreateOrder} disabled={orderProducts.length === 0 || status === 'pending'}>
             {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
             Criar pedido
+          </Button>
+
+          <Button variant="secondary" onClick={handleSaveDraft} disabled={orderProducts.length === 0}>
+            Salvar rascunho
           </Button>
 
           <Button variant="outline" asChild>
