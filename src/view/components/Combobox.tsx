@@ -26,7 +26,7 @@ interface ComboboxProps {
   emptyPlaceholder: string
   value?: Option
   options: Option[]
-  onSelectOption: (product: Option) => void
+  onSelectOption: (option: Option) => void
   onChangeFilter: (search: string) => void
 }
 

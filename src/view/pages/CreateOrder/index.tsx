@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { FaInfoCircle, FaInfo } from 'react-icons/fa'
 
@@ -24,8 +24,13 @@ import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
+import { ORDERS_DRAFT_KEY } from '@/view/constants/LOCALSTORAGE_KEYS'
 import { type Product } from '@/api/db/schema'
-import { type Draft } from '../Orders/components/DraftsTab'
+
+interface CustomerOption {
+  label: string
+  value: string
+}
 
 interface OrderProduct {
   id: string
@@ -37,8 +42,17 @@ interface OrderProduct {
   obs?: string
 }
 
+export interface Draft {
+  id: number
+  products: OrderProduct[]
+  customer: { id: string; name: string } | undefined
+  orderTotal: number
+  obs: string | undefined
+}
+
 export function CreateOrder() {
   const navigate = useNavigate()
+  const { state }: { state?: { selectedDraft: Draft } } = useLocation()
   const { user } = useAuth()
   const { toast } = useToast()
   const { barcode, clearBarcodeState } = useBarcode()
@@ -46,7 +60,7 @@ export function CreateOrder() {
 
   const [customersFilter, setCustomersFilter] = useState('')
   const [orderObs, setOrderObs] = useState('')
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>()
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerOption>()
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
 
   const { data: customersResponse } = useCustomers(
@@ -81,6 +95,23 @@ export function CreateOrder() {
       }
     }
   }, [error])
+
+  useEffect(() => {
+    if (state?.selectedDraft) {
+      setOrderObs(state.selectedDraft.obs ?? '')
+
+      if (state.selectedDraft.customer) {
+        setSelectedCustomer({
+          label: state.selectedDraft.customer.name,
+          value: state.selectedDraft.customer.id,
+        })
+      }
+
+      if (state.selectedDraft.products) {
+        setOrderProducts(state.selectedDraft.products)
+      }
+    }
+  }, [state])
 
   function handleAddProductToOrder({ id, name, price }: Product, quantity: number) {
     setOrderProducts((prevState) => {
@@ -177,7 +208,7 @@ export function CreateOrder() {
           customProductPrice: customPrice,
           obs,
         })),
-        customerId: selectedCustomerId,
+        customerId: selectedCustomer?.value,
         obs: orderObs,
       },
       {
@@ -188,6 +219,7 @@ export function CreateOrder() {
           })
         },
         onSuccess: () => {
+          removeDraft()
           toast({
             title: 'Pedido criado com sucesso.',
             duration: 3000,
@@ -199,11 +231,21 @@ export function CreateOrder() {
     )
   }
 
+  function removeDraft() {
+    const savedDrafts = localStorage.getItem(ORDERS_DRAFT_KEY)
+    if (!savedDrafts || !state?.selectedDraft) return
+
+    const drafts = JSON.parse(savedDrafts) as Draft[]
+    const updatedDrafts = drafts.filter((draft) => draft.id !== state.selectedDraft.id)
+
+    localStorage.setItem(ORDERS_DRAFT_KEY, JSON.stringify(updatedDrafts))
+  }
+
   function handleSaveDraft() {
-    const savedDrafts = localStorage.getItem('@gofer-app/order-draft')
     const drafts: Draft[] = []
     let draftId = 1
 
+    const savedDrafts = localStorage.getItem(ORDERS_DRAFT_KEY)
     if (savedDrafts) {
       const draftData = JSON.parse(savedDrafts) as Draft[]
 
@@ -215,28 +257,50 @@ export function CreateOrder() {
       drafts.push(...draftData)
     }
 
-    const customer = customers.find((item) => item.value === selectedCustomerId)
-
     const data: Draft = {
       id: draftId,
-      products: orderProducts.map(({ id, quantity, customPrice, obs }) => ({
-        id,
-        quantity,
-        customProductPrice: customPrice,
-        obs,
-      })),
-      customer: customer ? { id: customer.value, name: customer.label } : undefined,
+      products: orderProducts,
+      customer: selectedCustomer ? { id: selectedCustomer.value, name: selectedCustomer.label } : undefined,
       orderTotal,
       obs: orderObs,
     }
 
-    localStorage.setItem('@gofer-app/order-draft', JSON.stringify([...drafts, data]))
+    localStorage.setItem(ORDERS_DRAFT_KEY, JSON.stringify([...drafts, data]))
 
     toast({
       title: 'Rascunho salvo com sucesso.',
       duration: 3000,
     })
 
+    navigate('..', { relative: 'path' })
+  }
+
+  function handleUpdateDraft() {
+    const savedDrafts = localStorage.getItem(ORDERS_DRAFT_KEY)
+    if (!savedDrafts) return
+
+    const draftData = JSON.parse(savedDrafts) as Draft[]
+
+    const updatedDrafts = draftData.map((draft) => {
+      if (draft.id === state?.selectedDraft?.id) {
+        return {
+          ...draft,
+          products: orderProducts,
+          customer: selectedCustomer ? { id: selectedCustomer.value, name: selectedCustomer.label } : undefined,
+          orderTotal,
+          obs: orderObs,
+        }
+      }
+
+      return draft
+    })
+
+    localStorage.setItem(ORDERS_DRAFT_KEY, JSON.stringify(updatedDrafts))
+
+    toast({
+      title: 'Rascunho salvo com sucesso.',
+      duration: 3000,
+    })
     navigate('..', { relative: 'path' })
   }
 
@@ -269,8 +333,8 @@ export function CreateOrder() {
                 emptyPlaceholder="Nenhum cliente encontrado."
                 options={customers}
                 onChangeFilter={setCustomersFilter}
-                value={customers.find((item) => item.value === selectedCustomerId)}
-                onSelectOption={({ value }) => setSelectedCustomerId(value)}
+                value={selectedCustomer}
+                onSelectOption={setSelectedCustomer}
               />
             </div>
 
@@ -332,7 +396,7 @@ export function CreateOrder() {
           </TableHeader>
 
           <TableBody onKeyDown={(e) => e.stopPropagation()}>
-            {orderProducts.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
+            {orderProducts.map(({ id, name, unityPrice, customPrice, quantity, totalPrice, obs }) => (
               <OrderProductTableRow
                 key={id}
                 id={id}
@@ -341,6 +405,7 @@ export function CreateOrder() {
                 customPrice={customPrice}
                 quantity={quantity}
                 totalPrice={totalPrice}
+                note={obs}
                 onRequestPriceUpdate={handleUpdateProductPrice}
                 onRequestQuantityUpdate={handleUpdateProductQuantity}
                 onRequestNoteUpdate={handleUpdateProductNote}
@@ -363,7 +428,17 @@ export function CreateOrder() {
             Criar pedido
           </Button>
 
-          <Button variant="secondary" onClick={handleSaveDraft} disabled={orderProducts.length === 0}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (state?.selectedDraft) {
+                handleUpdateDraft()
+              } else {
+                handleSaveDraft()
+              }
+            }}
+            disabled={orderProducts.length === 0}
+          >
             Salvar rascunho
           </Button>
 
