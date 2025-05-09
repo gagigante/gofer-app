@@ -26,6 +26,11 @@ import { parseCentsToDecimal } from '@/view/utils/parsers'
 
 import { type Product } from '@/api/db/schema'
 
+interface CustomerOption {
+  label: string
+  value: string
+}
+
 interface OrderProduct {
   id: string
   name: string
@@ -45,7 +50,7 @@ export function CreateOrder() {
 
   const [customersFilter, setCustomersFilter] = useState('')
   const [orderObs, setOrderObs] = useState('')
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>()
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerOption>()
   const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
 
   const { data: customersResponse } = useCustomers(
@@ -176,7 +181,7 @@ export function CreateOrder() {
           customProductPrice: customPrice,
           obs,
         })),
-        customerId: selectedCustomerId,
+        customerId: selectedCustomer?.value,
         obs: orderObs,
       },
       {
@@ -227,12 +232,12 @@ export function CreateOrder() {
                 emptyPlaceholder="Nenhum cliente encontrado."
                 options={customers}
                 onChangeFilter={setCustomersFilter}
-                value={customers.find((item) => item.value === selectedCustomerId)}
-                onSelectOption={({ value }) => setSelectedCustomerId(value)}
+                value={selectedCustomer}
+                onSelectOption={setSelectedCustomer}
               />
             </div>
 
-            <CreateCustomerPopover />
+            <CreateCustomerPopover onCreateCustomer={(id, name) => setSelectedCustomer({ label: name, value: id })} />
           </div>
         </div>
 
