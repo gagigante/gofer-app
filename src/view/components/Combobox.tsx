@@ -49,7 +49,7 @@ export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxPr
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[320px] p-0" onKeyDown={(e) => e.stopPropagation()}>
+        <PopoverContent className="w-[320px] p-0" align="start" onKeyDown={(e) => e.stopPropagation()}>
           <Command shouldFilter={false}>
             <CommandInput placeholder={searchPlaceholder} value={inputValue} onValueChange={setInputValue} />
             <CommandList>
