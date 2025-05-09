@@ -15,7 +15,7 @@ const root = createRoot(container)
 
 root.render(
   <ReactQueryContext>
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <ThemeProvider>
       <TooltipProvider>
         <ToastContext>
           <AuthProvider>

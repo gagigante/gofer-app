@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { FiHome, FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiShoppingCart, FiBox, FiArchive } from 'react-icons/fi'
+import { FiHome, FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiBox, FiArchive } from 'react-icons/fi'
 
 import { Separator } from '@/view/components/ui/separator'
 import { ScrollArea } from '@/view/components/ui/scroll-area'
@@ -38,8 +38,6 @@ export function Sidebar() {
               {/* </Link> */}
             </Button>
 
-            <Separator className="my-4" />
-
             <Button
               asChild
               variant={pathname.includes('/home/orders') ? 'default' : 'ghost'}
@@ -49,13 +47,6 @@ export function Sidebar() {
                 <FiDollarSign className="w-4 h-4 mr-3" />
                 Pedidos
               </Link>
-            </Button>
-
-            <Button variant="ghost" className="w-full justify-start" disabled>
-              {/* <Link to="/home/budgets"> */}
-              <FiShoppingCart className="w-4 h-4 mr-3" />
-              Orçamentos
-              {/* </Link> */}
             </Button>
 
             <Separator className="my-4" />
