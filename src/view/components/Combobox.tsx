@@ -26,7 +26,7 @@ interface ComboboxProps {
   emptyPlaceholder: string
   value?: Option
   options: Option[]
-  onSelectOption: (product: Option) => void
+  onSelectOption: (option: Option) => void
   onChangeFilter: (search: string) => void
 }
 
@@ -44,7 +44,7 @@ export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxPr
       <Popover open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
         <PopoverTrigger ref={ref} asChild onKeyDown={(e) => e.stopPropagation()}>
           <Button variant="outline" role="combobox" aria-expanded={isOpen} className="w-full justify-between">
-            {!value ? placeholder : (options.find((item) => item.value === value.value)?.label ?? '')}
+            {!value ? placeholder : value.label}
 
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>

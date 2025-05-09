@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import type * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 
+import { FormField } from '@/view/components/ui/form'
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
 import { Label } from '@/view/components/ui/label'
@@ -13,20 +14,26 @@ import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnCreateCustomer } from '@/view/hooks/mutations/customers'
 
+import { formatPhone } from '@/view/utils/formatters'
 import { createCustomerSchema } from './schema'
 
-export function CreateCustomerPopover() {
+interface CreateCustomerPopoverProps {
+  onCreateCustomer: (id: string, name: string) => void
+}
+
+export function CreateCustomerPopover({ onCreateCustomer }: CreateCustomerPopoverProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync } = useMutateOnCreateCustomer()
+  const { mutateAsync, status } = useMutateOnCreateCustomer()
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
-  const { register, handleSubmit, reset } = useForm<z.infer<typeof createCustomerSchema>>({
+  const { control, register, handleSubmit, reset } = useForm<z.infer<typeof createCustomerSchema>>({
     resolver: zodResolver(createCustomerSchema),
     defaultValues: {
       name: '',
+      phone: '',
     },
   })
 
@@ -36,7 +43,11 @@ export function CreateCustomerPopover() {
     await mutateAsync(
       { loggedUserId: user.id, ...value },
       {
-        onSuccess: () => {
+        onSuccess: (response) => {
+          if (!response?.id) return
+
+          onCreateCustomer(response.id, response.name!)
+
           toast({
             title: 'Cliente cadastrado com sucesso.',
             duration: 3000,
@@ -87,8 +98,32 @@ export function CreateCustomerPopover() {
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name">Nome</Label>
+            <Label htmlFor="name">Nome *</Label>
             <Input id="name" className="col-span-3 h-8" placeholder="Nome do cliente" {...register('name')} />
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <FormField
+              control={control}
+              name="phone"
+              render={({ field: { value, onChange, ...rest } }) => (
+                <>
+                  <Label htmlFor="phone">Telefone</Label>
+                  <Input
+                    id="phone"
+                    className="col-span-3 h-8"
+                    placeholder="Telefone do cliente"
+                    value={formatPhone(value ?? '')}
+                    onChange={(e) => {
+                      const formatted = formatPhone(e.target.value)
+                      e.target.value = formatted
+                      onChange(formatted)
+                    }}
+                    {...rest}
+                  />
+                </>
+              )}
+            />
           </div>
 
           <div className="flex justify-end gap-2">
@@ -102,7 +137,10 @@ export function CreateCustomerPopover() {
               Cancelar
             </Button>
 
-            <Button onClick={handleSubmit(onSubmit, onSubmitInvalid)}>Adicionar</Button>
+            <Button onClick={handleSubmit(onSubmit, onSubmitInvalid)} disabled={status === 'pending'}>
+              {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              Adicionar
+            </Button>
           </div>
         </div>
       </PopoverContent>
