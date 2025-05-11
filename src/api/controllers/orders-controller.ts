@@ -39,6 +39,11 @@ export type GetOrderResponse = Response<{
   createdAt: string | null
   customer: Customer | null
   obs: string | null
+  city: string | null
+  complement: string | null
+  neighborhood: string | null
+  street: string | null
+  zipcode: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -63,6 +68,11 @@ export interface CreateOrderRequest {
   products: Array<{ id: string; quantity: number; customProductPrice: number; obs?: string }>
   customerId?: string
   obs?: string
+  city?: string
+  complement?: string
+  neighborhood?: string
+  street?: string
+  zipcode?: string
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -159,6 +169,11 @@ export class OrdersController {
     products,
     customerId,
     obs,
+    city,
+    complement,
+    neighborhood,
+    street,
+    zipcode,
   }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -225,6 +240,11 @@ export class OrdersController {
       totalPrice,
       customerId,
       obs,
+      city,
+      complement,
+      neighborhood,
+      street,
+      zipcode,
     })
 
     return { data: response, err: null }

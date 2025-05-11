@@ -132,6 +132,11 @@ export function CreateOrder() {
         })),
         customerId: data.customer?.id,
         obs: data.obs,
+        city: data.city,
+        complement: data.complement,
+        neighborhood: data.neighborhood,
+        street: data.street,
+        zipcode: data.zipcode,
       },
       {
         onError: () => {
@@ -162,7 +167,7 @@ export function CreateOrder() {
     <FormProvider {...form}>
       <div className="h-full flex flex-col">
         <div className="flex-1 px-3 py-6 overflow-auto">
-          <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Criar novo pedido</h2>
+          <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido</h2>
 
           <Alert>
             <FaInfoCircle className="h-4 w-4" />
@@ -173,10 +178,10 @@ export function CreateOrder() {
           </Alert>
 
           <CustomerFormSection />
-          <AddressFormSection />
           <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
           <ObsFormSection />
           <OrderProductsTable />
+          <AddressFormSection />
         </div>
 
         <footer className="flex items-center px-3 py-4 border-t border-border">
