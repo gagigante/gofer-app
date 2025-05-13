@@ -59,30 +59,31 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
             </p>
           </div>
 
+          <h3 className="mt-8 mb-4 text-lg font-semibold">Endereço da entrega</h3>
           <Card className="p-4 space-y-4">
             <div className="flex gap-4">
               <div className="flex-1">
                 <Label>CEP</Label>
-                <Input placeholder="Digite o CEP para entrega do pedido" value={data.zipcode ?? 'N/A'} readOnly />
+                <Input placeholder="Digite o CEP para entrega do pedido" value={data.zipcode || 'N/A'} readOnly />
               </div>
 
               <div className="flex-1">
                 <Label>Cidade</Label>
-                <Input placeholder="Digite a cidade para entrega do pedido" value={data.city ?? 'N/A'} readOnly />
+                <Input placeholder="Digite a cidade para entrega do pedido" value={data.city || 'N/A'} readOnly />
               </div>
             </div>
 
             <div className="flex gap-4">
               <div className="flex-1">
                 <Label>Logradouro</Label>
-                <Input placeholder="Digite o logradouro para entrega do pedido" value={data.street ?? 'N/A'} readOnly />
+                <Input placeholder="Digite o logradouro para entrega do pedido" value={data.street || 'N/A'} readOnly />
               </div>
 
               <div className="flex-1">
                 <Label>Bairro</Label>
                 <Input
                   placeholder="Digite o bairro para entrega do pedido"
-                  value={data.neighborhood ?? 'N/A'}
+                  value={data.neighborhood || 'N/A'}
                   readOnly
                 />
               </div>
@@ -91,7 +92,7 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
                 <Label>Complemento</Label>
                 <Input
                   placeholder="Digite o complemento para entrega do pedido"
-                  value={data.complement ?? 'N/A'}
+                  value={data.complement || 'N/A'}
                   readOnly
                 />
               </div>
@@ -105,6 +106,7 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
         </>
       )}
 
+      <h3 className="mt-8 mb-4 text-lg font-semibold">Produtos do pedido</h3>
       <Table>
         <TableHeader>
           <TableRow>

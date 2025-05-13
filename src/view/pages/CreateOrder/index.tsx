@@ -177,10 +177,10 @@ export function CreateOrder() {
             </AlertDescription>
           </Alert>
 
-          <CustomerFormSection />
           <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
           <ObsFormSection />
           <OrderProductsTable />
+          <CustomerFormSection />
           <AddressFormSection />
         </div>
 
