@@ -25,6 +25,7 @@ import { parseCentsToDecimal } from '@/view/utils/parsers'
 
 import { createOrderSchema } from './schema'
 import { type Product } from '@/api/db/schema'
+import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
 export function CreateOrder() {
   const navigate = useNavigate()
@@ -145,7 +146,11 @@ export function CreateOrder() {
             duration: 3000,
           })
         },
-        onSuccess: () => {
+        onSuccess: async (response) => {
+          if (!response) return
+
+          await handleDownloadFile(response.id)
+
           toast({
             title: 'Pedido criado com sucesso.',
             duration: 3000,
@@ -155,6 +160,22 @@ export function CreateOrder() {
         },
       },
     )
+  }
+
+  async function handleDownloadFile(orderId: string) {
+    if (!user) return
+
+    const { err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.generateFile({
+      loggedUserId: user.id,
+      orderId,
+    })
+
+    if (err) {
+      toast({
+        title: 'Algo deu errado ao tentar baixar o arquivo. Acesse o arquivo na listagem de pedidos.',
+        duration: 3000,
+      })
+    }
   }
 
   const orderTotal = (() => {
