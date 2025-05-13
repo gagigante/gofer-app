@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { Label } from '@/view/components/ui/label'
+import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
 import { Combobox } from '@/view/components/Combobox'
 
@@ -8,8 +10,6 @@ import { useAuth } from '@/view/hooks/useAuth'
 
 import { type Product } from '@/api/db/schema'
 import { type ProductWithCategoryAndBrand } from '@/api/repositories/products-repository'
-import { Button } from '@/view/components/ui/button'
-import { Label } from '@radix-ui/react-label'
 
 interface ProductOption {
   label: string
@@ -29,7 +29,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
   const [selectedProduct, setSelectedProduct] = useState<ProductOption>()
   const [quantity, setQuantity] = useState(1)
 
-  const { data: productsResponse } = useProducts(
+  const { data: productsResponse, isFetching } = useProducts(
     {
       loggedUserId: user?.id ?? '',
       name: filter,
@@ -82,47 +82,53 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
   }
 
   return (
-    <div className="w-full flex gap-4 items-end">
-      <div className="flex-1 w-full flex flex-col gap-2">
-        <Label>Produto</Label>
+    <div className="flex my-4">
+      <div className="w-full flex gap-4 items-end">
+        <div className="flex-1 w-full flex flex-col gap-2">
+          <Label>Produto *</Label>
 
-        <Combobox
-          placeholder="Selecione um produto"
-          searchPlaceholder="Pesquisar por nome de produto"
-          emptyPlaceholder="Nenhum produto encontrado."
-          options={products}
-          value={selectedProduct}
-          onSelectOption={(option) => {
-            setSelectedProduct(option)
-            quantityInputRef.current?.focus()
-          }}
-          onChangeFilter={setFilter}
-        />
+          <Combobox
+            placeholder="Selecione um produto"
+            searchPlaceholder="Pesquisar por nome de produto"
+            emptyPlaceholder="Nenhum produto encontrado."
+            options={products}
+            isLoading={isFetching}
+            value={selectedProduct}
+            onSelectOption={(option) => {
+              setSelectedProduct(option)
+              quantityInputRef.current?.focus()
+            }}
+            onChangeFilter={setFilter}
+          />
+        </div>
+
+        <div className="w-[140px] flex flex-col gap-2">
+          <Label>Quantidade</Label>
+
+          <Input
+            ref={quantityInputRef}
+            className="w-full"
+            type="number"
+            min={0}
+            value={quantity}
+            onKeyDown={(e) => {
+              e.stopPropagation()
+
+              if (e.key === 'Enter') {
+                handleAddProduct(selectedProduct, quantity)
+              }
+            }}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+          />
+        </div>
+
+        <Button
+          onClick={() => handleAddProduct(selectedProduct, quantity)}
+          disabled={!selectedProduct || quantity === 0}
+        >
+          Adicionar produto
+        </Button>
       </div>
-
-      <div className="w-[140px] flex flex-col gap-2">
-        <Label>Quantidade</Label>
-
-        <Input
-          ref={quantityInputRef}
-          className="w-full"
-          type="number"
-          min={0}
-          value={quantity}
-          onKeyDown={(e) => {
-            e.stopPropagation()
-
-            if (e.key === 'Enter') {
-              handleAddProduct(selectedProduct, quantity)
-            }
-          }}
-          onChange={(e) => setQuantity(Number(e.target.value))}
-        />
-      </div>
-
-      <Button onClick={() => handleAddProduct(selectedProduct, quantity)} disabled={!selectedProduct || quantity === 0}>
-        Adicionar produto
-      </Button>
     </div>
   )
 }

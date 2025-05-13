@@ -10,12 +10,25 @@ import { isElectronInDev } from './isElectronInDev'
 import { type Response } from '@/api/types/response'
 import { type Customer } from '../db/schema'
 
+interface Address {
+  city: string
+  complement: string
+  neighborhood: string
+  street: string
+  zipcode: string
+}
+
 interface Data {
   id: string
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
   obs: string | null
+  city: string | null
+  complement: string | null
+  neighborhood: string | null
+  street: string | null
+  zipcode: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -44,6 +57,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
       products: ReturnType<typeof formatProducts>
       orderTotal: string
       orderObs: string | null
+      address: Address
     }>(template)
 
     await file.close()
@@ -55,15 +69,16 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
       ? Object.entries(data.customer).reduce<Customer>((acc, [key, value]) => {
           return {
             ...acc,
-            [key]: value ?? 'N/A',
+            [key]: value || 'N/A',
           }
         }, {} as Customer)
       : null
 
     return {
       data: handlebarsTemplate({
-        orderObs: data.obs,
         customer: formattedCustomer,
+        address: formatAddress(formattedCustomer),
+        orderObs: data.obs,
         products: formattedProducts,
         orderTotal: formattedOrderTotal,
       }),
@@ -71,6 +86,16 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
     }
   } catch (err) {
     return { data: null, err: err as Error }
+  }
+}
+
+function formatAddress(data: Data['customer']): Address {
+  return {
+    city: data?.city || 'N/A',
+    complement: data?.complement || 'N/A',
+    neighborhood: data?.neighborhood || 'N/A',
+    street: data?.street || 'N/A',
+    zipcode: data?.zipcode || 'N/A',
   }
 }
 

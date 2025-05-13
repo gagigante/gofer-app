@@ -1,45 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { Link, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
-import { FaInfoCircle, FaInfo } from 'react-icons/fa'
+import { FaInfoCircle } from 'react-icons/fa'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
 
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
-import { Table, TableBody, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
-import { Textarea } from '@/view/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
-import { Label } from '@/view/components/ui/label'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
-import { Combobox } from '@/view/components/Combobox'
-import { CreateCustomerPopover } from './components/CreateCustomerPopover'
-import { OrderProductTableRow } from './components/OrderProductTableRow'
+import { CustomerFormSection } from './components/CustomerFormSection'
+import { AddressFormSection } from './components/AddressFormSection'
+import { ObsFormSection } from './components/ObsFormSection'
+import { OrderProductsTable } from './components/OrderProductsTable'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useBarcode } from '@/view/hooks/useBarcode'
 import { useProductByBarcode } from '@/view/hooks/queries/products'
-import { useCustomers } from '@/view/hooks/queries/customers'
 import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
+import { createOrderSchema } from './schema'
 import { type Product } from '@/api/db/schema'
-
-interface CustomerOption {
-  label: string
-  value: string
-}
-
-interface OrderProduct {
-  id: string
-  name: string
-  unityPrice: number
-  customPrice: number
-  quantity: number
-  totalPrice: number
-  obs?: string
-}
+import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
 export function CreateOrder() {
   const navigate = useNavigate()
@@ -48,23 +34,19 @@ export function CreateOrder() {
   const { barcode, clearBarcodeState } = useBarcode()
   const { mutateAsync, status } = useMutateOnCreateOrder()
 
-  const [customersFilter, setCustomersFilter] = useState('')
-  const [orderObs, setOrderObs] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerOption>()
-  const [orderProducts, setOrderProducts] = useState<OrderProduct[]>([])
-
-  const { data: customersResponse } = useCustomers(
-    {
-      loggedUserId: user?.id ?? '',
-      name: customersFilter,
-      page: 1,
+  const form = useForm<z.infer<typeof createOrderSchema>>({
+    resolver: zodResolver(createOrderSchema),
+    defaultValues: {
+      customer: null,
+      obs: '',
+      zipcode: '',
+      city: '',
+      street: '',
+      neighborhood: '',
+      complement: '',
+      products: [],
     },
-    {
-      enabled: !!user,
-      placeholderData: (previousData) => previousData,
-    },
-  )
-  const customers = (customersResponse?.customers ?? []).map((item) => ({ label: item.name!, value: item.id }))
+  })
 
   const { data, error } = useProductByBarcode(
     { loggedUserId: user?.id ?? '', barcode: barcode },
@@ -86,103 +68,81 @@ export function CreateOrder() {
     }
   }, [error])
 
+  const products = form.watch('products')
+
   function handleAddProductToOrder({ id, name, price }: Product, quantity: number) {
-    setOrderProducts((prevState) => {
-      if (prevState.length === 0) {
-        return [
-          {
-            id,
-            name: name ?? '',
-            unityPrice: price ?? 0,
-            customPrice: price ?? 0,
-            quantity,
-            totalPrice: (price ?? 0) * quantity,
-          },
-          ...prevState,
-        ]
-      }
+    if (products.length === 0) {
+      form.setValue('products', [
+        {
+          id,
+          name: name ?? '',
+          unityPrice: price ?? 0,
+          customPrice: price ?? 0,
+          quantity,
+          totalPrice: (price ?? 0) * quantity,
+          obs: '',
+        },
+      ])
+      clearBarcodeState()
+      return
+    }
 
-      const alreadyInOrder = prevState.find((item) => item.id === id)
+    const alreadyInOrder = products.find((item) => item.id === id)
 
-      if (!alreadyInOrder) {
-        return [
-          {
-            id,
-            name: name ?? '',
-            unityPrice: price ?? 0,
-            customPrice: price ?? 0,
-            quantity,
-            totalPrice: (price ?? 0) * quantity,
-          },
-          ...prevState,
-        ]
-      }
+    if (!alreadyInOrder) {
+      form.setValue('products', [
+        {
+          id,
+          name: name ?? '',
+          unityPrice: price ?? 0,
+          customPrice: price ?? 0,
+          quantity,
+          totalPrice: (price ?? 0) * quantity,
+          obs: '',
+        },
+        ...products,
+      ])
+      clearBarcodeState()
+      return
+    }
 
-      return prevState.map((item) => {
-        if (item.id === id) {
-          return { ...item, quantity: item.quantity + quantity }
+    const updatedProducts = products.map((item) => {
+      if (item.id === id) {
+        const newQuantity = item.quantity + quantity
+        return {
+          ...item,
+          quantity: newQuantity,
+          totalPrice: (item.customPrice ?? item.unityPrice) * newQuantity,
         }
+      }
 
-        return item
-      })
+      return item
     })
+
+    form.setValue('products', updatedProducts)
     clearBarcodeState()
+    return
   }
 
-  function handleUpdateProductPrice(id: string, price: number) {
-    setOrderProducts((prevState) =>
-      prevState.map((product) => {
-        if (product.id === id) {
-          return { ...product, customPrice: price, totalPrice: price * product.quantity }
-        }
-
-        return product
-      }),
-    )
-  }
-
-  function handleUpdateProductQuantity(id: string, quantity: number) {
-    setOrderProducts((prevState) =>
-      prevState.map((product) => {
-        if (product.id === id) {
-          return { ...product, quantity, totalPrice: product.customPrice * quantity }
-        }
-
-        return product
-      }),
-    )
-  }
-
-  function handleUpdateProductNote(id: string, note: string) {
-    setOrderProducts((prevState) =>
-      prevState.map((item) => {
-        if (item.id === id) {
-          return { ...item, obs: note }
-        }
-
-        return item
-      }),
-    )
-  }
-
-  function handleRemoveProductFromOrder(id: string) {
-    setOrderProducts((prevState) => prevState.filter((item) => item.id !== id))
-  }
-
-  async function handleCreateOrder() {
+  async function handleCreateOrder(data: z.infer<typeof createOrderSchema>) {
     if (!user) return
 
     mutateAsync(
       {
         loggedUserId: user.id,
-        products: orderProducts.map(({ id, quantity, customPrice, obs }) => ({
+        products: data.products.map(({ id, quantity, customPrice, obs }) => ({
           id,
           quantity,
           customProductPrice: customPrice,
           obs,
         })),
-        customerId: selectedCustomer?.value,
-        obs: orderObs,
+        customerId: data.customer?.id,
+        obs: data.obs,
+        city: data.city,
+        complement: data.complement,
+        neighborhood: data.neighborhood,
+        street: data.street,
+        zipcode: data.zipcode,
       },
       {
         onError: () => {
@@ -191,7 +151,11 @@ export function CreateOrder() {
             duration: 3000,
           })
         },
-        onSuccess: () => {
+        onSuccess: async (response) => {
+          if (!response) return
+
+          await handleDownloadFile(response.id)
+
           toast({
             title: 'Pedido criado com sucesso.',
             duration: 3000,
@@ -203,136 +167,72 @@ export function CreateOrder() {
     )
   }
 
+  async function handleDownloadFile(orderId: string) {
+    if (!user) return
+
+    const { err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.generateFile({
+      loggedUserId: user.id,
+      orderId,
+    })
+
+    if (err) {
+      toast({
+        title: 'Algo deu errado ao tentar baixar o arquivo. Acesse o arquivo na listagem de pedidos.',
+        duration: 3000,
+      })
+    }
+  }
+
   const orderTotal = (() => {
-    return orderProducts.reduce((acc, item) => {
+    return products.reduce((acc, item) => {
       return acc + item.totalPrice
     }, 0)
   })()
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 px-3 py-6 overflow-auto">
-        <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Criar novo pedido</h2>
+    <FormProvider {...form}>
+      <div className="h-full flex flex-col">
+        <div className="flex-1 px-3 py-6 overflow-auto">
+          <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido</h2>
 
-        <Alert>
-          <FaInfoCircle className="h-4 w-4" />
-          <AlertTitle>Busca de produtos por código de barra</AlertTitle>
-          <AlertDescription>
-            Você pode escanear o código de barras de um produto para adiciona-lo ao pedido.
-          </AlertDescription>
-        </Alert>
+          <Alert>
+            <FaInfoCircle className="h-4 w-4" />
+            <AlertTitle>Busca de produtos por código de barra</AlertTitle>
+            <AlertDescription>
+              Você pode escanear o código de barras de um produto para adiciona-lo ao pedido.
+            </AlertDescription>
+          </Alert>
 
-        <div className="flex my-4">
-          <div className="flex flex-1 items-end gap-2">
-            <div className="flex flex-1 flex-col gap-3">
-              <Label>Cliente</Label>
-              <Combobox
-                placeholder="Selecione um cliente"
-                searchPlaceholder="Busque pelo nome do cliente"
-                emptyPlaceholder="Nenhum cliente encontrado."
-                options={customers}
-                onChangeFilter={setCustomersFilter}
-                value={selectedCustomer}
-                onSelectOption={setSelectedCustomer}
-              />
-            </div>
-
-            <CreateCustomerPopover onCreateCustomer={(id, name) => setSelectedCustomer({ label: name, value: id })} />
-          </div>
-        </div>
-
-        <div className="flex my-4">
           <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
+          <ObsFormSection />
+          <OrderProductsTable />
+          <CustomerFormSection />
+          <AddressFormSection />
         </div>
 
-        <div className="grid w-full space-y-2 my-4">
-          <Label htmlFor="obs">Observações</Label>
-          <Textarea
-            id="obs"
-            placeholder="Adicione observações ao pedido"
-            value={orderObs}
-            onChange={(e) => setOrderObs(e.target.value)}
-            onKeyDown={(e) => e.stopPropagation()}
-          />
-        </div>
+        <footer className="flex items-center px-3 py-4 border-t border-border">
+          <p>
+            <strong>Total a pagar: </strong>
+            {formatCurrency(parseCentsToDecimal(orderTotal))}
+          </p>
 
-        <Table>
-          {orderProducts.length === 0 && <TableCaption>Nenhum produto adicionado no pedido.</TableCaption>}
+          <div className="flex gap-2 ml-auto">
+            <Button
+              onClick={form.handleSubmit(handleCreateOrder)}
+              disabled={products.length === 0 || status === 'pending'}
+            >
+              {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              Criar pedido
+            </Button>
 
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead className="min-w-[96px]">
-                Preço unitário
-                <Tooltip>
-                  <TooltipTrigger tabIndex={-1}>
-                    <div className="ml-2 rounded-full border p-[2px]">
-                      <FaInfo className="w-2 h-2" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Preço unitário original para o produto</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableHead>
-              <TableHead className="min-w-[124px]">
-                Preço unitário para o pedido
-                <Tooltip>
-                  <TooltipTrigger tabIndex={-1}>
-                    <div className="ml-2 rounded-full border p-[2px]">
-                      <FaInfo className="w-2 h-2" />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Preço unitário do produto para este pedido</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableHead>
-              <TableHead>Qtd.</TableHead>
-              <TableHead className="min-w-[116px]">Preço total</TableHead>
-              <TableHead className="min-w-[116px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody onKeyDown={(e) => e.stopPropagation()}>
-            {orderProducts.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
-              <OrderProductTableRow
-                key={id}
-                id={id}
-                name={name}
-                unityPrice={unityPrice}
-                customPrice={customPrice}
-                quantity={quantity}
-                totalPrice={totalPrice}
-                onRequestPriceUpdate={handleUpdateProductPrice}
-                onRequestQuantityUpdate={handleUpdateProductQuantity}
-                onRequestNoteUpdate={handleUpdateProductNote}
-                onRequestRemove={handleRemoveProductFromOrder}
-              />
-            ))}
-          </TableBody>
-        </Table>
+            <Button variant="outline" asChild>
+              <Link to=".." relative="path">
+                Cancelar
+              </Link>
+            </Button>
+          </div>
+        </footer>
       </div>
-
-      <footer className="flex items-center px-3 py-4 border-t border-border">
-        <p>
-          <strong>Total a pagar: </strong>
-          {formatCurrency(parseCentsToDecimal(orderTotal))}
-        </p>
-
-        <div className="flex gap-2 ml-auto">
-          <Button onClick={handleCreateOrder} disabled={orderProducts.length === 0 || status === 'pending'}>
-            {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
-            Criar pedido
-          </Button>
-
-          <Button variant="outline" asChild>
-            <Link to=".." relative="path">
-              Cancelar
-            </Link>
-          </Button>
-        </div>
-      </footer>
-    </div>
+    </FormProvider>
   )
 }

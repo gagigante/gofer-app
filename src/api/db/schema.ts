@@ -52,6 +52,11 @@ export const orders = sqliteTable('orders', {
   totalPrice: integer('total_price').notNull().default(0),
   createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
   obs: text('obs'),
+  zipcode: text('zipcode'),
+  city: text('city'),
+  street: text('street'),
+  neighborhood: text('neighborhood'),
+  complement: text('complement'),
 })
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert

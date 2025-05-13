@@ -1,5 +1,7 @@
-import { app, BrowserWindow, dialog, ipcMain } from 'electron'
-import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { writeFile, unlink } from 'node:fs/promises'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 
 import {
   type CreateOrderRequest,
@@ -23,6 +25,49 @@ ipcMain.handle('orders:get', async (_event, data: GetOrderRequest) => await orde
 ipcMain.handle('orders:create', async (_event, data: CreateOrderRequest) => await ordersController.createOrder(data))
 
 ipcMain.handle('orders:delete', async (_event, data: DeleteOrderRequest) => await ordersController.deleteOrder(data))
+
+ipcMain.handle('orders:generate-file', async (_event, data: GetOrderTemplateRequest): Promise<Response<null>> => {
+  const { data: response, err } = await ordersController.getOrderTemplate(data)
+  if (err) {
+    return { data: null, err: new FailToGenerateFileError() }
+  }
+
+  const printWindow = new BrowserWindow({ show: false })
+  try {
+    await printWindow.loadURL(`data:text/html;charset=UTF-8,${encodeURIComponent(response.template)}`)
+  } catch {
+    return { data: null, err: new FailToGenerateFileError() }
+  }
+
+  try {
+    const pdfBuffer = await printWindow.webContents.printToPDF({
+      pageSize: 'A4',
+      landscape: false,
+      displayHeaderFooter: false,
+    })
+
+    const tempFilePath = join(tmpdir(), `order-${Date.now()}.pdf`)
+    await writeFile(tempFilePath, pdfBuffer)
+
+    await shell.openPath(tempFilePath)
+
+    printWindow.close()
+
+    // Clean up the temporary file after a short delay
+    setTimeout(async () => {
+      try {
+        await unlink(tempFilePath)
+      } catch (error) {
+        console.error('Failed to delete temporary file:', error)
+      }
+    }, 1000)
+
+    return { data: null, err: null }
+  } catch (error) {
+    console.log({ error })
+    return { data: null, err: new FailToGenerateFileError() }
+  }
+})
 
 export const ordersHandler = (window: BrowserWindow) => {
   ipcMain.handle(

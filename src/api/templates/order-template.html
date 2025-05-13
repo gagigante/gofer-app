@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8">
@@ -50,17 +50,32 @@
       font-size: 12px;
     }
 
-    .address {
+    .section {
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
       border-bottom: 1px solid #000;
     }
 
-    .address strong {
+    .section strong {
       font-size: 12px;
     }
 
-    .address .content {
+    .section .content {
+      display: flex;
+      gap: 1rem; 
+    }
+    
+    .customer {
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #000;
+    }
+
+    .customer strong {
+      font-size: 12px;
+    }
+
+    .customer .content {
       display: flex;
       gap: 1rem; 
     }
@@ -137,7 +152,7 @@
   </div>
 
   {{#if customer}}
-  <div class="address">
+  <div class="customer">
     <strong>Cliente</strong>
     
     <div class="content">
@@ -153,14 +168,20 @@
         <p>CNPJ: {{customer.cnpj}}</p>
         <p>IE: {{customer.ie}}</p>
       </div>
-      
-      <div>
-        <p>CEP: {{customer.zipcode}}</p>
-        <p>Cidade: {{customer.city}}</p>
-        <p>Bairro: {{customer.neighborhood}}</p>
-        <p>Logradouro: {{customer.street}}</p>
-        <p>Complemento: {{customer.complement}}</p>
-      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if address}}
+  <div class="section">
+    <strong>Endereço do pedido</strong>
+
+    <div class="content">
+      <p>CEP: {{address.zipcode}}</p>
+      <p>Cidade: {{address.city}}</p>
+      <p>Bairro: {{address.neighborhood}}</p>
+      <p>Logradouro: {{address.street}}</p>
+      <p>Complemento: {{address.complement}}</p>
     </div>
   </div>
   {{/if}}
@@ -178,7 +199,6 @@
     <table>
       <thead>
         <tr>
-          <th>Identificador rápido</th>
           <th>Cód. barras</th>
           <th>Nome</th>
           <th>Qtd.</th>
@@ -190,7 +210,6 @@
       <tbody>
         {{#products}}
         <tr>
-          <td>{{fastId}}</td>
           <td>{{barCode}}</td>
           <td>{{name}}</td>
           <td>{{quantity}}</td>

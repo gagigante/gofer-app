@@ -18,6 +18,11 @@ export interface OrderResponse {
   createdAt: string | null
   customer: Customer | null
   obs: string | null
+  city: string | null
+  complement: string | null
+  neighborhood: string | null
+  street: string | null
+  zipcode: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -106,13 +111,18 @@ export class OrdersRepository {
     products,
     customerId,
     obs,
+    city,
+    complement,
+    neighborhood,
+    street,
+    zipcode,
   }: Omit<NewOrder, 'createdAt'> & {
     products: Array<{ id: string; quantity: number; customProductPrice: number; obs?: string }>
   }): Promise<Order> {
     // FIXME: Use transaction
     const [{ insertedOrderId }] = await db
       .insert(orders)
-      .values({ id, totalPrice, customerId, obs })
+      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode })
       .returning({ insertedOrderId: orders.id })
 
     for (const { id, quantity, customProductPrice, obs } of products) {
