@@ -29,7 +29,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
   const [selectedProduct, setSelectedProduct] = useState<ProductOption>()
   const [quantity, setQuantity] = useState(1)
 
-  const { data: productsResponse } = useProducts(
+  const { data: productsResponse, isFetching } = useProducts(
     {
       loggedUserId: user?.id ?? '',
       name: filter,
@@ -92,6 +92,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
             searchPlaceholder="Pesquisar por nome de produto"
             emptyPlaceholder="Nenhum produto encontrado."
             options={products}
+            isLoading={isFetching}
             value={selectedProduct}
             onSelectOption={(option) => {
               setSelectedProduct(option)

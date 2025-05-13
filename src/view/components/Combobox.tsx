@@ -1,5 +1,5 @@
 import { useEffect, useState, forwardRef, ElementRef } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { Check, ChevronsUpDown, Loader2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 
 import { Button } from '@/view/components/ui/button'
@@ -21,6 +21,7 @@ interface Option {
 }
 
 interface ComboboxProps {
+  isLoading?: boolean
   placeholder: string
   searchPlaceholder: string
   emptyPlaceholder: string
@@ -31,7 +32,19 @@ interface ComboboxProps {
 }
 
 export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxProps>(
-  ({ placeholder, searchPlaceholder, emptyPlaceholder, value, options, onSelectOption, onChangeFilter }, ref) => {
+  (
+    {
+      isLoading = false,
+      placeholder,
+      searchPlaceholder,
+      emptyPlaceholder,
+      value,
+      options,
+      onSelectOption,
+      onChangeFilter,
+    },
+    ref,
+  ) => {
     const [isOpen, setIsOpen] = useState(false)
     const [inputValue, setInputValue] = useState('')
     const [search] = useDebounce(inputValue, 250)
@@ -51,7 +64,20 @@ export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxPr
         </PopoverTrigger>
         <PopoverContent className="w-[320px] p-0" align="start" onKeyDown={(e) => e.stopPropagation()}>
           <Command shouldFilter={false}>
-            <CommandInput placeholder={searchPlaceholder} value={inputValue} onValueChange={setInputValue} />
+            <div className="relative">
+              <CommandInput
+                className=""
+                placeholder={searchPlaceholder}
+                value={inputValue}
+                onValueChange={setInputValue}
+              />
+              {isLoading && (
+                <div className="absolute right-0 top-0 bottom-0 flex items-center justify-center">
+                  <Loader2 className="animate-spin w-4 h-4 mr-2 text-muted-foreground" />
+                </div>
+              )}
+            </div>
+
             <CommandList>
               <CommandEmpty>{emptyPlaceholder}</CommandEmpty>
 

@@ -17,7 +17,7 @@ export function CustomerFormSection() {
 
   const [customersFilter, setCustomersFilter] = useState('')
 
-  const { data: customersResponse } = useCustomers(
+  const { data: customersResponse, isFetching } = useCustomers(
     {
       loggedUserId: user?.id ?? '',
       name: customersFilter,
@@ -45,6 +45,7 @@ export function CustomerFormSection() {
                   searchPlaceholder="Busque pelo nome do cliente"
                   emptyPlaceholder="Nenhum cliente encontrado."
                   options={customers}
+                  isLoading={isFetching}
                   onChangeFilter={setCustomersFilter}
                   value={field.value ? { label: field.value.name, value: field.value.id } : undefined}
                   onSelectOption={(option) => field.onChange({ id: option.value, name: option.label })}
