@@ -108,7 +108,12 @@ export function CreateOrder() {
 
     const updatedProducts = products.map((item) => {
       if (item.id === id) {
-        return { ...item, quantity: item.quantity + quantity }
+        const newQuantity = item.quantity + quantity
+        return {
+          ...item,
+          quantity: newQuantity,
+          totalPrice: (item.customPrice ?? item.unityPrice) * newQuantity,
+        }
       }
 
       return item

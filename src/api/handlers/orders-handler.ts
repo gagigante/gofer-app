@@ -51,6 +51,8 @@ ipcMain.handle('orders:generate-file', async (_event, data: GetOrderTemplateRequ
 
     await shell.openPath(tempFilePath)
 
+    printWindow.close()
+
     // Clean up the temporary file after a short delay
     setTimeout(async () => {
       try {
