@@ -64,61 +64,64 @@ export function OrderProductsTable() {
   const products = watch('products')
 
   return (
-    <Table>
-      {products.length === 0 && <TableCaption>Nenhum produto adicionado no pedido.</TableCaption>}
+    <>
+      <h3 className="mt-8 mb-4 text-lg font-semibold">Produtos do pedido</h3>
+      <Table>
+        {products.length === 0 && <TableCaption>Nenhum produto adicionado no pedido.</TableCaption>}
 
-      <TableHeader>
-        <TableRow>
-          <TableHead>Nome</TableHead>
-          <TableHead className="min-w-[96px]">
-            Preço unitário
-            <Tooltip>
-              <TooltipTrigger tabIndex={-1}>
-                <div className="ml-2 rounded-full border p-[2px]">
-                  <FaInfo className="w-2 h-2" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Preço unitário original para o produto</p>
-              </TooltipContent>
-            </Tooltip>
-          </TableHead>
-          <TableHead className="min-w-[124px]">
-            Preço unitário para o pedido
-            <Tooltip>
-              <TooltipTrigger tabIndex={-1}>
-                <div className="ml-2 rounded-full border p-[2px]">
-                  <FaInfo className="w-2 h-2" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Preço unitário do produto para este pedido</p>
-              </TooltipContent>
-            </Tooltip>
-          </TableHead>
-          <TableHead>Qtd.</TableHead>
-          <TableHead className="min-w-[116px]">Preço total</TableHead>
-          <TableHead className="min-w-[116px]"></TableHead>
-        </TableRow>
-      </TableHeader>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nome</TableHead>
+            <TableHead className="min-w-[96px]">
+              Preço unitário
+              <Tooltip>
+                <TooltipTrigger tabIndex={-1}>
+                  <div className="ml-2 rounded-full border p-[2px]">
+                    <FaInfo className="w-2 h-2" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Preço unitário original para o produto</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableHead>
+            <TableHead className="min-w-[124px]">
+              Preço unitário para o pedido
+              <Tooltip>
+                <TooltipTrigger tabIndex={-1}>
+                  <div className="ml-2 rounded-full border p-[2px]">
+                    <FaInfo className="w-2 h-2" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Preço unitário do produto para este pedido</p>
+                </TooltipContent>
+              </Tooltip>
+            </TableHead>
+            <TableHead>Qtd.</TableHead>
+            <TableHead className="min-w-[116px]">Preço total</TableHead>
+            <TableHead className="min-w-[116px]"></TableHead>
+          </TableRow>
+        </TableHeader>
 
-      <TableBody onKeyDown={(e) => e.stopPropagation()}>
-        {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
-          <OrderProductTableRow
-            key={id}
-            id={id}
-            name={name}
-            unityPrice={unityPrice}
-            customPrice={customPrice}
-            quantity={quantity}
-            totalPrice={totalPrice}
-            onRequestPriceUpdate={handleUpdateProductPrice}
-            onRequestQuantityUpdate={handleUpdateProductQuantity}
-            onRequestNoteUpdate={handleUpdateProductNote}
-            onRequestRemove={handleRemoveProductFromOrder}
-          />
-        ))}
-      </TableBody>
-    </Table>
+        <TableBody onKeyDown={(e) => e.stopPropagation()}>
+          {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
+            <OrderProductTableRow
+              key={id}
+              id={id}
+              name={name}
+              unityPrice={unityPrice}
+              customPrice={customPrice}
+              quantity={quantity}
+              totalPrice={totalPrice}
+              onRequestPriceUpdate={handleUpdateProductPrice}
+              onRequestQuantityUpdate={handleUpdateProductQuantity}
+              onRequestNoteUpdate={handleUpdateProductNote}
+              onRequestRemove={handleRemoveProductFromOrder}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </>
   )
 }

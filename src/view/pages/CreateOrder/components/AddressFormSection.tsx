@@ -113,7 +113,7 @@ export function AddressFormSection() {
         </div>
 
         {isFetching && (
-          <div className="absolute m-0 top-0 right-0 bottom-0 left-0 flex items-center justify-center backdrop-blur-md bg-white/30 border border-white/20 shadow-lg">
+          <div className="absolute m-0 top-0 right-0 bottom-0 left-0 flex items-center justify-center backdrop-blur-md bg-muted/20 border border-muted/10 shadow-lg">
             <Loader2 className="animate-spin w-4 h-4 mr-2" />
             Buscando endereço do cliente...
           </div>
