@@ -59,6 +59,104 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
             </p>
           </div>
 
+          <div className="grid w-full gap-1.5 my-4">
+            <Label htmlFor="obs">Observações</Label>
+            <Textarea placeholder="Observações" id="obs" readOnly value={data.obs || 'N/A'} />
+          </div>
+
+          <h3 className="mt-8 mb-4 text-lg font-semibold">Produtos do pedido</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead>Código de barras</TableHead>
+                <TableHead>
+                  Preço unitário atual
+                  <Tooltip>
+                    <TooltipTrigger tabIndex={-1}>
+                      <div className="ml-2 rounded-full border p-[2px]">
+                        <FaInfo className="w-2 h-2" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>O preço de um produto pode variar. Esta coluna representa o preço atual de um produto</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableHead>
+                <TableHead>
+                  Preço unitário
+                  <Tooltip>
+                    <TooltipTrigger tabIndex={-1}>
+                      <div className="ml-2 rounded-full border p-[2px]">
+                        <FaInfo className="w-2 h-2" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Esta coluna representa o preço original de um produto no momento da venda</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableHead>
+                <TableHead>
+                  Preço unitário para o pedido
+                  <Tooltip>
+                    <TooltipTrigger tabIndex={-1}>
+                      <div className="ml-2 rounded-full border p-[2px]">
+                        <FaInfo className="w-2 h-2" />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Esta coluna representa o preço de um produto praticado no momento da venda</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableHead>
+                <TableHead>Quantidade</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {data?.products.map(({ productId, name, barCode, currentPrice, price, customPrice, quantity, obs }) => (
+                <Fragment key={productId}>
+                  <TableRow>
+                    <TableCell>
+                      <p className="font-medium">{name}</p>
+                    </TableCell>
+
+                    <TableCell>
+                      <p className="font-medium">{barCode || 'N/A'}</p>
+                    </TableCell>
+
+                    <TableCell>
+                      <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentPrice ?? 0))}</p>
+                    </TableCell>
+
+                    <TableCell>
+                      <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
+                    </TableCell>
+
+                    <TableCell>
+                      <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
+                    </TableCell>
+
+                    <TableCell>
+                      <p className="font-medium">{quantity}</p>
+                    </TableCell>
+                  </TableRow>
+
+                  {obs && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-4">
+                        <div className="pl-4 space-y-2 border-l-2 border-border">
+                          <Label htmlFor="obs">Notas do produto</Label>
+                          <Textarea placeholder="Adicione uma nota opcional ao produto" value={obs} readOnly />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              ))}
+            </TableBody>
+          </Table>
+
           <h3 className="mt-8 mb-4 text-lg font-semibold">Endereço da entrega</h3>
           <Card className="p-4 space-y-4">
             <div className="flex gap-4">
@@ -98,106 +196,8 @@ export function OrdersDetailsDialog({ orderId, isOpen, onClose }: OrdersDetailsD
               </div>
             </div>
           </Card>
-
-          <div className="grid w-full gap-1.5 my-4">
-            <Label htmlFor="obs">Observações</Label>
-            <Textarea placeholder="Observações" id="obs" readOnly value={data.obs || 'N/A'} />
-          </div>
         </>
       )}
-
-      <h3 className="mt-8 mb-4 text-lg font-semibold">Produtos do pedido</h3>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Código de barras</TableHead>
-            <TableHead>
-              Preço unitário atual
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <div className="ml-2 rounded-full border p-[2px]">
-                    <FaInfo className="w-2 h-2" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>O preço de um produto pode variar. Esta coluna representa o preço atual de um produto</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableHead>
-            <TableHead>
-              Preço unitário
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <div className="ml-2 rounded-full border p-[2px]">
-                    <FaInfo className="w-2 h-2" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Esta coluna representa o preço original de um produto no momento da venda</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableHead>
-            <TableHead>
-              Preço unitário para o pedido
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <div className="ml-2 rounded-full border p-[2px]">
-                    <FaInfo className="w-2 h-2" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Esta coluna representa o preço de um produto praticado no momento da venda</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableHead>
-            <TableHead>Quantidade</TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {data?.products.map(({ productId, name, barCode, currentPrice, price, customPrice, quantity, obs }) => (
-            <Fragment key={productId}>
-              <TableRow>
-                <TableCell>
-                  <p className="font-medium">{name}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{barCode || 'N/A'}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentPrice ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{quantity}</p>
-                </TableCell>
-              </TableRow>
-
-              {obs && (
-                <TableRow>
-                  <TableCell colSpan={6} className="py-4">
-                    <div className="pl-4 space-y-2 border-l-2 border-border">
-                      <Label htmlFor="obs">Notas do produto</Label>
-                      <Textarea placeholder="Adicione uma nota opcional ao produto" value={obs} readOnly />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </Fragment>
-          ))}
-        </TableBody>
-      </Table>
     </Dialog>
   )
 }
