@@ -93,6 +93,7 @@ export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxPr
 
                       onSelectOption(product)
                       setIsOpen(false)
+                      setInputValue('')
                     }}
                   >
                     <Check className={cn('mr-2 h-4 w-4', value?.value === item.value ? 'opacity-100' : 'opacity-0')} />

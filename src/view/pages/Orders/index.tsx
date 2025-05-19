@@ -13,7 +13,7 @@ export function Orders() {
 
   const [pagination, setPagination] = useState(1)
 
-  const { data } = useOrders(
+  const { data, isFetching } = useOrders(
     { loggedUserId: user?.id ?? '', page: pagination },
     {
       enabled: !!user,
@@ -27,7 +27,7 @@ export function Orders() {
       <div className="flex-1 px-3 py-6 overflow-auto">
         <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Pedidos</h2>
 
-        <OrdersTable orders={orders} />
+        <OrdersTable orders={orders} isLoading={isFetching} />
       </div>
 
       <Footer page={pagination} total={data?.total ?? 0} onChange={setPagination}>
