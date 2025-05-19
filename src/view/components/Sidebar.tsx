@@ -51,11 +51,15 @@ export function Sidebar() {
               </Link>
             </Button>
 
-            <Button variant="ghost" className="w-full justify-start" disabled>
-              {/* <Link to="/home/budgets"> */}
-              <FiShoppingCart className="w-4 h-4 mr-3" />
-              Orçamentos
-              {/* </Link> */}
+            <Button
+              asChild
+              variant={pathname.includes('/home/budgets') ? 'default' : 'ghost'}
+              className="w-full justify-start"
+            >
+              <Link to="/home/budgets">
+                <FiShoppingCart className="w-4 h-4 mr-3" />
+                Orçamentos
+              </Link>
             </Button>
 
             <Separator className="my-4" />
