@@ -93,7 +93,7 @@
       padding: 4px;
     }
 
-    .order-obs textarea {
+    .order-obs pre {
       width: 100%;
     }
 
@@ -119,6 +119,7 @@
       margin-left: 8px;
       padding-left: 8px;
       border-left: 1px solid #000;
+      font-size: 12px;
     }
 
     .order-products table th {
@@ -190,7 +191,7 @@
   <div class="order-obs">
     <strong>Observações</strong>
     <div>
-      <p>{{orderObs}}</p>
+      <pre>{{orderObs}}</pre>
     </div>
   </div>
   {{/if}}
@@ -220,7 +221,7 @@
         <tr>
           <td colspan="6">
             <div class="note">
-              {{obs}}
+              <pre>{{obs}}</pre>
             </div>
           </td>
         </tr>
