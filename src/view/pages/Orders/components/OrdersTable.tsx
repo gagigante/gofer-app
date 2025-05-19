@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { FaEye, FaFile, FaTrash } from 'react-icons/fa'
+import { Loader2 } from 'lucide-react'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Button } from '@/view/components/ui/button'
@@ -19,11 +20,12 @@ import { type OrderWithCustomer } from '@/api/repositories/orders-repository'
 
 interface OrdersTableProps {
   orders: OrderWithCustomer[]
+  isLoading?: boolean
 }
 
 const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' })
 
-export function OrdersTable({ orders }: OrdersTableProps) {
+export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
   const { toast } = useToast()
   const { user } = useAuth()
 
@@ -90,7 +92,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   return (
     <>
       <Table>
-        {orders.length === 0 && <TableCaption>Nenhum pedido encontrado.</TableCaption>}
+        {orders.length === 0 && !isLoading && <TableCaption>Nenhum pedido encontrado.</TableCaption>}
 
         <TableHeader>
           <TableRow>
@@ -101,91 +103,109 @@ export function OrdersTable({ orders }: OrdersTableProps) {
           </TableRow>
         </TableHeader>
 
-        <TableBody>
-          {orders.map(({ id, customer, totalPrice, createdAt }) => (
-            <TableRow key={id}>
-              <TableCell>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
-                  </TooltipTrigger>
+        <TableBody className="relative">
+          {isLoading && (
+            <>
+              <div className="absolute top-0 right-0 bottom-0 left-0 ">
+                <div className="h-full flex items-center justify-center backdrop-blur-md bg-muted/20 border border-muted/10 z-10">
+                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                  Buscando pedidos...
+                </div>
+              </div>
 
-                  <TooltipContent>
-                    <p>{customer?.name ?? 'N/A'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
+              <TableRow>
+                <TableCell colSpan={4}>
+                  <div className="h-24"></div>
+                </TableCell>
+              </TableRow>
+            </>
+          )}
 
-              <TableCell>
-                <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
-              </TableCell>
+          {!isLoading &&
+            orders.map(({ id, customer, totalPrice, createdAt }) => (
+              <TableRow key={id}>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
+                    </TooltipTrigger>
 
-              <TableCell>
-                <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
-              </TableCell>
+                    <TooltipContent>
+                      <p>{customer?.name ?? 'N/A'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
 
-              <TableCell className="text-right space-x-1.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedOrderId(id)
-                        setIsOrderDetailsDialogOpen(true)
-                      }}
-                    >
-                      <FaEye className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
+                <TableCell>
+                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
+                </TableCell>
 
-                  <TooltipContent>
-                    <p>Ver detalhes do pedido</p>
-                  </TooltipContent>
-                </Tooltip>
+                <TableCell>
+                  <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
+                </TableCell>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        await handleSaveOrderFile(id)
-                      }}
-                    >
-                      <FaFile className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
+                <TableCell className="text-right space-x-1.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedOrderId(id)
+                          setIsOrderDetailsDialogOpen(true)
+                        }}
+                      >
+                        <FaEye className="w-3 h-3" />
+                      </Button>
+                    </TooltipTrigger>
 
-                  <TooltipContent>
-                    <p>Salvar arquivo do pedido</p>
-                  </TooltipContent>
-                </Tooltip>
+                    <TooltipContent>
+                      <p>Ver detalhes do pedido</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        const order = orders.find((item) => item.id === id)
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          await handleSaveOrderFile(id)
+                        }}
+                      >
+                        <FaFile className="w-3 h-3" />
+                      </Button>
+                    </TooltipTrigger>
 
-                        if (order) {
-                          handleRequestOrderDeletion(order.id)
-                        }
-                      }}
-                    >
-                      <FaTrash className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Salvar arquivo do pedido</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                  <TooltipContent>
-                    <p>Apagar pedido</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
-            </TableRow>
-          ))}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          const order = orders.find((item) => item.id === id)
+
+                          if (order) {
+                            handleRequestOrderDeletion(order.id)
+                          }
+                        }}
+                      >
+                        <FaTrash className="w-3 h-3" />
+                      </Button>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                      <p>Apagar pedido</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
 
