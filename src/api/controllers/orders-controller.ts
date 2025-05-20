@@ -76,6 +76,7 @@ export interface CreateOrderRequest {
   neighborhood?: string
   street?: string
   zipcode?: string
+  draft?: boolean
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -178,6 +179,7 @@ export class OrdersController {
     neighborhood,
     street,
     zipcode,
+    draft = false,
   }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -249,6 +251,7 @@ export class OrdersController {
       neighborhood,
       street,
       zipcode,
+      draft: draft ? 1 : 0,
     })
 
     return { data: response, err: null }

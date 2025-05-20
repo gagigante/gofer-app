@@ -24,6 +24,7 @@ export function useOrders(
         customerId,
         page,
         itemsPerPage,
+        filters,
       })
 
       if (err) {

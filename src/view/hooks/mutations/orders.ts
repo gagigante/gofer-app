@@ -34,7 +34,7 @@ export function useMutateOnCreateOrder() {
   })
 }
 
-export function useMutateOnDeleteBrand() {
+export function useMutateOnDeleteOrder() {
   return useMutation<DeleteOrderResponse['data'], Error, DeleteOrderRequest>({
     mutationFn: async ({ loggedUserId, orderId }) => {
       const { data, err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.delete({

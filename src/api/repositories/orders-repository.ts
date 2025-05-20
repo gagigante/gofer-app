@@ -50,7 +50,9 @@ export class OrdersRepository {
     const filters: SQL[] = []
 
     if (filterOptions.customerId) filters.push(eq(orders.customerId, filterOptions.customerId))
-    if (filterOptions.draft) filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    if (filterOptions.draft !== undefined) {
+      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    }
 
     const response = await db
       .select()
@@ -73,7 +75,9 @@ export class OrdersRepository {
     const filters: SQL[] = []
 
     if (filterOptions.customerId) filters.push(eq(orders.customerId, filterOptions.customerId))
-    if (filterOptions.draft) filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    if (filterOptions.draft !== undefined) {
+      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    }
 
     const [response] = await db
       .select({ count: count() })
@@ -133,13 +137,14 @@ export class OrdersRepository {
     neighborhood,
     street,
     zipcode,
+    draft,
   }: Omit<NewOrder, 'createdAt'> & {
     products: Array<{ id: string; quantity: number; customProductPrice: number; obs?: string }>
   }): Promise<Order> {
     // FIXME: Use transaction
     const [{ insertedOrderId }] = await db
       .insert(orders)
-      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode })
+      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode, draft })
       .returning({ insertedOrderId: orders.id })
 
     for (const { id, quantity, customProductPrice, obs } of products) {

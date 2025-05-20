@@ -8,7 +8,7 @@ import { Button } from '@/view/components/ui/button'
 import { OrdersDetailsDialog } from './OrdersDetailsDialog'
 import { DeleteOrderAction } from './DeleteOrderAction'
 
-import { useMutateOnDeleteBrand } from '@/view/hooks/mutations/orders'
+import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
 
@@ -29,7 +29,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
   const { toast } = useToast()
   const { user } = useAuth()
 
-  const { mutateAsync } = useMutateOnDeleteBrand()
+  const { mutateAsync } = useMutateOnDeleteOrder()
 
   const [selectedOrderId, setSelectedOrderId] = useState<string>()
   const [isOrderDetailsDialogOpen, setIsOrderDetailsDialogOpen] = useState(false)

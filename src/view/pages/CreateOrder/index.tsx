@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 import { FaInfoCircle } from 'react-icons/fa'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -29,10 +29,13 @@ import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
 export function CreateOrder() {
   const navigate = useNavigate()
+  const { state } = useLocation()
   const { user } = useAuth()
   const { toast } = useToast()
   const { barcode, clearBarcodeState } = useBarcode()
   const { mutateAsync, status } = useMutateOnCreateOrder()
+
+  const [actionType, setActionType] = useState<'order' | 'budget' | null>(null)
 
   const form = useForm<z.infer<typeof createOrderSchema>>({
     resolver: zodResolver(createOrderSchema),
@@ -69,6 +72,7 @@ export function CreateOrder() {
   }, [error])
 
   const products = form.watch('products')
+  const comeFromBudgetsPage = (state?.draft ?? false) as boolean
 
   function handleAddProductToOrder({ id, name, price }: Product, quantity: number) {
     if (products.length === 0) {
@@ -127,6 +131,8 @@ export function CreateOrder() {
   async function handleCreateOrder(data: z.infer<typeof createOrderSchema>) {
     if (!user) return
 
+    setActionType('order')
+
     mutateAsync(
       {
         loggedUserId: user.id,
@@ -167,6 +173,52 @@ export function CreateOrder() {
     )
   }
 
+  async function handleCreateBudget(data: z.infer<typeof createOrderSchema>) {
+    if (!user) return
+
+    setActionType('budget')
+
+    mutateAsync(
+      {
+        loggedUserId: user.id,
+        products: data.products.map(({ id, quantity, customPrice, obs }) => ({
+          id,
+          quantity,
+          customProductPrice: customPrice,
+          obs,
+        })),
+        customerId: data.customer?.id,
+        obs: data.obs,
+        city: data.city,
+        complement: data.complement,
+        neighborhood: data.neighborhood,
+        street: data.street,
+        zipcode: data.zipcode,
+        draft: true,
+      },
+      {
+        onError: () => {
+          toast({
+            title: 'Algo deu errado ao tentar criar o orçamento. Tente novamente.',
+            duration: 3000,
+          })
+        },
+        onSuccess: async (response) => {
+          if (!response) return
+
+          await handleDownloadFile(response.id)
+
+          toast({
+            title: 'Orçamento criado com sucesso.',
+            duration: 3000,
+          })
+
+          navigate('/home/budgets')
+        },
+      },
+    )
+  }
+
   async function handleDownloadFile(orderId: string) {
     if (!user) return
 
@@ -193,7 +245,7 @@ export function CreateOrder() {
     <FormProvider {...form}>
       <div className="h-full flex flex-col">
         <div className="flex-1 px-3 py-6 overflow-auto">
-          <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido</h2>
+          <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido ou orçamento</h2>
 
           <Alert>
             <FaInfoCircle className="h-4 w-4" />
@@ -221,12 +273,21 @@ export function CreateOrder() {
               onClick={form.handleSubmit(handleCreateOrder)}
               disabled={products.length === 0 || status === 'pending'}
             >
-              {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              {status === 'pending' && actionType === 'order' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
               Criar pedido
             </Button>
 
+            <Button
+              variant="outline"
+              onClick={form.handleSubmit(handleCreateBudget)}
+              disabled={products.length === 0 || status === 'pending'}
+            >
+              {status === 'pending' && actionType === 'budget' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
+              Criar orçamento
+            </Button>
+
             <Button variant="outline" asChild>
-              <Link to=".." relative="path">
+              <Link to={comeFromBudgetsPage ? '/home/budgets' : '..'} relative="path">
                 Cancelar
               </Link>
             </Button>

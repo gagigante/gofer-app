@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type * as z from 'zod'
-import { FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { Pencil } from 'lucide-react'
+import { FaTrash } from 'react-icons/fa'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
@@ -221,7 +222,7 @@ export function Users() {
                               }
                             }}
                           >
-                            <FaPencilAlt className="w-3 h-3" />
+                            <Pencil className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
 
