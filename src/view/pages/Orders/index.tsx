@@ -14,7 +14,7 @@ export function Orders() {
   const [pagination, setPagination] = useState(1)
 
   const { data, isFetching } = useOrders(
-    { loggedUserId: user?.id ?? '', page: pagination },
+    { loggedUserId: user?.id ?? '', page: pagination, filters: { draft: false } },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,

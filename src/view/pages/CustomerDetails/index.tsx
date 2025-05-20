@@ -25,7 +25,7 @@ export function CustomerDetails() {
   )
 
   const { data: ordersResponse } = useOrders(
-    { loggedUserId: user?.id ?? '', customerId: customer_id ?? '' },
+    { loggedUserId: user?.id ?? '', customerId: customer_id ?? '', filters: { draft: false } },
     { enabled: !!user?.id && !!customer_id },
   )
   const orders = ordersResponse?.orders ?? []

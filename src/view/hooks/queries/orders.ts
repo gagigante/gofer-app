@@ -11,10 +11,10 @@ import {
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 export function useOrders(
-  { loggedUserId, customerId, page = 1, itemsPerPage = ITEMS_PER_PAGE }: ListOrdersRequest,
+  { loggedUserId, customerId, page = 1, itemsPerPage = ITEMS_PER_PAGE, filters }: ListOrdersRequest,
   options?: Omit<UseQueryOptions<ListOrdersResponse['data']>, 'queryKey'>,
 ) {
-  const key = ['orders', JSON.stringify({ customerId, page, itemsPerPage })]
+  const key = ['orders', JSON.stringify({ customerId, page, itemsPerPage, filters })]
 
   return useQuery({
     queryKey: key,

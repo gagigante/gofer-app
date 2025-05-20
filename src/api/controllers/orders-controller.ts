@@ -19,6 +19,9 @@ export interface ListOrdersRequest {
   customerId?: string
   page?: number
   itemsPerPage?: number
+  filters?: {
+    draft?: boolean
+  }
 }
 
 export type ListOrdersResponse = Response<{
@@ -102,6 +105,7 @@ export class OrdersController {
     customerId,
     page = 1,
     itemsPerPage = 15,
+    filters = {},
   }: ListOrdersRequest): Promise<ListOrdersResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -116,8 +120,8 @@ export class OrdersController {
       }
     }
 
-    const total = await this.ordersRepository.countOrders(customerId)
-    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, customerId)
+    const total = await this.ordersRepository.countOrders({ customerId, ...filters })
+    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, { customerId, ...filters })
 
     const data = { orders, total, page, itemsPerPage }
 
