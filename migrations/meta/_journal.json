@@ -127,6 +127,13 @@
       "when": 1746794610796,
       "tag": "0017_unique_toad_men",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "6",
+      "when": 1747760102597,
+      "tag": "0018_smart_lilandra",
+      "breakpoints": true
     }
   ]
 }

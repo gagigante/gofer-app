@@ -57,6 +57,7 @@ export const orders = sqliteTable('orders', {
   street: text('street'),
   neighborhood: text('neighborhood'),
   complement: text('complement'),
+  draft: integer('draft').notNull().default(0),
 })
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert

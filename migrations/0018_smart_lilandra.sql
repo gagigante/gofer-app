@@ -1,0 +1,1 @@
+ALTER TABLE `orders` ADD `draft` integer DEFAULT 0 NOT NULL;
