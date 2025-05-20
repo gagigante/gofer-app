@@ -4,20 +4,20 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/view/components/ui/button'
 import { Alert } from '@/view/components/Alert'
 
-interface DeleteOrderActionProps {
+interface DeleteBudgetActionProps {
   isOpen: boolean
   onDelete: () => Promise<void>
   onClose: () => void
 }
 
-export function DeleteOrderAction({ isOpen, onDelete, onClose }: DeleteOrderActionProps) {
+export function DeleteBudgetAction({ isOpen, onDelete, onClose }: DeleteBudgetActionProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   return (
     <Alert
       isOpen={isOpen}
-      title="Apagar pedido"
-      description="Deseja mesmo apagar este pedido?"
+      title="Apagar orçamento"
+      description="Deseja mesmo apagar este orçamento?"
       cancelButton={
         <Button variant="outline" disabled={isLoading}>
           Cancelar
