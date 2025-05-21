@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
-import * as z from 'zod'
 import { Loader2 } from 'lucide-react'
 
 import { Card } from '@/view/components/ui/card'
@@ -10,11 +9,11 @@ import { FormItem, FormField, FormLabel, FormControl, FormMessage } from '@/view
 import { useCustomer } from '@/view/hooks/queries/customers'
 import { useAuth } from '@/view/hooks/useAuth'
 
-import { createOrderSchema } from '../schema'
+import { type CreateOrderSchema } from '../schema'
 
 export function AddressFormSection() {
   const { user } = useAuth()
-  const { control, watch, setValue } = useFormContext<z.infer<typeof createOrderSchema>>()
+  const { control, watch, setValue } = useFormContext<CreateOrderSchema>()
 
   const customerId = watch('customer')
 

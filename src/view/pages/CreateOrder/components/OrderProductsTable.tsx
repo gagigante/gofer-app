@@ -104,7 +104,7 @@ export function OrderProductsTable() {
         </TableHeader>
 
         <TableBody onKeyDown={(e) => e.stopPropagation()}>
-          {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
+          {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice, obs }) => (
             <OrderProductTableRow
               key={id}
               id={id}
@@ -113,6 +113,7 @@ export function OrderProductsTable() {
               customPrice={customPrice}
               quantity={quantity}
               totalPrice={totalPrice}
+              obs={obs}
               onRequestPriceUpdate={handleUpdateProductPrice}
               onRequestQuantityUpdate={handleUpdateProductQuantity}
               onRequestNoteUpdate={handleUpdateProductNote}

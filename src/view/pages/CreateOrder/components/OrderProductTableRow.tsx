@@ -20,6 +20,7 @@ interface OrderProductTableRowProps {
   customPrice: number
   quantity: number
   totalPrice: number
+  obs: string
   onRequestPriceUpdate: (id: string, price: number) => void
   onRequestQuantityUpdate: (id: string, quantity: number) => void
   onRequestRemove: (id: string) => void
@@ -37,9 +38,10 @@ export function OrderProductTableRow({
   onRequestQuantityUpdate,
   onRequestRemove,
   onRequestNoteUpdate,
+  obs,
 }: OrderProductTableRowProps) {
-  const [productNote, setProductNote] = useState<string | undefined>(undefined)
-  const [hasNote, setHasNote] = useState(false)
+  const [productNote, setProductNote] = useState<string | undefined>(obs)
+  const [hasNote, setHasNote] = useState(!!obs)
 
   return (
     <>
@@ -97,6 +99,7 @@ export function OrderProductTableRow({
 
                   if (!updatedHasNote) {
                     setProductNote(undefined)
+                    onRequestNoteUpdate(id, '')
                   }
                   setHasNote(updatedHasNote)
                 }}
