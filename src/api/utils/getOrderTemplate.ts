@@ -77,7 +77,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
     return {
       data: handlebarsTemplate({
         customer: formattedCustomer,
-        address: formatAddress(formattedCustomer),
+        address: formatAddress(data),
         orderObs: data.obs,
         products: formattedProducts,
         orderTotal: formattedOrderTotal,
@@ -89,7 +89,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
   }
 }
 
-function formatAddress(data: Data['customer']): Address {
+function formatAddress(data: Data): Address {
   return {
     city: data?.city || 'N/A',
     complement: data?.complement || 'N/A',
