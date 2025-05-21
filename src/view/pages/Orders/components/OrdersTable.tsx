@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
-import { FaEye, FaFile, FaTrash } from 'react-icons/fa'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Eye, FileText, Trash2 } from 'lucide-react'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Button } from '@/view/components/ui/button'
@@ -155,7 +154,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
                           setIsOrderDetailsDialogOpen(true)
                         }}
                       >
-                        <FaEye className="w-3 h-3" />
+                        <Eye className="w-3 h-3" />
                       </Button>
                     </TooltipTrigger>
 
@@ -173,7 +172,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
                           await handleSaveOrderFile(id)
                         }}
                       >
-                        <FaFile className="w-3 h-3" />
+                        <FileText className="w-3 h-3" />
                       </Button>
                     </TooltipTrigger>
 
@@ -195,7 +194,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
                           }
                         }}
                       >
-                        <FaTrash className="w-3 h-3" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </TooltipTrigger>
 

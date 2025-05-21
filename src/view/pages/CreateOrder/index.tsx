@@ -160,14 +160,14 @@ export function CreateOrder() {
         onSuccess: async (response) => {
           if (!response) return
 
-          await handleDownloadFile(response.id)
-
           toast({
             title: 'Pedido criado com sucesso.',
             duration: 3000,
           })
 
           navigate('..', { relative: 'path' })
+
+          await handleDownloadFile(response.id)
         },
       },
     )
@@ -206,14 +206,14 @@ export function CreateOrder() {
         onSuccess: async (response) => {
           if (!response) return
 
-          await handleDownloadFile(response.id)
-
           toast({
             title: 'Orçamento criado com sucesso.',
             duration: 3000,
           })
 
           navigate('/home/budgets')
+
+          await handleDownloadFile(response.id)
         },
       },
     )
@@ -286,8 +286,8 @@ export function CreateOrder() {
               Criar orçamento
             </Button>
 
-            <Button variant="outline" asChild>
-              <Link to={comeFromBudgetsPage ? '/home/budgets' : '..'} relative="path">
+            <Button variant="outline" disabled={status === 'pending'} asChild={status === 'pending' ? false : true}>
+              <Link to={cameFromBudgetsPage ? '/home/budgets' : '..'} relative="path">
                 Cancelar
               </Link>
             </Button>
