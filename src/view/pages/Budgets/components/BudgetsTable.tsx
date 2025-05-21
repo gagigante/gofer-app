@@ -170,7 +170,7 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
                     icon={<Pencil className="w-3 h-3" />}
                     variant="outline"
                     tooltip="Criar pedido a partir do rascunho ou editar orçamento"
-                    customLoading={isOrderLoading}
+                    customLoading={isOrderLoading && selectedOrderId === id}
                     onClick={() => {
                       setSelectedOrderId(id)
                     }}

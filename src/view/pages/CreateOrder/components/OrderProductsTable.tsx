@@ -1,15 +1,14 @@
 import { FaInfo } from 'react-icons/fa'
-import * as z from 'zod'
 import { useFormContext } from 'react-hook-form'
 
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { OrderProductTableRow } from './OrderProductTableRow'
 
-import { createOrderSchema } from '../schema'
+import { type CreateOrderSchema } from '../schema'
 
 export function OrderProductsTable() {
-  const { getValues, setValue, watch } = useFormContext<z.infer<typeof createOrderSchema>>()
+  const { getValues, setValue, watch } = useFormContext<CreateOrderSchema>()
 
   function handleUpdateProductPrice(id: string, price: number) {
     const products = getValues('products')

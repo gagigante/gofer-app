@@ -25,3 +25,5 @@ export const createOrderSchema = z.object({
   neighborhood: z.string(),
   complement: z.string(),
 })
+
+export type CreateOrderSchema = z.infer<typeof createOrderSchema>
