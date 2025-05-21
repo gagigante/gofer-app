@@ -69,13 +69,13 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
       {
         onSuccess: () => {
           toast({
-            title: 'Pedido removido com sucesso.',
+            title: 'Orçamento removido com sucesso.',
             duration: 3000,
           })
         },
         onError: () => {
           toast({
-            title: 'Houve um erro ao apagar o pedido. Tente novamente.',
+            title: 'Houve um erro ao apagar o orçamento. Tente novamente.',
             duration: 3000,
           })
         },

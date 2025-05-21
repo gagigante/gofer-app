@@ -3,7 +3,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Loader2, Eye, FileText, Trash2 } from 'lucide-react'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
-import { Button } from '@/view/components/ui/button'
+import { TableActionButton } from '@/view/components/TableActionButton'
 import { OrdersDetailsDialog } from './OrdersDetailsDialog'
 import { DeleteOrderAction } from './DeleteOrderAction'
 
@@ -144,64 +144,37 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
                 </TableCell>
 
                 <TableCell className="text-right space-x-1.5">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedOrderId(id)
-                          setIsOrderDetailsDialogOpen(true)
-                        }}
-                      >
-                        <Eye className="w-3 h-3" />
-                      </Button>
-                    </TooltipTrigger>
+                  <TableActionButton
+                    icon={<Eye className="w-3 h-3" />}
+                    variant="outline"
+                    tooltip="Ver detalhes do pedido"
+                    onClick={() => {
+                      setSelectedOrderId(id)
+                      setIsOrderDetailsDialogOpen(true)
+                    }}
+                  />
 
-                    <TooltipContent>
-                      <p>Ver detalhes do pedido</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <TableActionButton
+                    icon={<FileText className="w-3 h-3" />}
+                    variant="outline"
+                    tooltip="Salvar arquivo do pedido"
+                    onClick={async () => {
+                      await handleSaveOrderFile(id)
+                    }}
+                  />
 
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          await handleSaveOrderFile(id)
-                        }}
-                      >
-                        <FileText className="w-3 h-3" />
-                      </Button>
-                    </TooltipTrigger>
+                  <TableActionButton
+                    icon={<Trash2 className="w-3 h-3" />}
+                    variant="destructive"
+                    tooltip="Apagar pedido"
+                    onClick={() => {
+                      const order = orders.find((item) => item.id === id)
 
-                    <TooltipContent>
-                      <p>Salvar arquivo do pedido</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => {
-                          const order = orders.find((item) => item.id === id)
-
-                          if (order) {
-                            handleRequestOrderDeletion(order.id)
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>
-                      <p>Apagar pedido</p>
-                    </TooltipContent>
-                  </Tooltip>
+                      if (order) {
+                        handleRequestOrderDeletion(order.id)
+                      }
+                    }}
+                  />
                 </TableCell>
               </TableRow>
             ))}
