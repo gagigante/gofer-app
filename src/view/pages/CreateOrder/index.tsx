@@ -76,7 +76,7 @@ export function CreateOrder() {
         unityPrice: product.price ?? 0,
         customPrice: product.customPrice ?? 0,
         quantity: product.quantity ?? 0,
-        totalPrice: (product.price ?? 0) * (product.quantity ?? 0),
+        totalPrice: (product.customPrice ?? 0) * (product.quantity ?? 0),
         obs: product.obs ?? '',
       }))
     }

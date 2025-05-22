@@ -16,10 +16,10 @@ import { type Response } from '../types/response'
 
 export interface ListOrdersRequest {
   loggedUserId: string
-  customerId?: string
   page?: number
   itemsPerPage?: number
   filters?: {
+    customerId?: string
     draft?: boolean
   }
 }
@@ -103,7 +103,6 @@ export class OrdersController {
 
   public async listOrders({
     loggedUserId,
-    customerId,
     page = 1,
     itemsPerPage = 15,
     filters = {},
@@ -113,16 +112,16 @@ export class OrdersController {
       return { data: null, err }
     }
 
-    if (customerId) {
-      const customer = await this.customersRepository.getCustomerById(customerId)
+    if (filters.customerId) {
+      const customer = await this.customersRepository.getCustomerById(filters.customerId)
 
       if (!customer) {
         return { data: null, err: new NotFoundError() }
       }
     }
 
-    const total = await this.ordersRepository.countOrders({ customerId, ...filters })
-    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, { customerId, ...filters })
+    const total = await this.ordersRepository.countOrders(filters)
+    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, filters)
 
     const data = { orders, total, page, itemsPerPage }
 

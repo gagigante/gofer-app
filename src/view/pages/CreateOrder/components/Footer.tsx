@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, type NavigateOptions } from 'react-router-dom'
 import { useFormContext } from 'react-hook-form'
 
 import { Button } from '@/view/components/ui/button'
@@ -35,10 +35,16 @@ export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
 
   const hasDraft = !!draftOrderId
 
-  async function handleCreateOrder(data: CreateOrderSchema) {
+  async function handleCreate(
+    data: CreateOrderSchema,
+    isDraft: boolean,
+    successMessage: string,
+    errorMessage: string,
+    navigateOptions: { to: string; options?: NavigateOptions },
+  ) {
     if (!user) return
 
-    setActionType('order')
+    setActionType(isDraft ? 'budget' : 'order')
 
     if (hasDraft) {
       try {
@@ -51,7 +57,7 @@ export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
           // Continue execution since NotFoundError is tolerable
         } else {
           toast({
-            title: 'Algo deu errado ao tentar criar o pedido. Tente novamente.',
+            title: errorMessage,
             duration: 3000,
           })
           return
@@ -75,11 +81,12 @@ export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
         neighborhood: data.neighborhood,
         street: data.street,
         zipcode: data.zipcode,
+        draft: isDraft,
       },
       {
         onError: () => {
           toast({
-            title: 'Algo deu errado ao tentar criar o pedido. Tente novamente.',
+            title: errorMessage,
             duration: 3000,
           })
         },
@@ -87,11 +94,11 @@ export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
           if (!response) return
 
           toast({
-            title: 'Pedido criado com sucesso.',
+            title: successMessage,
             duration: 3000,
           })
 
-          navigate('..', { relative: 'path' })
+          navigate(navigateOptions.to, navigateOptions.options)
 
           await handleDownloadFile(response.id)
         },
@@ -99,68 +106,23 @@ export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
     )
   }
 
+  async function handleCreateOrder(data: CreateOrderSchema) {
+    await handleCreate(
+      data,
+      false,
+      'Pedido criado com sucesso.',
+      'Algo deu errado ao tentar criar o pedido. Tente novamente.',
+      { to: '..', options: { relative: 'path' } },
+    )
+  }
+
   async function handleCreateBudget(data: CreateOrderSchema) {
-    if (!user) return
-
-    setActionType('budget')
-
-    if (hasDraft) {
-      try {
-        await mutateOnDeleteOrder({
-          loggedUserId: user.id,
-          orderId: draftOrderId,
-        })
-      } catch (error) {
-        if (error instanceof Error && error.message === 'NotFoundError') {
-          // Continue execution since NotFoundError is tolerable
-        } else {
-          toast({
-            title: 'Algo deu errado ao tentar criar o orçamento. Tente novamente.',
-            duration: 3000,
-          })
-          return
-        }
-      }
-    }
-
-    mutateOnCreateOrder(
-      {
-        loggedUserId: user.id,
-        products: data.products.map(({ id, quantity, customPrice, obs }) => ({
-          id,
-          quantity,
-          customProductPrice: customPrice,
-          obs,
-        })),
-        customerId: data.customer?.id,
-        obs: data.obs,
-        city: data.city,
-        complement: data.complement,
-        neighborhood: data.neighborhood,
-        street: data.street,
-        zipcode: data.zipcode,
-        draft: true,
-      },
-      {
-        onError: () => {
-          toast({
-            title: 'Algo deu errado ao tentar criar o orçamento. Tente novamente.',
-            duration: 3000,
-          })
-        },
-        onSuccess: async (response) => {
-          if (!response) return
-
-          toast({
-            title: 'Orçamento criado com sucesso.',
-            duration: 3000,
-          })
-
-          navigate('/home/budgets')
-
-          await handleDownloadFile(response.id)
-        },
-      },
+    await handleCreate(
+      data,
+      true,
+      'Orçamento criado com sucesso.',
+      'Algo deu errado ao tentar criar o orçamento. Tente novamente.',
+      { to: '/home/budgets' },
     )
   }
 

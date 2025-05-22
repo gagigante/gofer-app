@@ -11,17 +11,16 @@ import {
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 export function useOrders(
-  { loggedUserId, customerId, page = 1, itemsPerPage = ITEMS_PER_PAGE, filters }: ListOrdersRequest,
+  { loggedUserId, page = 1, itemsPerPage = ITEMS_PER_PAGE, filters }: ListOrdersRequest,
   options?: Omit<UseQueryOptions<ListOrdersResponse['data']>, 'queryKey'>,
 ) {
-  const key = ['orders', JSON.stringify({ customerId, page, itemsPerPage, filters })]
+  const key = ['orders', JSON.stringify({ page, itemsPerPage, filters })]
 
   return useQuery({
     queryKey: key,
     queryFn: async () => {
       const { data, err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.list({
         loggedUserId,
-        customerId,
         page,
         itemsPerPage,
         filters,
