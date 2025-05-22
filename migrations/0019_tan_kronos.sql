@@ -1,0 +1,1 @@
+CREATE INDEX `draft_idx` ON `orders` (`draft`);

@@ -134,6 +134,13 @@
       "when": 1747760102597,
       "tag": "0018_smart_lilandra",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1747940012550,
+      "tag": "0019_tan_kronos",
+      "breakpoints": true
     }
   ]
 }
