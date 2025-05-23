@@ -3,6 +3,7 @@ import { createHashRouter } from 'react-router-dom'
 import { Login } from '@/view/pages/Login'
 import { Home } from '@/view/pages/Home'
 import { Users } from '@/view/pages/Users'
+import { Budgets } from '@/view/pages/Budgets'
 import { Orders } from '@/view/pages/Orders'
 import { CreateOrder } from '@/view/pages/CreateOrder'
 import { CreateCustomer } from '@/view/pages/CreateCustomer'
@@ -40,6 +41,10 @@ export const router = createHashRouter([
       {
         path: 'orders',
         element: <Orders />,
+      },
+      {
+        path: 'budgets',
+        element: <Budgets />,
       },
       {
         path: 'orders/new',

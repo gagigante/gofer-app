@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { text, sqliteTable, integer, primaryKey } from 'drizzle-orm/sqlite-core'
+import { text, sqliteTable, integer, primaryKey, index } from 'drizzle-orm/sqlite-core'
 
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -46,18 +46,27 @@ export const products = sqliteTable('products', {
 export type Product = typeof products.$inferSelect
 export type NewProduct = typeof products.$inferInsert
 
-export const orders = sqliteTable('orders', {
-  id: text('id').primaryKey(),
-  customerId: text('customer_id').references(() => customers.id, { onDelete: 'set null' }),
-  totalPrice: integer('total_price').notNull().default(0),
-  createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
-  obs: text('obs'),
-  zipcode: text('zipcode'),
-  city: text('city'),
-  street: text('street'),
-  neighborhood: text('neighborhood'),
-  complement: text('complement'),
-})
+export const orders = sqliteTable(
+  'orders',
+  {
+    id: text('id').primaryKey(),
+    customerId: text('customer_id').references(() => customers.id, { onDelete: 'set null' }),
+    totalPrice: integer('total_price').notNull().default(0),
+    createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
+    obs: text('obs'),
+    zipcode: text('zipcode'),
+    city: text('city'),
+    street: text('street'),
+    neighborhood: text('neighborhood'),
+    complement: text('complement'),
+    draft: integer('draft').notNull().default(0),
+  },
+  (table) => {
+    return {
+      draftIdx: index('draft_idx').on(table.draft),
+    }
+  },
+)
 export type Order = typeof orders.$inferSelect
 export type NewOrder = typeof orders.$inferInsert
 

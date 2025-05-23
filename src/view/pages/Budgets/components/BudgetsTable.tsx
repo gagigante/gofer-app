@@ -1,38 +1,90 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Loader2, Pencil, FileText, Trash2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
-import { Loader2, Eye, FileText, Trash2 } from 'lucide-react'
-
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { TableActionButton } from '@/view/components/TableActionButton'
-import { OrdersDetailsDialog } from './OrdersDetailsDialog'
-import { DeleteOrderAction } from './DeleteOrderAction'
+import { DeleteBudgetAction } from './DeleteBudgetAction'
 
-import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
+import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
+import { useOrder } from '@/view/hooks/queries/orders'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
-import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
+import { apiName, type OrdersApi } from '@/api/exposes/orders-api'
 import { type OrderWithCustomer } from '@/api/repositories/orders-repository'
 
-interface OrdersTableProps {
+interface BudgetsTableProps {
   orders: OrderWithCustomer[]
   isLoading?: boolean
 }
 
 const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' })
 
-export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
-  const { toast } = useToast()
+export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
+  const navigate = useNavigate()
   const { user } = useAuth()
+  const { toast } = useToast()
+
+  const [selectedOrderId, setSelectedOrderId] = useState<string>()
+  const [orderToDeleteId, setOrderToDeleteId] = useState<string>()
+  const [isDeleteBudgetDialogOpen, setIsDeleteBudgetDialogOpen] = useState(false)
 
   const { mutateAsync } = useMutateOnDeleteOrder()
 
-  const [selectedOrderId, setSelectedOrderId] = useState<string>()
-  const [isOrderDetailsDialogOpen, setIsOrderDetailsDialogOpen] = useState(false)
-  const [isDeleteOrderDialogOpen, setIsDeleteOrderDialogOpen] = useState(false)
+  const { data: order, isLoading: isOrderLoading } = useOrder(
+    { loggedUserId: user?.id ?? '', orderId: selectedOrderId ?? '' },
+    {
+      staleTime: 0,
+      enabled: !!selectedOrderId && !!user,
+    },
+  )
+
+  useEffect(() => {
+    if (order) {
+      handleCreateOrderFromDraft()
+    }
+  }, [order])
+
+  function handleCreateOrderFromDraft() {
+    if (!order) return
+
+    navigate('/home/orders/new', { state: { draft: true, draftData: order } })
+  }
+
+  function handleRequestBudgetDeletion(orderId: string) {
+    setOrderToDeleteId(orderId)
+    setIsDeleteBudgetDialogOpen(true)
+  }
+
+  async function handleDeleteBudget() {
+    if (!orderToDeleteId || !user) return
+
+    await mutateAsync(
+      { loggedUserId: user.id, orderId: orderToDeleteId },
+      {
+        onSuccess: () => {
+          toast({
+            title: 'Orçamento removido com sucesso.',
+            duration: 3000,
+          })
+        },
+        onError: () => {
+          toast({
+            title: 'Houve um erro ao apagar o orçamento. Tente novamente.',
+            duration: 3000,
+          })
+        },
+      },
+    )
+
+    setIsDeleteBudgetDialogOpen(false)
+    setOrderToDeleteId(undefined)
+  }
 
   async function handleSaveOrderFile(orderId: string) {
     if (!user) return
@@ -58,46 +110,16 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
     })
   }
 
-  function handleRequestOrderDeletion(orderId: string) {
-    setSelectedOrderId(orderId)
-    setIsDeleteOrderDialogOpen(true)
-  }
-
-  async function handleDeleteOrder() {
-    if (!selectedOrderId || !user) return
-
-    await mutateAsync(
-      { loggedUserId: user.id, orderId: selectedOrderId },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Pedido removido com sucesso.',
-            duration: 3000,
-          })
-        },
-        onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar o pedido. Tente novamente.',
-            duration: 3000,
-          })
-        },
-      },
-    )
-
-    setIsDeleteOrderDialogOpen(false)
-    setSelectedOrderId(undefined)
-  }
-
   return (
     <>
       <Table>
-        {orders.length === 0 && !isLoading && <TableCaption>Nenhum pedido encontrado.</TableCaption>}
+        {orders.length === 0 && !isLoading && <TableCaption>Nenhum orçamento encontrado.</TableCaption>}
 
         <TableHeader>
           <TableRow>
             <TableHead>Cliente</TableHead>
-            <TableHead className="min-w-[138px]">Preço do pedido</TableHead>
-            <TableHead className="min-w-[208px]">Data do pedido</TableHead>
+            <TableHead className="min-w-[138px]">Preço do orçamento</TableHead>
+            <TableHead className="min-w-[208px]">Data do orçamento</TableHead>
             <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
@@ -108,7 +130,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
               <div className="absolute top-0 right-0 bottom-0 left-0 ">
                 <div className="h-full flex items-center justify-center backdrop-blur-md bg-muted/20 border border-muted/10 z-10">
                   <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                  Buscando pedidos...
+                  Buscando orçamentos...
                 </div>
               </div>
 
@@ -145,33 +167,31 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
 
                 <TableCell className="text-right space-x-1.5">
                   <TableActionButton
-                    icon={<Eye className="w-3 h-3" />}
+                    icon={<Pencil className="w-3 h-3" />}
                     variant="outline"
-                    tooltip="Ver detalhes do pedido"
+                    tooltip="Criar pedido a partir do rascunho ou editar orçamento"
+                    customLoading={isOrderLoading && selectedOrderId === id}
                     onClick={() => {
                       setSelectedOrderId(id)
-                      setIsOrderDetailsDialogOpen(true)
                     }}
                   />
 
                   <TableActionButton
                     icon={<FileText className="w-3 h-3" />}
                     variant="outline"
-                    tooltip="Salvar arquivo do pedido"
-                    onClick={async () => {
-                      await handleSaveOrderFile(id)
-                    }}
+                    tooltip="Salvar arquivo do orçamento"
+                    onClick={async () => await handleSaveOrderFile(id)}
                   />
 
                   <TableActionButton
                     icon={<Trash2 className="w-3 h-3" />}
                     variant="destructive"
-                    tooltip="Apagar pedido"
+                    tooltip="Apagar orçamento"
                     onClick={() => {
                       const order = orders.find((item) => item.id === id)
 
                       if (order) {
-                        handleRequestOrderDeletion(order.id)
+                        handleRequestBudgetDeletion(order.id)
                       }
                     }}
                   />
@@ -181,16 +201,10 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
         </TableBody>
       </Table>
 
-      <OrdersDetailsDialog
-        orderId={selectedOrderId}
-        isOpen={isOrderDetailsDialogOpen}
-        onClose={() => setIsOrderDetailsDialogOpen(false)}
-      />
-
-      <DeleteOrderAction
-        onDelete={handleDeleteOrder}
-        isOpen={isDeleteOrderDialogOpen}
-        onClose={() => setIsDeleteOrderDialogOpen(false)}
+      <DeleteBudgetAction
+        onDelete={handleDeleteBudget}
+        isOpen={isDeleteBudgetDialogOpen}
+        onClose={() => setIsDeleteBudgetDialogOpen(false)}
       />
     </>
   )

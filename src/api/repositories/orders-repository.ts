@@ -1,4 +1,4 @@
-import { count, desc, eq } from 'drizzle-orm'
+import { and, count, desc, eq, SQL } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
@@ -39,12 +39,26 @@ export interface OrderResponse {
 export type OrderWithCustomer = Order & { customer: Customer | null }
 
 export class OrdersRepository {
-  public async getOrders(page = 1, itemsPerPage = 15, customerId?: string): Promise<OrderWithCustomer[]> {
+  public async getOrders(
+    page = 1,
+    itemsPerPage = 15,
+    filterOptions: {
+      customerId?: string
+      draft?: boolean
+    } = {},
+  ): Promise<OrderWithCustomer[]> {
+    const filters: SQL[] = []
+
+    if (filterOptions.customerId) filters.push(eq(orders.customerId, filterOptions.customerId))
+    if (filterOptions.draft !== undefined) {
+      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    }
+
     const response = await db
       .select()
       .from(orders)
       .leftJoin(customers, eq(orders.customerId, customers.id))
-      .where(customerId ? eq(orders.customerId, customerId) : undefined)
+      .where(and(...filters))
       .orderBy(desc(orders.createdAt))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
@@ -57,11 +71,18 @@ export class OrdersRepository {
     })
   }
 
-  public async countOrders(customerId?: string): Promise<number> {
+  public async countOrders(filterOptions: { customerId?: string; draft?: boolean } = {}): Promise<number> {
+    const filters: SQL[] = []
+
+    if (filterOptions.customerId) filters.push(eq(orders.customerId, filterOptions.customerId))
+    if (filterOptions.draft !== undefined) {
+      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    }
+
     const [response] = await db
       .select({ count: count() })
       .from(orders)
-      .where(customerId ? eq(orders.customerId, customerId) : undefined)
+      .where(and(...filters))
 
     return response.count
   }
@@ -116,13 +137,14 @@ export class OrdersRepository {
     neighborhood,
     street,
     zipcode,
+    draft,
   }: Omit<NewOrder, 'createdAt'> & {
     products: Array<{ id: string; quantity: number; customProductPrice: number; obs?: string }>
   }): Promise<Order> {
     // FIXME: Use transaction
     const [{ insertedOrderId }] = await db
       .insert(orders)
-      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode })
+      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode, draft })
       .returning({ insertedOrderId: orders.id })
 
     for (const { id, quantity, customProductPrice, obs } of products) {

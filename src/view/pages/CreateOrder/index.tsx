@@ -1,40 +1,33 @@
 import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Link, useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { FaInfoCircle } from 'react-icons/fa'
 import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
 
-import { Button } from '@/view/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { CustomerFormSection } from './components/CustomerFormSection'
 import { AddressFormSection } from './components/AddressFormSection'
 import { ObsFormSection } from './components/ObsFormSection'
 import { OrderProductsTable } from './components/OrderProductsTable'
+import { Footer } from './components/Footer'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useBarcode } from '@/view/hooks/useBarcode'
 import { useProductByBarcode } from '@/view/hooks/queries/products'
-import { useMutateOnCreateOrder } from '@/view/hooks/mutations/orders'
 
-import { formatCurrency } from '@/view/utils/formatters'
-import { parseCentsToDecimal } from '@/view/utils/parsers'
-
-import { createOrderSchema } from './schema'
+import { type CreateOrderSchema, createOrderSchema } from './schema'
 import { type Product } from '@/api/db/schema'
-import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
+import { type GetOrderResponse } from '@/api/controllers/orders-controller'
 
 export function CreateOrder() {
-  const navigate = useNavigate()
+  const { state } = useLocation()
   const { user } = useAuth()
   const { toast } = useToast()
   const { barcode, clearBarcodeState } = useBarcode()
-  const { mutateAsync, status } = useMutateOnCreateOrder()
 
-  const form = useForm<z.infer<typeof createOrderSchema>>({
+  const form = useForm<CreateOrderSchema>({
     resolver: zodResolver(createOrderSchema),
     defaultValues: {
       customer: null,
@@ -69,6 +62,39 @@ export function CreateOrder() {
   }, [error])
 
   const products = form.watch('products')
+
+  const cameFromBudgetsPage = (state?.draft ?? false) as boolean
+  const draftData = state?.draftData as GetOrderResponse['data'] | undefined
+
+  useEffect(() => {
+    const parseProducts = (
+      products: NonNullable<GetOrderResponse['data']>['products'],
+    ): CreateOrderSchema['products'] => {
+      return products.map((product) => ({
+        id: product.productId ?? '',
+        name: product.name ?? '',
+        unityPrice: product.price ?? 0,
+        customPrice: product.customPrice ?? 0,
+        quantity: product.quantity ?? 0,
+        totalPrice: (product.customPrice ?? 0) * (product.quantity ?? 0),
+        obs: product.obs ?? '',
+      }))
+    }
+
+    if (draftData) {
+      form.setValue(
+        'customer',
+        draftData.customer ? { id: draftData.customer.id, name: draftData.customer.name ?? '' } : null,
+      )
+      form.setValue('obs', draftData.obs ?? '')
+      form.setValue('city', draftData.city ?? '')
+      form.setValue('complement', draftData.complement ?? '')
+      form.setValue('neighborhood', draftData.neighborhood ?? '')
+      form.setValue('street', draftData.street ?? '')
+      form.setValue('zipcode', draftData.zipcode ?? '')
+      form.setValue('products', parseProducts(draftData.products ?? []))
+    }
+  }, [draftData])
 
   function handleAddProductToOrder({ id, name, price }: Product, quantity: number) {
     if (products.length === 0) {
@@ -124,65 +150,6 @@ export function CreateOrder() {
     return
   }
 
-  async function handleCreateOrder(data: z.infer<typeof createOrderSchema>) {
-    if (!user) return
-
-    mutateAsync(
-      {
-        loggedUserId: user.id,
-        products: data.products.map(({ id, quantity, customPrice, obs }) => ({
-          id,
-          quantity,
-          customProductPrice: customPrice,
-          obs,
-        })),
-        customerId: data.customer?.id,
-        obs: data.obs,
-        city: data.city,
-        complement: data.complement,
-        neighborhood: data.neighborhood,
-        street: data.street,
-        zipcode: data.zipcode,
-      },
-      {
-        onError: () => {
-          toast({
-            title: 'Algo deu errado ao tentar criar o pedido. Tente novamente.',
-            duration: 3000,
-          })
-        },
-        onSuccess: async (response) => {
-          if (!response) return
-
-          await handleDownloadFile(response.id)
-
-          toast({
-            title: 'Pedido criado com sucesso.',
-            duration: 3000,
-          })
-
-          navigate('..', { relative: 'path' })
-        },
-      },
-    )
-  }
-
-  async function handleDownloadFile(orderId: string) {
-    if (!user) return
-
-    const { err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.generateFile({
-      loggedUserId: user.id,
-      orderId,
-    })
-
-    if (err) {
-      toast({
-        title: 'Algo deu errado ao tentar baixar o arquivo. Acesse o arquivo na listagem de pedidos.',
-        duration: 3000,
-      })
-    }
-  }
-
   const orderTotal = (() => {
     return products.reduce((acc, item) => {
       return acc + item.totalPrice
@@ -193,7 +160,7 @@ export function CreateOrder() {
     <FormProvider {...form}>
       <div className="h-full flex flex-col">
         <div className="flex-1 px-3 py-6 overflow-auto">
-          <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido</h2>
+          <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido ou orçamento</h2>
 
           <Alert>
             <FaInfoCircle className="h-4 w-4" />
@@ -210,28 +177,11 @@ export function CreateOrder() {
           <AddressFormSection />
         </div>
 
-        <footer className="flex items-center px-3 py-4 border-t border-border">
-          <p>
-            <strong>Total a pagar: </strong>
-            {formatCurrency(parseCentsToDecimal(orderTotal))}
-          </p>
-
-          <div className="flex gap-2 ml-auto">
-            <Button
-              onClick={form.handleSubmit(handleCreateOrder)}
-              disabled={products.length === 0 || status === 'pending'}
-            >
-              {status === 'pending' && <Loader2 className="animate-spin w-4 h-4 mr-2" />}
-              Criar pedido
-            </Button>
-
-            <Button variant="outline" asChild>
-              <Link to=".." relative="path">
-                Cancelar
-              </Link>
-            </Button>
-          </div>
-        </footer>
+        <Footer
+          draftOrderId={state?.draftData?.id}
+          orderTotal={orderTotal}
+          origin={cameFromBudgetsPage ? 'budget' : 'order'}
+        />
       </div>
     </FormProvider>
   )

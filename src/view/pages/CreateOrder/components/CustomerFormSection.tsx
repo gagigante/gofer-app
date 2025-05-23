@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import * as z from 'zod'
 
 import { Label } from '@/view/components/ui/label'
 import { Combobox } from '@/view/components/Combobox'
@@ -9,11 +8,11 @@ import { CreateCustomerPopover } from './CreateCustomerPopover'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useCustomers } from '@/view/hooks/queries/customers'
 
-import { createOrderSchema } from '../schema'
+import { type CreateOrderSchema } from '../schema'
 
 export function CustomerFormSection() {
   const { user } = useAuth()
-  const { control, setValue } = useFormContext<z.infer<typeof createOrderSchema>>()
+  const { control, setValue } = useFormContext<CreateOrderSchema>()
 
   const [customersFilter, setCustomersFilter] = useState('')
 

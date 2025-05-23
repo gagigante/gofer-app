@@ -1,15 +1,14 @@
 import { FaInfo } from 'react-icons/fa'
-import * as z from 'zod'
 import { useFormContext } from 'react-hook-form'
 
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { OrderProductTableRow } from './OrderProductTableRow'
 
-import { createOrderSchema } from '../schema'
+import { type CreateOrderSchema } from '../schema'
 
 export function OrderProductsTable() {
-  const { getValues, setValue, watch } = useFormContext<z.infer<typeof createOrderSchema>>()
+  const { getValues, setValue, watch } = useFormContext<CreateOrderSchema>()
 
   function handleUpdateProductPrice(id: string, price: number) {
     const products = getValues('products')
@@ -105,7 +104,7 @@ export function OrderProductsTable() {
         </TableHeader>
 
         <TableBody onKeyDown={(e) => e.stopPropagation()}>
-          {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice }) => (
+          {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice, obs }) => (
             <OrderProductTableRow
               key={id}
               id={id}
@@ -114,6 +113,7 @@ export function OrderProductsTable() {
               customPrice={customPrice}
               quantity={quantity}
               totalPrice={totalPrice}
+              obs={obs}
               onRequestPriceUpdate={handleUpdateProductPrice}
               onRequestQuantityUpdate={handleUpdateProductQuantity}
               onRequestNoteUpdate={handleUpdateProductNote}

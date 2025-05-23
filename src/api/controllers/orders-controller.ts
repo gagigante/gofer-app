@@ -16,9 +16,12 @@ import { type Response } from '../types/response'
 
 export interface ListOrdersRequest {
   loggedUserId: string
-  customerId?: string
   page?: number
   itemsPerPage?: number
+  filters?: {
+    customerId?: string
+    draft?: boolean
+  }
 }
 
 export type ListOrdersResponse = Response<{
@@ -73,6 +76,7 @@ export interface CreateOrderRequest {
   neighborhood?: string
   street?: string
   zipcode?: string
+  draft?: boolean
 }
 
 export type CreateOrderResponse = Response<Order>
@@ -99,25 +103,25 @@ export class OrdersController {
 
   public async listOrders({
     loggedUserId,
-    customerId,
     page = 1,
     itemsPerPage = 15,
+    filters = {},
   }: ListOrdersRequest): Promise<ListOrdersResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
       return { data: null, err }
     }
 
-    if (customerId) {
-      const customer = await this.customersRepository.getCustomerById(customerId)
+    if (filters.customerId) {
+      const customer = await this.customersRepository.getCustomerById(filters.customerId)
 
       if (!customer) {
         return { data: null, err: new NotFoundError() }
       }
     }
 
-    const total = await this.ordersRepository.countOrders(customerId)
-    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, customerId)
+    const total = await this.ordersRepository.countOrders(filters)
+    const orders = await this.ordersRepository.getOrders(page, itemsPerPage, filters)
 
     const data = { orders, total, page, itemsPerPage }
 
@@ -174,6 +178,7 @@ export class OrdersController {
     neighborhood,
     street,
     zipcode,
+    draft = false,
   }: CreateOrderRequest): Promise<CreateOrderResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -245,6 +250,7 @@ export class OrdersController {
       neighborhood,
       street,
       zipcode,
+      draft: draft ? 1 : 0,
     })
 
     return { data: response, err: null }
