@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto'
+import * as z from 'zod'
 
 import { UsersRepository } from '../repositories/users-repository'
 import { CustomersRepository } from '@/api/repositories/customers-repository'
 
+import { InvalidParamsError } from '@/api/errors/InvalidParamsError'
 import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 
