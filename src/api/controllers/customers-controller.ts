@@ -114,10 +114,31 @@ export class CustomersController {
       return { data: null, err }
     }
 
-    const createdCustomer = await this.customersRepository.createCustomer({
+    const customerWithTrimmedFields = Object.entries(newCustomer).reduce(
+      (acc, [key, value]) => {
+        return {
+          ...acc,
+          [key]: value?.trim() || null,
+        }
+      },
+      {} as Omit<NewCustomer, 'id'>,
+    )
+
+    const response = this.validateCustomerData(customerWithTrimmedFields)
+    if (!response) {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
+    const { data: createdCustomer, err } = await this.customersRepository.createCustomer({
       id: randomUUID(),
-      ...newCustomer,
+      ...customerWithTrimmedFields,
     })
+
+    if (err) {
+      return { data: null, err }
+    }
 
     return { data: createdCustomer, err: null }
   }
@@ -159,5 +180,24 @@ export class CustomersController {
     const response = await this.customersRepository.updateCustomer(updatedCustomer)
 
     return { data: response, err: null }
+  }
+
+  private validateCustomerData(data: Omit<NewCustomer, 'id'>): boolean {
+    const schema = z.object({
+      name: z.string().min(1),
+      rg: z.union([z.string().nullable(), z.undefined()]),
+      cpf: z.union([z.string().nullable(), z.undefined()]),
+      cnpj: z.union([z.string().nullable(), z.undefined()]),
+      ie: z.union([z.string().nullable(), z.undefined()]),
+      email: z.union([z.string().email().nullable(), z.undefined()]),
+      phone: z.union([z.string().nullable(), z.undefined()]),
+      zipcode: z.union([z.string().nullable(), z.undefined()]),
+      city: z.union([z.string().nullable(), z.undefined()]),
+      street: z.union([z.string().nullable(), z.undefined()]),
+      neighborhood: z.union([z.string().nullable(), z.undefined()]),
+      complement: z.union([z.string().nullable(), z.undefined()]),
+    })
+
+    return schema.safeParse(data).success
   }
 }
