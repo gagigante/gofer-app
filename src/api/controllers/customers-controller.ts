@@ -1,8 +1,10 @@
 import { randomUUID } from 'node:crypto'
+import * as z from 'zod'
 
 import { UsersRepository } from '../repositories/users-repository'
 import { CustomersRepository } from '@/api/repositories/customers-repository'
 
+import { InvalidParamsError } from '@/api/errors/InvalidParamsError'
 import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 
@@ -112,10 +114,30 @@ export class CustomersController {
       return { data: null, err }
     }
 
-    const createdCustomer = await this.customersRepository.createCustomer({
+    const customerWithTrimmedFields = Object.entries(newCustomer).reduce(
+      (acc, [key, value]) => {
+        acc[key as keyof Omit<NewCustomer, 'id'>] = value?.trim() || null
+
+        return acc
+      },
+      {} as Omit<NewCustomer, 'id'>,
+    )
+
+    const response = this.validateCustomerData(customerWithTrimmedFields)
+    if (!response) {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
+    const { data: createdCustomer, err } = await this.customersRepository.createCustomer({
       id: randomUUID(),
-      ...newCustomer,
+      ...customerWithTrimmedFields,
     })
+
+    if (err) {
+      return { data: null, err }
+    }
 
     return { data: createdCustomer, err: null }
   }
@@ -142,10 +164,7 @@ export class CustomersController {
     return { data: null, err: null }
   }
 
-  public async updateCustomer({
-    loggedUserId,
-    ...updatedCustomer
-  }: UpdateCustomerRequest): Promise<UpdateCustomerResponse> {
+  public async updateCustomer({ loggedUserId, ...customer }: UpdateCustomerRequest): Promise<UpdateCustomerResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -154,8 +173,55 @@ export class CustomersController {
       return { data: null, err }
     }
 
-    const response = await this.customersRepository.updateCustomer(updatedCustomer)
+    const customerToUpdate = await this.customersRepository.getCustomerById(customer.id)
 
-    return { data: response, err: null }
+    if (!customerToUpdate) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    const customerWithTrimmedFields = Object.entries(customer).reduce(
+      (acc, [key, value]) => {
+        acc[key as keyof Omit<NewCustomer, 'id'>] = value?.trim() || null
+
+        return acc
+      },
+      {} as Omit<NewCustomer, 'id'>,
+    )
+
+    const response = this.validateCustomerData(customerWithTrimmedFields)
+    if (!response) {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
+    const { data: updatedCustomer, err } = await this.customersRepository.updateCustomer(customer)
+
+    if (err) {
+      return { data: null, err }
+    }
+
+    return { data: updatedCustomer, err: null }
+  }
+
+  private validateCustomerData(data: Omit<NewCustomer, 'id'>): boolean {
+    const schema = z.object({
+      name: z.string().min(1),
+      rg: z.union([z.string().nullable(), z.undefined()]),
+      cpf: z.union([z.string().nullable(), z.undefined()]),
+      cnpj: z.union([z.string().nullable(), z.undefined()]),
+      ie: z.union([z.string().nullable(), z.undefined()]),
+      email: z.union([z.string().email().nullable(), z.undefined()]),
+      phone: z.union([z.string().nullable(), z.undefined()]),
+      zipcode: z.union([z.string().nullable(), z.undefined()]),
+      city: z.union([z.string().nullable(), z.undefined()]),
+      street: z.union([z.string().nullable(), z.undefined()]),
+      neighborhood: z.union([z.string().nullable(), z.undefined()]),
+      complement: z.union([z.string().nullable(), z.undefined()]),
+    })
+
+    return schema.safeParse(data).success
   }
 }
