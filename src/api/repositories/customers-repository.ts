@@ -50,9 +50,13 @@ export class CustomersRepository {
     await db.delete(customers).where(eq(customers.id, customerId))
   }
 
-  public async updateCustomer({ id, ...rest }: Customer): Promise<Customer> {
-    const [response] = await db.update(customers).set(rest).where(eq(customers.id, id)).returning()
+  public async updateCustomer({ id, ...rest }: Customer): Promise<Response<Customer>> {
+    try {
+      const [response] = await db.update(customers).set(rest).where(eq(customers.id, id)).returning()
 
-    return response
+      return { data: response, err: null }
+    } catch (error) {
+      return { data: null, err: new RepositoryError(error as LibsqlError) }
+    }
   }
 }

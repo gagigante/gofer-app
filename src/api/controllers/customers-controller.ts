@@ -165,10 +165,7 @@ export class CustomersController {
     return { data: null, err: null }
   }
 
-  public async updateCustomer({
-    loggedUserId,
-    ...updatedCustomer
-  }: UpdateCustomerRequest): Promise<UpdateCustomerResponse> {
+  public async updateCustomer({ loggedUserId, ...customer }: UpdateCustomerRequest): Promise<UpdateCustomerResponse> {
     const loggedUser = await this.usersRepository.getUserById(loggedUserId)
 
     if (!loggedUser) {
@@ -177,9 +174,38 @@ export class CustomersController {
       return { data: null, err }
     }
 
-    const response = await this.customersRepository.updateCustomer(updatedCustomer)
+    const customerToUpdate = await this.customersRepository.getCustomerById(customer.id)
 
-    return { data: response, err: null }
+    if (!customerToUpdate) {
+      const err = new NotFoundError()
+
+      return { data: null, err }
+    }
+
+    const customerWithTrimmedFields = Object.entries(customer).reduce(
+      (acc, [key, value]) => {
+        return {
+          ...acc,
+          [key]: value?.trim() || null,
+        }
+      },
+      {} as Omit<NewCustomer, 'id'>,
+    )
+
+    const response = this.validateCustomerData(customerWithTrimmedFields)
+    if (!response) {
+      const err = new InvalidParamsError()
+
+      return { data: null, err }
+    }
+
+    const { data: updatedCustomer, err } = await this.customersRepository.updateCustomer(customer)
+
+    if (err) {
+      return { data: null, err }
+    }
+
+    return { data: updatedCustomer, err: null }
   }
 
   private validateCustomerData(data: Omit<NewCustomer, 'id'>): boolean {
