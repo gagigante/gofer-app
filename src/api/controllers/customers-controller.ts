@@ -116,10 +116,9 @@ export class CustomersController {
 
     const customerWithTrimmedFields = Object.entries(newCustomer).reduce(
       (acc, [key, value]) => {
-        return {
-          ...acc,
-          [key]: value?.trim() || null,
-        }
+        acc[key as keyof Omit<NewCustomer, 'id'>] = value?.trim() || null
+
+        return acc
       },
       {} as Omit<NewCustomer, 'id'>,
     )
@@ -184,10 +183,9 @@ export class CustomersController {
 
     const customerWithTrimmedFields = Object.entries(customer).reduce(
       (acc, [key, value]) => {
-        return {
-          ...acc,
-          [key]: value?.trim() || null,
-        }
+        acc[key as keyof Omit<NewCustomer, 'id'>] = value?.trim() || null
+
+        return acc
       },
       {} as Omit<NewCustomer, 'id'>,
     )
