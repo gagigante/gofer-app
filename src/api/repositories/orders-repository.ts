@@ -129,6 +129,7 @@ export class OrdersRepository {
   public async createOrder({
     id,
     totalPrice,
+    totalCostPrice,
     products,
     customerId,
     obs,
@@ -144,7 +145,19 @@ export class OrdersRepository {
     // FIXME: Use transaction
     const [{ insertedOrderId }] = await db
       .insert(orders)
-      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode, draft })
+      .values({
+        id,
+        totalPrice,
+        totalCostPrice,
+        customerId,
+        obs,
+        city,
+        complement,
+        neighborhood,
+        street,
+        zipcode,
+        draft,
+      })
       .returning({ insertedOrderId: orders.id })
 
     for (const { id, quantity, customProductPrice, obs } of products) {

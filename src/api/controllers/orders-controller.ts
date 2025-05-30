@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
 import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
+import { ProductsRepository } from '../repositories/products-repository'
 import { CustomersRepository } from '../repositories/customers-repository'
 
 import { AuthMiddleware } from '../middlewares/auth'
@@ -92,12 +93,14 @@ export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
   private readonly customersRepository: CustomersRepository
+  private readonly productsRepository: ProductsRepository
   private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
     this.customersRepository = new CustomersRepository()
+    this.productsRepository = new ProductsRepository()
     this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
@@ -193,56 +196,65 @@ export class OrdersController {
       }
     }
 
-    let mergedProductsMap: Map<string, { id: string; quantity: number; customProductPrice: number; obs?: string }>
+    const mergedProducts = new Map<string, { id: string; quantity: number; customProductPrice: number; obs?: string }>()
 
-    try {
-      mergedProductsMap = products.reduce<
-        Map<string, { id: string; quantity: number; customProductPrice: number; obs?: string }>
-      >((acc, item) => {
-        const existingProduct = acc.get(item.id)
+    for (const item of products) {
+      const existing = mergedProducts.get(item.id)
 
-        if (existingProduct) {
-          if (existingProduct.customProductPrice !== item.customProductPrice) {
-            throw new InvalidParamsError()
-          }
-
-          existingProduct.quantity += item.quantity
-        } else {
-          acc.set(item.id, {
-            id: item.id,
-            quantity: item.quantity,
-            customProductPrice: item.customProductPrice,
-            obs: item.obs,
-          })
-        }
-
-        return acc
-      }, new Map())
-    } catch (err) {
-      return { data: null, err: err as InvalidParamsError }
-    }
-
-    let totalPrice = 0
-
-    try {
-      totalPrice = mergedProductsMap.entries().reduce((acc, [, item]) => {
-        const price = Number(item.customProductPrice)
-        const quantity = Number(item.quantity)
-
-        if (isNaN(price) || isNaN(quantity)) {
+      if (existing) {
+        if (existing.customProductPrice !== item.customProductPrice) {
           throw new InvalidParamsError()
         }
 
-        return acc + price * quantity
-      }, 0)
-    } catch (err) {
-      return { data: null, err: err as InvalidParamsError }
+        existing.quantity += item.quantity
+      } else {
+        mergedProducts.set(item.id, { ...item })
+      }
+    }
+
+    const orderProducts = await this.productsRepository.getProducts(1, mergedProducts.size, {
+      ids: Array.from(mergedProducts.keys()),
+    })
+
+    if (orderProducts.length !== mergedProducts.size) {
+      return { data: null, err: new InvalidParamsError() }
+    }
+
+    const productLookup = new Map(orderProducts.map((p) => [p.id, p]))
+
+    let totalPrice = 0
+    let totalCostPrice = 0
+
+    const validatedProducts = new Map<
+      string,
+      { id: string; quantity: number; customProductPrice: number; obs?: string }
+    >()
+
+    for (const [productId, product] of mergedProducts) {
+      const dbProduct = productLookup.get(productId)
+
+      if (!dbProduct) {
+        throw new InvalidParamsError()
+      }
+
+      const costPrice = Number(dbProduct.costPrice)
+      const price = Number(product.customProductPrice)
+      const quantity = Number(product.quantity)
+
+      if (isNaN(price) || isNaN(costPrice) || isNaN(quantity)) {
+        throw new InvalidParamsError()
+      }
+
+      totalPrice += price * quantity
+      totalCostPrice += costPrice * quantity
+      validatedProducts.set(productId, product)
     }
 
     const response = await this.ordersRepository.createOrder({
       id: randomUUID(),
-      products: Array.from(mergedProductsMap.values()),
+      products: Array.from(validatedProducts.values()),
       totalPrice,
+      totalCostPrice,
       customerId,
       obs,
       city,
