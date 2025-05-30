@@ -51,6 +51,7 @@ export const orders = sqliteTable(
   {
     id: text('id').primaryKey(),
     customerId: text('customer_id').references(() => customers.id, { onDelete: 'set null' }),
+    totalCostPrice: integer('total_cost_price').notNull().default(0),
     totalPrice: integer('total_price').notNull().default(0),
     createdAt: text('created_at').default(sql`(CURRENT_TIMESTAMP)`),
     obs: text('obs'),
