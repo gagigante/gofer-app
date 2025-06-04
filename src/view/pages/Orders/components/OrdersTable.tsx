@@ -1,10 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Loader2, Eye, FileText, Trash2 } from 'lucide-react'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { TableActionButton } from '@/view/components/TableActionButton'
-import { OrdersDetailsDialog } from './OrdersDetailsDialog'
 import { DeleteOrderAction } from './DeleteOrderAction'
 
 import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
@@ -25,13 +25,13 @@ interface OrdersTableProps {
 const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' })
 
 export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
+  const navigate = useNavigate()
   const { toast } = useToast()
   const { user } = useAuth()
 
   const { mutateAsync } = useMutateOnDeleteOrder()
 
   const [selectedOrderId, setSelectedOrderId] = useState<string>()
-  const [isOrderDetailsDialogOpen, setIsOrderDetailsDialogOpen] = useState(false)
   const [isDeleteOrderDialogOpen, setIsDeleteOrderDialogOpen] = useState(false)
 
   async function handleSaveOrderFile(orderId: string) {
@@ -96,6 +96,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Cliente</TableHead>
+            <TableHead className="min-w-[138px]">Preço de custo do pedido</TableHead>
             <TableHead className="min-w-[138px]">Preço do pedido</TableHead>
             <TableHead className="min-w-[208px]">Data do pedido</TableHead>
             <TableHead className="min-w-[160px]"></TableHead>
@@ -121,7 +122,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
           )}
 
           {!isLoading &&
-            orders.map(({ id, customer, totalPrice, createdAt }) => (
+            orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
               <TableRow key={id}>
                 <TableCell>
                   <Tooltip>
@@ -133,6 +134,10 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
                       <p>{customer?.name ?? 'N/A'}</p>
                     </TooltipContent>
                   </Tooltip>
+                </TableCell>
+
+                <TableCell>
+                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalCostPrice ?? 0))}</p>
                 </TableCell>
 
                 <TableCell>
@@ -149,8 +154,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
                     variant="outline"
                     tooltip="Ver detalhes do pedido"
                     onClick={() => {
-                      setSelectedOrderId(id)
-                      setIsOrderDetailsDialogOpen(true)
+                      navigate(`/home/orders/${id}`)
                     }}
                   />
 
@@ -180,12 +184,6 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
             ))}
         </TableBody>
       </Table>
-
-      <OrdersDetailsDialog
-        orderId={selectedOrderId}
-        isOpen={isOrderDetailsDialogOpen}
-        onClose={() => setIsOrderDetailsDialogOpen(false)}
-      />
 
       <DeleteOrderAction
         onDelete={handleDeleteOrder}

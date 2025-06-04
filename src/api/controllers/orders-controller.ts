@@ -39,6 +39,7 @@ export interface GetOrderRequest {
 
 export type GetOrderResponse = Response<{
   id: string
+  totalCostPrice: number | null
   totalPrice: number | null
   createdAt: string | null
   customer: Customer | null
@@ -51,9 +52,11 @@ export type GetOrderResponse = Response<{
   products: Array<{
     productId: string | null
     quantity: number | null
-    currentPrice: number | null
+    costPrice: number | null
     price: number | null
     customPrice: number | null
+    currentPrice: number | null
+    currentCostPrice: number | null
     name: string | null
     barCode: string | null
     obs: string | null

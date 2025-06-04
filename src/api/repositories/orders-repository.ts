@@ -15,6 +15,7 @@ import {
 export interface OrderResponse {
   id: string
   totalPrice: number | null
+  totalCostPrice: number | null
   createdAt: string | null
   customer: Customer | null
   obs: string | null
@@ -26,9 +27,11 @@ export interface OrderResponse {
   products: Array<{
     productId: string | null
     quantity: number | null
-    currentPrice: number | null
+    costPrice: number | null
     price: number | null
     customPrice: number | null
+    currentCostPrice: number | null
+    currentPrice: number | null
     obs: string | null
     name: string | null
     barCode: string | null
@@ -95,10 +98,12 @@ export class OrdersRepository {
         orderProduct: {
           productId: ordersProducts.productId,
           quantity: ordersProducts.quantity,
+          costPrice: ordersProducts.productCostPrice,
           price: ordersProducts.productPrice,
           customPrice: ordersProducts.customProductPrice,
-          obs: ordersProducts.obs,
+          currentCostPrice: productsSchema.costPrice,
           currentPrice: productsSchema.price,
+          obs: ordersProducts.obs,
           name: productsSchema.name,
           barCode: productsSchema.barCode,
           fastId: productsSchema.fastId,
