@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '../repositories/users-repository'
 import { type OrderResponse, type OrderWithCustomer, OrdersRepository } from '../repositories/orders-repository'
+import { ProductsRepository } from '../repositories/products-repository'
 import { CustomersRepository } from '../repositories/customers-repository'
 
 import { AuthMiddleware } from '../middlewares/auth'
@@ -36,28 +37,23 @@ export interface GetOrderRequest {
   orderId: string
 }
 
-export type GetOrderResponse = Response<{
-  id: string
-  totalPrice: number | null
-  createdAt: string | null
-  customer: Customer | null
-  obs: string | null
-  city: string | null
-  complement: string | null
-  neighborhood: string | null
-  street: string | null
-  zipcode: string | null
-  products: Array<{
-    productId: string | null
-    quantity: number | null
-    currentPrice: number | null
-    price: number | null
-    customPrice: number | null
-    name: string | null
-    barCode: string | null
-    obs: string | null
-  }>
-}>
+export type GetOrderResponse = Response<
+  Order & {
+    customer: Customer | null
+    products: Array<{
+      productId: string | null
+      quantity: number | null
+      costPrice: number | null
+      price: number | null
+      customPrice: number | null
+      currentPrice: number | null
+      currentCostPrice: number | null
+      name: string | null
+      barCode: string | null
+      obs: string | null
+    }>
+  }
+>
 
 export interface GetOrderTemplateRequest {
   loggedUserId: string
@@ -92,12 +88,14 @@ export class OrdersController {
   private readonly usersRepository: UsersRepository
   private readonly ordersRepository: OrdersRepository
   private readonly customersRepository: CustomersRepository
+  private readonly productsRepository: ProductsRepository
   private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.ordersRepository = new OrdersRepository()
     this.customersRepository = new CustomersRepository()
+    this.productsRepository = new ProductsRepository()
     this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
