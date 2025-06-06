@@ -102,8 +102,8 @@ export class ProductsController {
       return { data: null, err }
     }
 
-    const total = await this.productsRepository.countProducts(name)
-    const products = await this.productsRepository.getProducts(name, page, itemsPerPage)
+    const total = await this.productsRepository.countProducts({ name })
+    const products = await this.productsRepository.getProducts(page, itemsPerPage, { name })
 
     const data = { products, total, page, itemsPerPage }
 

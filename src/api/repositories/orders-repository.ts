@@ -12,23 +12,16 @@ import {
   products as productsSchema,
 } from '@/api/db/schema'
 
-export interface OrderResponse {
-  id: string
-  totalPrice: number | null
-  createdAt: string | null
+export type OrderResponse = Order & {
   customer: Customer | null
-  obs: string | null
-  city: string | null
-  complement: string | null
-  neighborhood: string | null
-  street: string | null
-  zipcode: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
-    currentPrice: number | null
+    costPrice: number | null
     price: number | null
     customPrice: number | null
+    currentCostPrice: number | null
+    currentPrice: number | null
     obs: string | null
     name: string | null
     barCode: string | null
@@ -95,10 +88,12 @@ export class OrdersRepository {
         orderProduct: {
           productId: ordersProducts.productId,
           quantity: ordersProducts.quantity,
+          costPrice: ordersProducts.productCostPrice,
           price: ordersProducts.productPrice,
           customPrice: ordersProducts.customProductPrice,
-          obs: ordersProducts.obs,
+          currentCostPrice: productsSchema.costPrice,
           currentPrice: productsSchema.price,
+          obs: ordersProducts.obs,
           name: productsSchema.name,
           barCode: productsSchema.barCode,
           fastId: productsSchema.fastId,
@@ -115,11 +110,16 @@ export class OrdersRepository {
     const formattedResponse = response.reduce<OrderResponse>((acc, item) => {
       const { order, orderProduct } = item
 
+      const updatedOrderProducts = acc.products ?? []
+      if (orderProduct.productId !== null) {
+        updatedOrderProducts.push(orderProduct)
+      }
+
       return {
         ...acc,
         ...order,
         customer: item.customer,
-        products: [...(acc.products ?? []), orderProduct],
+        products: updatedOrderProducts,
       }
     }, {} as OrderResponse)
 
@@ -129,6 +129,7 @@ export class OrdersRepository {
   public async createOrder({
     id,
     totalPrice,
+    totalCostPrice,
     products,
     customerId,
     obs,
@@ -144,7 +145,19 @@ export class OrdersRepository {
     // FIXME: Use transaction
     const [{ insertedOrderId }] = await db
       .insert(orders)
-      .values({ id, totalPrice, customerId, obs, city, complement, neighborhood, street, zipcode, draft })
+      .values({
+        id,
+        totalPrice,
+        totalCostPrice,
+        customerId,
+        obs,
+        city,
+        complement,
+        neighborhood,
+        street,
+        zipcode,
+        draft,
+      })
       .returning({ insertedOrderId: orders.id })
 
     for (const { id, quantity, customProductPrice, obs } of products) {

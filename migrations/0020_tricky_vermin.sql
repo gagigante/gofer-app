@@ -1,0 +1,1 @@
+ALTER TABLE `orders` ADD `total_cost_price` integer DEFAULT 0 NOT NULL;

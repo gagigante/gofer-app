@@ -1,4 +1,4 @@
-import { asc, count, eq, like, max } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, like, max, SQL } from 'drizzle-orm'
 import { type LibsqlError } from '@libsql/client'
 
 import { db } from '../db/client'
@@ -11,13 +11,22 @@ import { type Brand, type Category, NewProduct, type Product, brands, categories
 export type ProductWithCategoryAndBrand = Product & { category: Category | null } & { brand: Brand | null }
 
 export class ProductsRepository {
-  public async getProducts(name = '', page = 1, itemsPerPage = 15): Promise<Array<ProductWithCategoryAndBrand>> {
+  public async getProducts(
+    page = 1,
+    itemsPerPage = 15,
+    filterOptions: {
+      ids?: string[]
+      name?: string
+    } = {},
+  ): Promise<Array<ProductWithCategoryAndBrand>> {
+    const filters = this.listFilters(filterOptions)
+
     const response = await db
       .select()
       .from(products)
       .leftJoin(categories, eq(products.categoryId, categories.id))
       .leftJoin(brands, eq(products.brandId, brands.id))
-      .where(like(products.name, `%${name}%`))
+      .where(and(...filters))
       .orderBy(asc(products.name))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
@@ -43,11 +52,18 @@ export class ProductsRepository {
     return response
   }
 
-  public async countProducts(name = ''): Promise<number> {
+  public async countProducts(
+    filterOptions: {
+      ids?: string[]
+      name?: string
+    } = {},
+  ): Promise<number> {
+    const filters = this.listFilters(filterOptions)
+
     const [response] = await db
       .select({ count: count() })
       .from(products)
-      .where(like(products.name, `%${name}%`))
+      .where(and(...filters))
 
     return response.count
   }
@@ -148,5 +164,14 @@ export class ProductsRepository {
       .returning()
 
     return response
+  }
+
+  private listFilters(filterOptions: { ids?: string[]; name?: string }): SQL[] {
+    const filters: SQL[] = []
+
+    if (filterOptions.ids) filters.push(inArray(products.id, filterOptions.ids))
+    if (filterOptions.name) filters.push(like(products.name, `%${filterOptions.name}%`))
+
+    return filters
   }
 }
