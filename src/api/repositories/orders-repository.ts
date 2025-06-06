@@ -110,11 +110,16 @@ export class OrdersRepository {
     const formattedResponse = response.reduce<OrderResponse>((acc, item) => {
       const { order, orderProduct } = item
 
+      const updatedOrderProducts = acc.products ?? []
+      if (orderProduct.productId !== null) {
+        updatedOrderProducts.push(orderProduct)
+      }
+
       return {
         ...acc,
         ...order,
         customer: item.customer,
-        products: [...(acc.products ?? []), orderProduct],
+        products: updatedOrderProducts,
       }
     }, {} as OrderResponse)
 
