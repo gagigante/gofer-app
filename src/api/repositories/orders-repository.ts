@@ -12,18 +12,8 @@ import {
   products as productsSchema,
 } from '@/api/db/schema'
 
-export interface OrderResponse {
-  id: string
-  totalPrice: number | null
-  totalCostPrice: number | null
-  createdAt: string | null
+export type OrderResponse = Order & {
   customer: Customer | null
-  obs: string | null
-  city: string | null
-  complement: string | null
-  neighborhood: string | null
-  street: string | null
-  zipcode: string | null
   products: Array<{
     productId: string | null
     quantity: number | null
@@ -120,11 +110,16 @@ export class OrdersRepository {
     const formattedResponse = response.reduce<OrderResponse>((acc, item) => {
       const { order, orderProduct } = item
 
+      const updatedOrderProducts = acc.products ?? []
+      if (orderProduct.productId !== null) {
+        updatedOrderProducts.push(orderProduct)
+      }
+
       return {
         ...acc,
         ...order,
         customer: item.customer,
-        products: [...(acc.products ?? []), orderProduct],
+        products: updatedOrderProducts,
       }
     }, {} as OrderResponse)
 
