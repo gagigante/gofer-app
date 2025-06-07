@@ -1,4 +1,4 @@
-# Gofer App
+# Gofer App 
 
 Gofer App é uma aplicação desktop desenvolvida com Electron que oferece um dashboard completo para análise de performance de negócios, com foco em métricas de vendas, produtos e clientes.
 
