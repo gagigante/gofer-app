@@ -77,6 +77,7 @@ export function CreateOrder() {
         unityPrice: product.price ?? 0,
         customPrice: product.customPrice ?? 0,
         quantity: product.quantity ?? 0,
+        totalCostPrice: (product.costPrice ?? 0) * (product.quantity ?? 0),
         totalPrice: (product.customPrice ?? 0) * (product.quantity ?? 0),
         obs: product.obs ?? '',
       }))
@@ -107,6 +108,7 @@ export function CreateOrder() {
           unityPrice: price ?? 0,
           customPrice: price ?? 0,
           quantity,
+          totalCostPrice: (costPrice ?? 0) * quantity,
           totalPrice: (price ?? 0) * quantity,
           obs: '',
         },
@@ -126,6 +128,7 @@ export function CreateOrder() {
           unityPrice: price ?? 0,
           customPrice: price ?? 0,
           quantity,
+          totalCostPrice: (costPrice ?? 0) * quantity,
           totalPrice: (price ?? 0) * quantity,
           obs: '',
         },
@@ -141,6 +144,7 @@ export function CreateOrder() {
         return {
           ...item,
           quantity: newQuantity,
+          totalCostPrice: (item.costPrice ?? 0) * newQuantity,
           totalPrice: (item.customPrice ?? item.unityPrice) * newQuantity,
         }
       }
@@ -153,10 +157,16 @@ export function CreateOrder() {
     return
   }
 
-  const orderTotal = (() => {
-    return products.reduce((acc, item) => {
-      return acc + item.totalPrice
-    }, 0)
+  const { orderTotal, orderCostPrice } = (() => {
+    return products.reduce(
+      (acc, item) => {
+        return {
+          orderTotal: acc.orderTotal + item.totalPrice,
+          orderCostPrice: acc.orderCostPrice + item.totalCostPrice,
+        }
+      },
+      { orderTotal: 0, orderCostPrice: 0 },
+    )
   })()
 
   return (
@@ -183,6 +193,7 @@ export function CreateOrder() {
         <Footer
           draftOrderId={state?.draftData?.id}
           orderTotal={orderTotal}
+          orderCostPrice={orderCostPrice}
           origin={cameFromBudgetsPage ? 'budget' : 'order'}
         />
       </div>
