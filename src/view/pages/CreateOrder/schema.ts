@@ -17,6 +17,7 @@ export const createOrderSchema = z.object({
       customPrice: z.number(),
       quantity: z.number(),
       totalPrice: z.number(),
+      totalCostPrice: z.number(),
       obs: z.string(),
     }),
   ),

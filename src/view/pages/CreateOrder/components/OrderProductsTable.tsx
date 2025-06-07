@@ -13,7 +13,12 @@ export function OrderProductsTable() {
 
     const updatedProducts = products.map((product) => {
       if (product.id === id) {
-        return { ...product, customPrice: price, totalPrice: price * product.quantity }
+        return {
+          ...product,
+          customPrice: price,
+          totalPrice: price * product.quantity,
+          totalCostPrice: product.costPrice * product.quantity,
+        }
       }
 
       return product
@@ -27,7 +32,12 @@ export function OrderProductsTable() {
 
     const updatedProducts = products.map((product) => {
       if (product.id === id) {
-        return { ...product, quantity, totalPrice: product.customPrice * quantity }
+        return {
+          ...product,
+          quantity,
+          totalPrice: product.customPrice * quantity,
+          totalCostPrice: product.costPrice * quantity,
+        }
       }
 
       return product

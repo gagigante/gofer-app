@@ -18,10 +18,11 @@ import { apiName, type OrdersApi } from '@/api/exposes/orders-api'
 interface FooterProps {
   draftOrderId?: string
   orderTotal: number
+  orderCostPrice: number
   origin: 'order' | 'budget'
 }
 
-export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
+export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: FooterProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
@@ -149,6 +150,11 @@ export function Footer({ draftOrderId, orderTotal, origin }: FooterProps) {
       <p>
         <strong>Total a pagar: </strong>
         {formatCurrency(parseCentsToDecimal(orderTotal))}
+      </p>
+
+      <p className="ml-4">
+        <strong>Total preço de custo: </strong>
+        {formatCurrency(parseCentsToDecimal(orderCostPrice))}
       </p>
 
       <div className="flex gap-2 ml-auto">
