@@ -5,6 +5,7 @@ import { Home } from '@/view/pages/Home'
 import { Users } from '@/view/pages/Users'
 import { Budgets } from '@/view/pages/Budgets'
 import { Orders } from '@/view/pages/Orders'
+import { OrderDetails } from '@/view/pages/OrderDetails'
 import { CreateOrder } from '@/view/pages/CreateOrder'
 import { CreateCustomer } from '@/view/pages/CreateCustomer'
 import { UpdateCustomer } from '@/view/pages/UpdateCustomer'
@@ -41,6 +42,10 @@ export const router = createHashRouter([
       {
         path: 'orders',
         element: <Orders />,
+      },
+      {
+        path: 'orders/:order_id',
+        element: <OrderDetails />,
       },
       {
         path: 'budgets',

@@ -1,8 +1,6 @@
-import { FaInfo } from 'react-icons/fa'
 import { useFormContext } from 'react-hook-form'
 
 import { Table, TableBody, TableHead, TableHeader, TableRow, TableCaption } from '@/view/components/ui/table'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { OrderProductTableRow } from './OrderProductTableRow'
 
 import { type CreateOrderSchema } from '../schema'
@@ -71,32 +69,9 @@ export function OrderProductsTable() {
         <TableHeader>
           <TableRow>
             <TableHead>Nome</TableHead>
-            <TableHead className="min-w-[96px]">
-              Preço unitário
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <div className="ml-2 rounded-full border p-[2px]">
-                    <FaInfo className="w-2 h-2" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Preço unitário original para o produto</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableHead>
-            <TableHead className="min-w-[124px]">
-              Preço unitário para o pedido
-              <Tooltip>
-                <TooltipTrigger tabIndex={-1}>
-                  <div className="ml-2 rounded-full border p-[2px]">
-                    <FaInfo className="w-2 h-2" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Preço unitário do produto para este pedido</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableHead>
+            <TableHead>Preço de custo</TableHead>
+            <TableHead className="min-w-[96px]">Preço unitário</TableHead>
+            <TableHead className="min-w-[124px]">Preço unitário para o pedido</TableHead>
             <TableHead>Qtd.</TableHead>
             <TableHead className="min-w-[116px]">Preço total</TableHead>
             <TableHead className="min-w-[116px]"></TableHead>
@@ -104,11 +79,12 @@ export function OrderProductsTable() {
         </TableHeader>
 
         <TableBody onKeyDown={(e) => e.stopPropagation()}>
-          {products.map(({ id, name, unityPrice, customPrice, quantity, totalPrice, obs }) => (
+          {products.map(({ id, name, costPrice, unityPrice, customPrice, quantity, totalPrice, obs }) => (
             <OrderProductTableRow
               key={id}
               id={id}
               name={name}
+              costPrice={costPrice}
               unityPrice={unityPrice}
               customPrice={customPrice}
               quantity={quantity}

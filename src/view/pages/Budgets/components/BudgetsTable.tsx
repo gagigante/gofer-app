@@ -118,6 +118,7 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Cliente</TableHead>
+            <TableHead className="min-w-[138px]">Preço de custo do orçamento</TableHead>
             <TableHead className="min-w-[138px]">Preço do orçamento</TableHead>
             <TableHead className="min-w-[208px]">Data do orçamento</TableHead>
             <TableHead className="min-w-[160px]"></TableHead>
@@ -143,7 +144,7 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
           )}
 
           {!isLoading &&
-            orders.map(({ id, customer, totalPrice, createdAt }) => (
+            orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
               <TableRow key={id}>
                 <TableCell>
                   <Tooltip>
@@ -155,6 +156,10 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
                       <p>{customer?.name ?? 'N/A'}</p>
                     </TooltipContent>
                   </Tooltip>
+                </TableCell>
+
+                <TableCell>
+                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalCostPrice ?? 0))}</p>
                 </TableCell>
 
                 <TableCell>
