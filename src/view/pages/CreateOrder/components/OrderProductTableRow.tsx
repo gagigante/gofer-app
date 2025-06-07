@@ -16,6 +16,7 @@ import { parseCentsToDecimal } from '@/view/utils/parsers'
 interface OrderProductTableRowProps {
   id: string
   name: string
+  costPrice: number
   unityPrice: number
   customPrice: number
   quantity: number
@@ -30,6 +31,7 @@ interface OrderProductTableRowProps {
 export function OrderProductTableRow({
   id,
   name,
+  costPrice,
   unityPrice,
   customPrice,
   quantity,
@@ -56,6 +58,10 @@ export function OrderProductTableRow({
               <p>{name}</p>
             </TooltipContent>
           </Tooltip>
+        </TableCell>
+
+        <TableCell>
+          <p className="font-medium">{formatCurrency(parseCentsToDecimal(costPrice))}</p>
         </TableCell>
 
         <TableCell>
@@ -129,7 +135,7 @@ export function OrderProductTableRow({
 
       {hasNote && (
         <TableRow>
-          <TableCell colSpan={6} className="py-4">
+          <TableCell colSpan={7} className="py-4">
             <div className="pl-4 space-y-2 border-l-2 border-border">
               <Label htmlFor="obs">Notas do produto</Label>
               <Textarea

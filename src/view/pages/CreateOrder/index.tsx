@@ -73,6 +73,7 @@ export function CreateOrder() {
       return products.map((product) => ({
         id: product.productId ?? '',
         name: product.name ?? '',
+        costPrice: product.costPrice ?? 0,
         unityPrice: product.price ?? 0,
         customPrice: product.customPrice ?? 0,
         quantity: product.quantity ?? 0,
@@ -96,12 +97,13 @@ export function CreateOrder() {
     }
   }, [draftData])
 
-  function handleAddProductToOrder({ id, name, price }: Product, quantity: number) {
+  function handleAddProductToOrder({ id, name, price, costPrice }: Product, quantity: number) {
     if (products.length === 0) {
       form.setValue('products', [
         {
           id,
           name: name ?? '',
+          costPrice: costPrice ?? 0,
           unityPrice: price ?? 0,
           customPrice: price ?? 0,
           quantity,
@@ -120,6 +122,7 @@ export function CreateOrder() {
         {
           id,
           name: name ?? '',
+          costPrice: costPrice ?? 0,
           unityPrice: price ?? 0,
           customPrice: price ?? 0,
           quantity,

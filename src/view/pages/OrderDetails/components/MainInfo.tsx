@@ -28,7 +28,7 @@ export function MainInfo({ customer, totalCostPrice, totalPrice, createdAt, obs 
           <b>Preço total:</b> {formatCurrency(parseCentsToDecimal(totalPrice))}
         </p>
         <p className="font-medium">
-          <b>Data do pedido:</b> {FORMATTER.format(new Date(createdAt + ' UTC'))}
+          <b>Data do pedido:</b> {createdAt ? FORMATTER.format(new Date(createdAt + ' UTC')) : 'N/A'}
         </p>
       </div>
 

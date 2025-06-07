@@ -16,29 +16,29 @@ export function Address({ zipcode, city, street, neighborhood, complement }: Add
       <div className="flex gap-4">
         <div className="flex-1">
           <Label>CEP</Label>
-          <Input placeholder="Digite o CEP para entrega do pedido" value={zipcode} readOnly />
+          <Input value={zipcode} readOnly />
         </div>
 
         <div className="flex-1">
           <Label>Cidade</Label>
-          <Input placeholder="Digite a cidade para entrega do pedido" value={city} readOnly />
+          <Input value={city} readOnly />
         </div>
       </div>
 
       <div className="flex gap-4">
         <div className="flex-1">
           <Label>Logradouro</Label>
-          <Input placeholder="Digite o logradouro para entrega do pedido" value={street} readOnly />
+          <Input value={street} readOnly />
         </div>
 
         <div className="flex-1">
           <Label>Bairro</Label>
-          <Input placeholder="Digite o bairro para entrega do pedido" value={neighborhood} readOnly />
+          <Input value={neighborhood} readOnly />
         </div>
 
         <div className="flex-1">
           <Label>Complemento</Label>
-          <Input placeholder="Digite o complemento para entrega do pedido" value={complement} readOnly />
+          <Input value={complement} readOnly />
         </div>
       </div>
     </Card>
