@@ -104,7 +104,11 @@ export class ProductsRepository {
       .from(products)
       .get()
 
-    return response?.products ?? null
+    if (!response?.products?.id) {
+      return null
+    }
+
+    return response.products
   }
 
   public async createProduct({
