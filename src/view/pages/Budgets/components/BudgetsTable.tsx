@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Loader2, Pencil, FileText, Trash2 } from 'lucide-react'
+import { Pencil, FileText, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
 import { TableActionButton } from '@/view/components/TableActionButton'
+import { TableLoading } from '@/view/components/TableLoading'
 import { DeleteBudgetAction } from './DeleteBudgetAction'
 
 import { useAuth } from '@/view/hooks/useAuth'
@@ -110,10 +111,14 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
     })
   }
 
+  if (isLoading) {
+    return <TableLoading columns={5} rows={5} />
+  }
+
   return (
     <>
       <Table>
-        {orders.length === 0 && !isLoading && <TableCaption>Nenhum orçamento encontrado.</TableCaption>}
+        {orders.length === 0 && <TableCaption>Nenhum orçamento encontrado.</TableCaption>}
 
         <TableHeader>
           <TableRow>
@@ -126,83 +131,65 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
         </TableHeader>
 
         <TableBody className="relative">
-          {isLoading && (
-            <>
-              <div className="absolute top-0 right-0 bottom-0 left-0 ">
-                <div className="h-full flex items-center justify-center backdrop-blur-md bg-muted/20 border border-muted/10 z-10">
-                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                  Buscando orçamentos...
-                </div>
-              </div>
+          {orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
+            <TableRow key={id}>
+              <TableCell>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
+                  </TooltipTrigger>
 
-              <TableRow>
-                <TableCell colSpan={4}>
-                  <div className="h-24"></div>
-                </TableCell>
-              </TableRow>
-            </>
-          )}
+                  <TooltipContent>
+                    <p>{customer?.name ?? 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TableCell>
 
-          {!isLoading &&
-            orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
-              <TableRow key={id}>
-                <TableCell>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
-                    </TooltipTrigger>
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalCostPrice ?? 0))}</p>
+              </TableCell>
 
-                    <TooltipContent>
-                      <p>{customer?.name ?? 'N/A'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TableCell>
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
+              </TableCell>
 
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalCostPrice ?? 0))}</p>
-                </TableCell>
+              <TableCell>
+                <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
+              </TableCell>
 
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
-                </TableCell>
+              <TableCell className="text-right space-x-1.5">
+                <TableActionButton
+                  icon={<Pencil className="w-3 h-3" />}
+                  variant="outline"
+                  tooltip="Criar pedido a partir do rascunho ou editar orçamento"
+                  customLoading={isOrderLoading && selectedOrderId === id}
+                  onClick={() => {
+                    setSelectedOrderId(id)
+                  }}
+                />
 
-                <TableCell>
-                  <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
-                </TableCell>
+                <TableActionButton
+                  icon={<FileText className="w-3 h-3" />}
+                  variant="outline"
+                  tooltip="Salvar arquivo do orçamento"
+                  onClick={async () => await handleSaveOrderFile(id)}
+                />
 
-                <TableCell className="text-right space-x-1.5">
-                  <TableActionButton
-                    icon={<Pencil className="w-3 h-3" />}
-                    variant="outline"
-                    tooltip="Criar pedido a partir do rascunho ou editar orçamento"
-                    customLoading={isOrderLoading && selectedOrderId === id}
-                    onClick={() => {
-                      setSelectedOrderId(id)
-                    }}
-                  />
+                <TableActionButton
+                  icon={<Trash2 className="w-3 h-3" />}
+                  variant="destructive"
+                  tooltip="Apagar orçamento"
+                  onClick={() => {
+                    const order = orders.find((item) => item.id === id)
 
-                  <TableActionButton
-                    icon={<FileText className="w-3 h-3" />}
-                    variant="outline"
-                    tooltip="Salvar arquivo do orçamento"
-                    onClick={async () => await handleSaveOrderFile(id)}
-                  />
-
-                  <TableActionButton
-                    icon={<Trash2 className="w-3 h-3" />}
-                    variant="destructive"
-                    tooltip="Apagar orçamento"
-                    onClick={() => {
-                      const order = orders.find((item) => item.id === id)
-
-                      if (order) {
-                        handleRequestBudgetDeletion(order.id)
-                      }
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+                    if (order) {
+                      handleRequestBudgetDeletion(order.id)
+                    }
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
 
