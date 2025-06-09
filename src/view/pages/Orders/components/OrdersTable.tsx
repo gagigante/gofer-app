@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
-import { Loader2, Eye, FileText, Trash2 } from 'lucide-react'
+import { Eye, FileText, Trash2 } from 'lucide-react'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { TableActionButton } from '@/view/components/TableActionButton'
 import { DeleteOrderAction } from './DeleteOrderAction'
+import { TableLoading } from '@/view/components/TableLoading'
 
 import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -88,10 +89,14 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
     setSelectedOrderId(undefined)
   }
 
+  if (isLoading) {
+    return <TableLoading columns={5} rows={5} />
+  }
+
   return (
     <>
       <Table>
-        {orders.length === 0 && !isLoading && <TableCaption>Nenhum pedido encontrado.</TableCaption>}
+        {orders.length === 0 && <TableCaption>Nenhum pedido encontrado.</TableCaption>}
 
         <TableHeader>
           <TableRow>
@@ -104,84 +109,66 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
         </TableHeader>
 
         <TableBody className="relative">
-          {isLoading && (
-            <>
-              <div className="absolute top-0 right-0 bottom-0 left-0 ">
-                <div className="h-full flex items-center justify-center backdrop-blur-md bg-muted/20 border border-muted/10 z-10">
-                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
-                  Buscando pedidos...
-                </div>
-              </div>
+          {orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
+            <TableRow key={id}>
+              <TableCell>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
+                  </TooltipTrigger>
 
-              <TableRow>
-                <TableCell colSpan={4}>
-                  <div className="h-24"></div>
-                </TableCell>
-              </TableRow>
-            </>
-          )}
+                  <TooltipContent>
+                    <p>{customer?.name ?? 'N/A'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TableCell>
 
-          {!isLoading &&
-            orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
-              <TableRow key={id}>
-                <TableCell>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className="font-medium line-clamp-1">{customer?.name ?? 'N/A'}</p>
-                    </TooltipTrigger>
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalCostPrice ?? 0))}</p>
+              </TableCell>
 
-                    <TooltipContent>
-                      <p>{customer?.name ?? 'N/A'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TableCell>
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
+              </TableCell>
 
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalCostPrice ?? 0))}</p>
-                </TableCell>
+              <TableCell>
+                <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
+              </TableCell>
 
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(totalPrice ?? 0))}</p>
-                </TableCell>
+              <TableCell className="text-right space-x-1.5">
+                <TableActionButton
+                  icon={<Eye className="w-3 h-3" />}
+                  variant="outline"
+                  tooltip="Ver detalhes do pedido"
+                  onClick={() => {
+                    navigate(`/home/orders/${id}`)
+                  }}
+                />
 
-                <TableCell>
-                  <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
-                </TableCell>
+                <TableActionButton
+                  icon={<FileText className="w-3 h-3" />}
+                  variant="outline"
+                  tooltip="Salvar arquivo do pedido"
+                  onClick={async () => {
+                    await handleSaveOrderFile(id)
+                  }}
+                />
 
-                <TableCell className="text-right space-x-1.5">
-                  <TableActionButton
-                    icon={<Eye className="w-3 h-3" />}
-                    variant="outline"
-                    tooltip="Ver detalhes do pedido"
-                    onClick={() => {
-                      navigate(`/home/orders/${id}`)
-                    }}
-                  />
+                <TableActionButton
+                  icon={<Trash2 className="w-3 h-3" />}
+                  variant="destructive"
+                  tooltip="Apagar pedido"
+                  onClick={() => {
+                    const order = orders.find((item) => item.id === id)
 
-                  <TableActionButton
-                    icon={<FileText className="w-3 h-3" />}
-                    variant="outline"
-                    tooltip="Salvar arquivo do pedido"
-                    onClick={async () => {
-                      await handleSaveOrderFile(id)
-                    }}
-                  />
-
-                  <TableActionButton
-                    icon={<Trash2 className="w-3 h-3" />}
-                    variant="destructive"
-                    tooltip="Apagar pedido"
-                    onClick={() => {
-                      const order = orders.find((item) => item.id === id)
-
-                      if (order) {
-                        handleRequestOrderDeletion(order.id)
-                      }
-                    }}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+                    if (order) {
+                      handleRequestOrderDeletion(order.id)
+                    }
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
 
