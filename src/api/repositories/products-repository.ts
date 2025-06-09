@@ -158,16 +158,20 @@ export class ProductsRepository {
     }
   }
 
-  public async updateProduct({ id, ...data }: Product): Promise<Product> {
-    const [response] = await db
-      .update(products)
-      .set({
-        ...data,
-      })
-      .where(eq(products.id, id))
-      .returning()
+  public async updateProduct({ id, ...data }: Product): Promise<Response<Product>> {
+    try {
+      const [response] = await db
+        .update(products)
+        .set({
+          ...data,
+        })
+        .where(eq(products.id, id))
+        .returning()
 
-    return response
+      return { data: response, err: null }
+    } catch (error) {
+      return { data: null, err: new RepositoryError(error as LibsqlError) }
+    }
   }
 
   private listFilters(filterOptions: { ids?: string[]; name?: string }): SQL[] {

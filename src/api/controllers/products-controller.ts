@@ -62,7 +62,7 @@ export type CreateProductResponse = Response<Product>
 export interface UpdateProductRequest {
   loggedUserId: string
   productId: string
-  barCode: string
+  barCode?: string
   name: string
   description?: string
   price: number
@@ -271,23 +271,27 @@ export class ProductsController {
 
     const updatedProduct = await this.productsRepository.updateProduct({
       id: productId,
-      barCode,
       fastId: productToBeUpdated.fastId,
-      name,
-      description,
+      barCode: barCode?.trim() || null,
+      name: name.trim(),
+      description: description?.trim() || null,
       price,
       costPrice,
       availableQuantity,
       minimumQuantity,
-      categoryId: categoryId ?? null,
-      brandId: brandId ?? null,
+      categoryId: categoryId || null,
+      brandId: brandId || null,
       icms,
       ncm,
       cest,
-      cestSegment,
-      cestDescription,
+      cestSegment: cestSegment?.trim() || null,
+      cestDescription: cestDescription?.trim() || null,
     })
 
-    return { data: updatedProduct, err: null }
+    if (updatedProduct.err) {
+      return { data: null, err: updatedProduct.err }
+    }
+
+    return { data: updatedProduct.data, err: null }
   }
 }
