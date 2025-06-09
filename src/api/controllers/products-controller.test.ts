@@ -12,6 +12,8 @@ import { RepositoryError } from '@/api/errors/RepositoryError'
 import { ProductWithThisBarCodeALreadyExistsError } from '@/api/errors/ProductWithThisBarCodeALreadyExistsError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 
+import { eq } from 'drizzle-orm'
+
 const PRODUCT_DATA = {
   barCode: '088381178655',
   name: 'test-product',
@@ -811,6 +813,210 @@ describe('products-controller', () => {
         cest: PRODUCT_DATA.cest,
         cestSegment: PRODUCT_DATA.cestSegment,
         cestDescription: PRODUCT_DATA.cestDescription,
+      })
+      expect(response.err).toBeNull()
+    })
+  })
+
+  describe('updateProduct', () => {
+    let existingProduct: Product
+
+    beforeEach(async () => {
+      // Create a product to update
+      const createResponse = await productsController.createProduct({
+        loggedUserId: 'test-user-id',
+        ...PRODUCT_DATA,
+      })
+
+      existingProduct = createResponse.data!
+    })
+
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
+      const response = await productsController.updateProduct({
+        loggedUserId: 'non-existing-user-id',
+        productId: existingProduct.id,
+        ...PRODUCT_DATA,
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw NotFoundError if product does not exist', async () => {
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: 'non-existing-product-id',
+        ...PRODUCT_DATA,
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotFoundError)
+    })
+
+    test('should throw ProductAlreadyExistsError if name already exists in another product', async () => {
+      // Create another product with a different name
+      const secondProductResponse = await productsController.createProduct({
+        loggedUserId: 'test-user-id',
+        ...PRODUCT_DATA,
+        name: 'another-product',
+        barCode: '123456789012',
+      })
+
+      expect(secondProductResponse.data).not.toBeNull()
+      expect(secondProductResponse.err).toBeNull()
+
+      // Try to update the first product with the name of the second product
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        ...PRODUCT_DATA,
+        name: 'another-product',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(ProductAlreadyExistsError)
+    })
+
+    test('should throw ProductWithThisBarCodeALreadyExistsError if barCode already exists in another product', async () => {
+      // Create another product with a different barCode
+      await productsController.createProduct({
+        loggedUserId: 'test-user-id',
+        ...PRODUCT_DATA,
+        name: 'another-product',
+        barCode: '123456789012',
+      })
+
+      // Try to update the first product with the barCode of the second product
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        ...PRODUCT_DATA,
+        barCode: '123456789012',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(ProductWithThisBarCodeALreadyExistsError)
+    })
+
+    test('should throw RepositoryError if categoryId is provided but does not exist', async () => {
+      // First ensure the product has no category
+      await db.update(products).set({ categoryId: null }).where(eq(products.id, existingProduct.id))
+
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        ...PRODUCT_DATA,
+        categoryId: 'non-existing-category-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(RepositoryError)
+    })
+
+    test('should throw RepositoryError if brandId is provided but does not exist', async () => {
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        ...PRODUCT_DATA,
+        brandId: 'non-existing-brand-id',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(RepositoryError)
+    })
+
+    test('should update product successfully with only required data', async () => {
+      const requiredProductData = {
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        name: 'updated-minimal-product',
+        price: 150,
+        costPrice: 75,
+        availableQuantity: 15,
+        minimumQuantity: 8,
+        icms: 0,
+        ncm: '22222222',
+        cest: '2222222',
+      }
+
+      const response = await productsController.updateProduct(requiredProductData)
+
+      expect(response.data).toMatchObject({
+        id: existingProduct.id,
+        name: requiredProductData.name,
+        barCode: null,
+        price: requiredProductData.price,
+        costPrice: requiredProductData.costPrice,
+        availableQuantity: requiredProductData.availableQuantity,
+        minimumQuantity: requiredProductData.minimumQuantity,
+        icms: requiredProductData.icms,
+        ncm: requiredProductData.ncm,
+        cest: requiredProductData.cest,
+        description: null,
+        categoryId: null,
+        brandId: null,
+        cestSegment: null,
+        cestDescription: null,
+      })
+      expect(response.err).toBeNull()
+    })
+
+    test('should update product successfully with valid data', async () => {
+      const updatedData = {
+        ...PRODUCT_DATA,
+        name: 'updated-product-name',
+        price: 250,
+        costPrice: 125,
+      }
+
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        ...updatedData,
+      })
+
+      expect(response.data).toMatchObject({
+        id: existingProduct.id,
+        barCode: updatedData.barCode,
+        name: updatedData.name,
+        description: updatedData.description,
+        price: updatedData.price,
+        costPrice: updatedData.costPrice,
+        availableQuantity: updatedData.availableQuantity,
+        minimumQuantity: updatedData.minimumQuantity,
+        icms: updatedData.icms,
+        ncm: updatedData.ncm,
+        cest: updatedData.cest,
+        cestSegment: updatedData.cestSegment,
+        cestDescription: updatedData.cestDescription,
+      })
+      expect(response.err).toBeNull()
+    })
+
+    test('should update product successfully with category and brand', async () => {
+      await db.insert(categories).values({
+        id: 'test-category-id',
+        name: 'Test Category',
+      })
+
+      await db.insert(brands).values({
+        id: 'test-brand-id',
+        name: 'Test Brand',
+      })
+
+      const response = await productsController.updateProduct({
+        loggedUserId: 'test-user-id',
+        productId: existingProduct.id,
+        ...PRODUCT_DATA,
+        categoryId: 'test-category-id',
+        brandId: 'test-brand-id',
+      })
+
+      expect(response.data).toMatchObject({
+        id: existingProduct.id,
+        ...PRODUCT_DATA,
+        categoryId: 'test-category-id',
+        brandId: 'test-brand-id',
       })
       expect(response.err).toBeNull()
     })
