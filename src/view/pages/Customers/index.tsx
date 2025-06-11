@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
+import { useDebounce } from 'use-debounce'
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Footer } from '@/view/components/Footer'
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
+import { TableLoading } from '@/view/components/TableLoading'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { DeleteCustomerAction } from './components/DeleteCustomerAction'
 
@@ -28,8 +30,10 @@ export function Customers() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer>()
   const [isDeleteCustomerDialogOpen, setIsDeleteCustomerDialogOpen] = useState(false)
 
-  const { data } = useCustomers(
-    { loggedUserId: user?.id ?? '', name: nameFilter, page: pagination },
+  const [search] = useDebounce(nameFilter, 250)
+
+  const { data, isFetching } = useCustomers(
+    { loggedUserId: user?.id ?? '', name: search, page: pagination },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -92,134 +96,138 @@ export function Customers() {
           }}
         />
 
-        <Table>
-          {customers.length === 0 && <TableCaption>Nenhum cliente encontrado.</TableCaption>}
+        {isFetching && <TableLoading columns={6} rows={5} />}
 
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead className="min-w-[156px]">Telefone</TableHead>
-              <TableHead className="min-w-[172px]">CNPJ</TableHead>
-              <TableHead className="min-w-[140px]">CPF</TableHead>
-              <TableHead className="min-w-[128px]">RG</TableHead>
-              <TableHead className="min-w-[160px]"></TableHead>
-            </TableRow>
-          </TableHeader>
+        {!isFetching && (
+          <Table>
+            {customers.length === 0 && <TableCaption>Nenhum cliente encontrado.</TableCaption>}
 
-          <TableBody>
-            {customers.map(({ id, name, phone, cnpj, cpf, rg }) => {
-              return (
-                <TableRow key={id}>
-                  <TableCell>
-                    <div className="flex">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead className="min-w-[128px]">Telefone</TableHead>
+                <TableHead className="min-w-[128px]">CNPJ</TableHead>
+                <TableHead className="min-w-[128px]">CPF</TableHead>
+                <TableHead className="min-w-[128px]">RG</TableHead>
+                <TableHead className="min-w-[156px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {customers.map(({ id, name, phone, cnpj, cpf, rg }) => {
+                return (
+                  <TableRow key={id}>
+                    <TableCell>
+                      <div className="flex">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="font-medium line-clamp-1">{name}</p>
+                          </TooltipTrigger>
+
+                          <TooltipContent>
+                            <p>{name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex">
+                        <p className="font-medium">{formatPhone(phone ?? '') || 'N/A'}</p>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex">
+                        <p className="font-medium">{formatCNPJ(cnpj ?? '') || 'N/A'}</p>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex">
+                        <p className="font-medium">{formatCPF(cpf ?? '') || 'N/A'}</p>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className="flex">
+                        <p className="font-medium">{formatRG(rg ?? '') || 'N/A'}</p>
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-right space-x-1.5">
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <p className="font-medium line-clamp-1">{name}</p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const customer = customers.find((item) => item.id === id)
+
+                              if (customer) {
+                                handleRequestCustomerDetails(customer)
+                              }
+                            }}
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
                         </TooltipTrigger>
 
                         <TooltipContent>
-                          <p>{name}</p>
+                          <p>Ver detalhes do cliente</p>
                         </TooltipContent>
                       </Tooltip>
-                    </div>
-                  </TableCell>
 
-                  <TableCell>
-                    <div className="flex">
-                      <p className="font-medium">{formatPhone(phone ?? '') || 'N/A'}</p>
-                    </div>
-                  </TableCell>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const customer = customers.find((item) => item.id === id)
 
-                  <TableCell>
-                    <div className="flex">
-                      <p className="font-medium">{formatCNPJ(cnpj ?? '') || 'N/A'}</p>
-                    </div>
-                  </TableCell>
+                              if (customer) {
+                                handleRequestCustomerUpdate(customer)
+                              }
+                            }}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
 
-                  <TableCell>
-                    <div className="flex">
-                      <p className="font-medium">{formatCPF(cpf ?? '') || 'N/A'}</p>
-                    </div>
-                  </TableCell>
+                        <TooltipContent>
+                          <p>Editar cliente</p>
+                        </TooltipContent>
+                      </Tooltip>
 
-                  <TableCell>
-                    <div className="flex">
-                      <p className="font-medium">{formatRG(rg ?? '') || 'N/A'}</p>
-                    </div>
-                  </TableCell>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              const customer = customers.find((item) => item.id === id)
 
-                  <TableCell className="text-right space-x-1.5">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const customer = customers.find((item) => item.id === id)
+                              if (customer) {
+                                handleRequestCustomerDeletion(customer)
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
 
-                            if (customer) {
-                              handleRequestCustomerDetails(customer)
-                            }
-                          }}
-                        >
-                          <FaEye className="w-3 h-3" />
-                        </Button>
-                      </TooltipTrigger>
-
-                      <TooltipContent>
-                        <p>Ver detalhes do cliente</p>
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            const customer = customers.find((item) => item.id === id)
-
-                            if (customer) {
-                              handleRequestCustomerUpdate(customer)
-                            }
-                          }}
-                        >
-                          <FaPencilAlt className="w-3 h-3" />
-                        </Button>
-                      </TooltipTrigger>
-
-                      <TooltipContent>
-                        <p>Editar cliente</p>
-                      </TooltipContent>
-                    </Tooltip>
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            const customer = customers.find((item) => item.id === id)
-
-                            if (customer) {
-                              handleRequestCustomerDeletion(customer)
-                            }
-                          }}
-                        >
-                          <FaTrash className="w-3 h-3" />
-                        </Button>
-                      </TooltipTrigger>
-
-                      <TooltipContent>
-                        <p>Apagar cliente</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+                        <TooltipContent>
+                          <p>Apagar cliente</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        )}
       </div>
 
       <Footer page={pagination} total={data?.total ?? 0} onChange={setPagination}>
