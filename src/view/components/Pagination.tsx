@@ -1,5 +1,3 @@
-import React from 'react'
-
 import {
   Pagination as ShadPagination,
   PaginationContent,
@@ -45,6 +43,7 @@ export const Pagination = ({ currentPage, total, onChangePage }: PaginationProps
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
+            size="sm"
             onClick={() => {
               if (currentPage === 1) return
 
@@ -66,6 +65,7 @@ export const Pagination = ({ currentPage, total, onChangePage }: PaginationProps
               onClick={() => {
                 onChangePage(page)
               }}
+              size="sm"
             >
               {page}
             </PaginationLink>
@@ -80,6 +80,7 @@ export const Pagination = ({ currentPage, total, onChangePage }: PaginationProps
 
         <PaginationItem>
           <PaginationNext
+            size="sm"
             onClick={() => {
               if (currentPage === numberOfPages) return
 
