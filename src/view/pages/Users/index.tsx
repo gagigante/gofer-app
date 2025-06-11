@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type * as z from 'zod'
 import { Pencil, Trash2 } from 'lucide-react'
+import { useDebounce } from 'use-debounce'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
@@ -36,12 +37,14 @@ export function Users() {
   const [isUpdateUserDialogOpen, setIsUpdateUserDialogOpen] = useState(false)
   const [isDeleteUserAlertOpen, setIsDeleteUserAlertOpen] = useState(false)
 
+  const [search] = useDebounce(nameFilter, 250)
+
   const { mutateAsync: mutateOnCreate } = useMutateOnCreateUser()
   const { mutateAsync: mutateOnUpdate } = useMutateOnUpdateUser()
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteUser()
 
-  const { data, isLoading } = useUsers(
-    { loggedUserId: user?.id ?? '', name: nameFilter, page: pagination },
+  const { data, isFetching } = useUsers(
+    { loggedUserId: user?.id ?? '', name: search, page: pagination },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -174,9 +177,9 @@ export function Users() {
           }}
         />
 
-        {isLoading && <TableLoading columns={3} rows={5} />}
+        {isFetching && <TableLoading columns={3} rows={5} />}
 
-        {!isLoading && (
+        {!isFetching && (
           <Table>
             {users.length === 0 && <TableCaption>Nenhum usuário encontrado.</TableCaption>}
 
