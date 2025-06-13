@@ -27,7 +27,7 @@ export function useMutateOnCreateBrand() {
       return data
     },
     onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['brands'] })
+      queryClient.invalidateQueries({ queryKey: ['brands'] })
 
       return response
     },
@@ -50,10 +50,8 @@ export function useMutateOnUpdateBrand() {
       return data
     },
     onSuccess: async (response) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['brands'] }),
-        queryClient.invalidateQueries({ queryKey: ['products'] }),
-      ])
+      queryClient.invalidateQueries({ queryKey: ['brands'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
 
       return response
     },

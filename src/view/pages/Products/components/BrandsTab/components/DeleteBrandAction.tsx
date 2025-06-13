@@ -22,7 +22,7 @@ export const DeleteBrandAction = ({ isOpen, onDelete, onClose }: DeleteBrandActi
 
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogContent>
+      <AlertDialogContent onKeyDown={(e) => e.stopPropagation()}>
         <AlertDialogHeader>
           <AlertDialogTitle>Apagar marca</AlertDialogTitle>
           <AlertDialogDescription>
@@ -31,7 +31,7 @@ export const DeleteBrandAction = ({ isOpen, onDelete, onClose }: DeleteBrandActi
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <Button variant="outline" disabled={isLoading} onClick={onClose}>
+          <Button variant="outline" disabled={isLoading} onClick={onClose} autoFocus>
             Cancelar
           </Button>
 

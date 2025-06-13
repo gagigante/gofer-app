@@ -130,6 +130,7 @@ export function Products() {
 
           <BrandsTab
             brands={brands}
+            isFetching={isFetchingBrands}
             onChangeFilter={(filter) => {
               setBrandsNameFilter(filter)
               setBrandsPagination(1)
