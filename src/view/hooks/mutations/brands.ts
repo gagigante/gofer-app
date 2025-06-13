@@ -75,10 +75,8 @@ export function useMutateOnDeleteBrand() {
       return data
     },
     onSuccess: async (response) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['brands'] }),
-        queryClient.invalidateQueries({ queryKey: ['products'] }),
-      ])
+      queryClient.invalidateQueries({ queryKey: ['brands'] })
+      queryClient.invalidateQueries({ queryKey: ['products'] })
 
       return response
     },

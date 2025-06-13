@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import type * as z from 'zod'
 
@@ -8,26 +8,28 @@ import { Input } from '@/view/components/ui/input'
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
+import { TableLoading } from '@/view/components/TableLoading'
 import { CreateBrandAction } from './components/CreateBrandAction'
 import { DeleteBrandAction } from './components/DeleteBrandAction'
 import { UpdateBrandAction } from './components/UpdateBrandAction'
+import { BrandDetails } from './components/BrandDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnDeleteBrand, useMutateOnUpdateBrand } from '@/view/hooks/mutations/brands'
 
-import { BrandWithProductsQuantity } from '../..'
-
 import { createBrandSchema } from './components/CreateBrandAction/schema'
-import { BrandDetails } from './components/BrandDetails'
+
+import { type BrandWithProductsQuantity } from '../..'
 
 interface BrandsTabProps {
   brands: BrandWithProductsQuantity[]
+  isFetching: boolean
   onChangeFilter: (nameFilter: string) => void
   onDelete: () => void
 }
 
-export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) {
+export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: BrandsTabProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -109,27 +111,22 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
   async function handleDeleteBrand(brandId: string) {
     if (!user) return
 
-    handleToggleDialog('deleteBrand')
-    setSelectedBrand(undefined)
+    try {
+      await mutateOnDelete({ loggedUserId: user.id, brandId })
 
-    await mutateOnDelete(
-      { loggedUserId: user.id, brandId },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Marca removida com sucesso.',
-            duration: 3000,
-          })
-          onDelete()
-        },
-        onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar a marca. Tente novamente.',
-            duration: 3000,
-          })
-        },
-      },
-    )
+      toast({
+        title: 'Marca removida com sucesso.',
+        duration: 3000,
+      })
+    } catch {
+      toast({
+        title: 'Houve um erro ao apagar a marca. Tente novamente.',
+        duration: 3000,
+      })
+    } finally {
+      setSelectedBrand(undefined)
+      onDelete()
+    }
   }
 
   return (
