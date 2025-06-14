@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
-import type * as z from 'zod'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
@@ -16,9 +15,7 @@ import { BrandDetails } from './components/BrandDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
-import { useMutateOnDeleteBrand, useMutateOnUpdateBrand } from '@/view/hooks/mutations/brands'
-
-import { createBrandSchema } from './components/CreateBrandAction/schema'
+import { useMutateOnDeleteBrand } from '@/view/hooks/mutations/brands'
 
 import { type BrandWithProductsQuantity } from '../..'
 
@@ -33,7 +30,6 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync: mutateOnUpdate } = useMutateOnUpdateBrand()
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteBrand()
 
   const [selectedBrand, setSelectedBrand] = useState<BrandWithProductsQuantity>()
@@ -61,46 +57,6 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
   function handleRequestBrandUpdate(brand: BrandWithProductsQuantity) {
     setSelectedBrand(brand)
     handleToggleDialog('updateBrand')
-  }
-
-  async function handleUpdateBrand(data: z.infer<typeof createBrandSchema> & { brandId: string }) {
-    if (!user) return
-
-    await mutateOnUpdate(
-      {
-        loggedUserId: user.id,
-        brandId: data.brandId,
-        updatedName: data.name,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Marca atualizada com sucesso.',
-            duration: 3000,
-          })
-
-          handleToggleDialog('updateBrand')
-          setSelectedBrand(undefined)
-        },
-        onError: (err) => {
-          if (err.message === 'BrandAlreadyExistsError') {
-            toast({
-              title: 'Ja existe uma marca com este nome.',
-              duration: 3000,
-            })
-            return
-          }
-
-          toast({
-            title: 'Houve um erro ao atualizar a marca. Tente novamente.',
-            duration: 3000,
-          })
-
-          handleToggleDialog('updateBrand')
-          setSelectedBrand(undefined)
-        },
-      },
-    )
   }
 
   function handleRequestBrandDeletion(brand: BrandWithProductsQuantity) {
