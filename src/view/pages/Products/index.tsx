@@ -28,7 +28,7 @@ export function Products() {
   const [activeTab, setActiveTab] = useState<'categories' | 'products' | 'brands'>('products')
 
   const [brandsNameFilter, setBrandsNameFilter] = useState('')
-  const { data: brandsResponse } = useBrands(
+  const { data: brandsResponse, isFetching: isFetchingBrands } = useBrands(
     { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: brandsPagination },
     {
       enabled: !!user,
