@@ -1,37 +1,36 @@
 import { useEffect, useState } from 'react'
-import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
-import type * as z from 'zod'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
 import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
+import { TableLoading } from '@/view/components/TableLoading'
+import { TableActionButton } from '@/view/components/TableActionButton'
 import { CreateBrandAction } from './components/CreateBrandAction'
 import { DeleteBrandAction } from './components/DeleteBrandAction'
 import { UpdateBrandAction } from './components/UpdateBrandAction'
+import { BrandDetails } from './components/BrandDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
-import { useMutateOnDeleteBrand, useMutateOnUpdateBrand } from '@/view/hooks/mutations/brands'
+import { useMutateOnDeleteBrand } from '@/view/hooks/mutations/brands'
 
-import { BrandWithProductsQuantity } from '../..'
-
-import { createBrandSchema } from './components/CreateBrandAction/schema'
-import { BrandDetails } from './components/BrandDetails'
+import { type BrandWithProductsQuantity } from '../..'
 
 interface BrandsTabProps {
   brands: BrandWithProductsQuantity[]
+  isFetching: boolean
   onChangeFilter: (nameFilter: string) => void
   onDelete: () => void
 }
 
-export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) {
+export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: BrandsTabProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync: mutateOnUpdate } = useMutateOnUpdateBrand()
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteBrand()
 
   const [selectedBrand, setSelectedBrand] = useState<BrandWithProductsQuantity>()
@@ -61,46 +60,6 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
     handleToggleDialog('updateBrand')
   }
 
-  async function handleUpdateBrand(data: z.infer<typeof createBrandSchema> & { brandId: string }) {
-    if (!user) return
-
-    await mutateOnUpdate(
-      {
-        loggedUserId: user.id,
-        brandId: data.brandId,
-        updatedName: data.name,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Marca atualizada com sucesso.',
-            duration: 3000,
-          })
-
-          handleToggleDialog('updateBrand')
-          setSelectedBrand(undefined)
-        },
-        onError: (err) => {
-          if (err.message === 'BrandAlreadyExistsError') {
-            toast({
-              title: 'Ja existe uma marca com este nome.',
-              duration: 3000,
-            })
-            return
-          }
-
-          toast({
-            title: 'Houve um erro ao atualizar a marca. Tente novamente.',
-            duration: 3000,
-          })
-
-          handleToggleDialog('updateBrand')
-          setSelectedBrand(undefined)
-        },
-      },
-    )
-  }
-
   function handleRequestBrandDeletion(brand: BrandWithProductsQuantity) {
     setSelectedBrand(brand)
     handleToggleDialog('deleteBrand')
@@ -109,27 +68,22 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
   async function handleDeleteBrand(brandId: string) {
     if (!user) return
 
-    handleToggleDialog('deleteBrand')
-    setSelectedBrand(undefined)
+    try {
+      await mutateOnDelete({ loggedUserId: user.id, brandId })
 
-    await mutateOnDelete(
-      { loggedUserId: user.id, brandId },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Marca removida com sucesso.',
-            duration: 3000,
-          })
-          onDelete()
-        },
-        onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar a marca. Tente novamente.',
-            duration: 3000,
-          })
-        },
-      },
-    )
+      toast({
+        title: 'Marca removida com sucesso.',
+        duration: 3000,
+      })
+    } catch {
+      toast({
+        title: 'Houve um erro ao apagar a marca. Tente novamente.',
+        duration: 3000,
+      })
+    } finally {
+      setSelectedBrand(undefined)
+      onDelete()
+    }
   }
 
   return (
@@ -147,107 +101,90 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
         }}
       />
 
-      <Table>
-        {brands.length === 0 && <TableCaption>Nenhuma marca encontrada.</TableCaption>}
+      {isFetching && <TableLoading columns={3} rows={5} />}
 
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead className="min-w-[164px]">Produtos associados</TableHead>
-            <TableHead className="min-w-[160px]"></TableHead>
-          </TableRow>
-        </TableHeader>
+      {!isFetching && (
+        <Table>
+          {brands.length === 0 && <TableCaption>Nenhuma marca encontrada.</TableCaption>}
 
-        <TableBody>
-          {brands.map(({ id, name, products }) => (
-            <TableRow key={id}>
-              <TableCell>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="font-medium line-clamp-1">{name}</p>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>{name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
-
-              <TableCell>
-                <p className="font-medium">{products}</p>
-              </TableCell>
-
-              <TableCell className="text-right space-x-1.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const brand = brands.find((item) => item.id === id)
-                        if (brand) {
-                          setSelectedBrand(brand)
-                          handleToggleDialog('brandDetails')
-                        }
-                      }}
-                    >
-                      <FaEye className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>Ver detalhes da marca</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const brand = brands.find((item) => item.id === id)
-
-                        if (brand) {
-                          handleRequestBrandUpdate(brand)
-                        }
-                      }}
-                    >
-                      <FaPencilAlt className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>Editar marca</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        const brand = brands.find((item) => item.id === id)
-
-                        if (brand) {
-                          handleRequestBrandDeletion(brand)
-                        }
-                      }}
-                    >
-                      <FaTrash className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>Apagar marca</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead className="min-w-[164px]">Produtos associados</TableHead>
+              <TableHead className="min-w-[160px]"></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {brands.map(({ id, name, products }) => (
+              <TableRow key={id}>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="font-medium line-clamp-1">{name}</p>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                      <p>{name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+
+                <TableCell>
+                  <p className="font-medium">{products}</p>
+                </TableCell>
+
+                <TableCell className="text-right space-x-1.5">
+                  <TableActionButton
+                    icon={<Eye className="w-3 h-3" />}
+                    variant="outline"
+                    tooltip="Ver detalhes da marca"
+                    onClick={() => {
+                      const brand = brands.find((item) => item.id === id)
+                      if (brand) {
+                        setSelectedBrand(brand)
+                        handleToggleDialog('brandDetails')
+                      }
+                    }}
+                  />
+
+                  <TableActionButton
+                    icon={<Pencil className="w-3 h-3" />}
+                    variant="outline"
+                    tooltip="Editar marca"
+                    onClick={() => {
+                      const brand = brands.find((item) => item.id === id)
+
+                      if (brand) {
+                        handleRequestBrandUpdate(brand)
+                      }
+                    }}
+                  />
+
+                  <TableActionButton
+                    icon={<Trash2 className="w-3 h-3" />}
+                    variant="destructive"
+                    tooltip="Apagar marca"
+                    onClick={() => {
+                      const brand = brands.find((item) => item.id === id)
+
+                      if (brand) {
+                        handleRequestBrandDeletion(brand)
+                      }
+                    }}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <BrandDetails
+        brandId={selectedBrand?.id}
+        isOpen={dialogsVisibility.brandDetails}
+        onClose={() => handleToggleDialog('brandDetails')}
+      />
 
       <CreateBrandAction
         isOpen={dialogsVisibility.createBrand}
@@ -256,23 +193,9 @@ export function BrandsTab({ brands, onChangeFilter, onDelete }: BrandsTabProps) 
         }}
       />
 
-      <BrandDetails
-        brandId={selectedBrand?.id}
-        isOpen={dialogsVisibility.brandDetails}
-        onClose={() => handleToggleDialog('brandDetails')}
-      />
-
       <UpdateBrandAction
         selectedBrand={selectedBrand}
         isOpen={dialogsVisibility.updateBrand}
-        onUpdateBrand={async (updatedBrand) => {
-          if (!selectedBrand) return
-
-          await handleUpdateBrand({
-            brandId: selectedBrand.id,
-            ...updatedBrand,
-          })
-        }}
         onClose={() => {
           handleToggleDialog('updateBrand')
         }}

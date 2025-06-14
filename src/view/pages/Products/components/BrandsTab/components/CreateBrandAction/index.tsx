@@ -1,10 +1,22 @@
+import { useState } from 'react'
 import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import type * as z from 'zod'
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
+import { Loader2 } from 'lucide-react'
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/view/components/ui/dialog'
 import { Label } from '@/view/components/ui/label'
 import { Input } from '@/view/components/ui/input'
-import { Dialog } from '@/view/components/Dialog'
+import { Button } from '@/view/components/ui/button'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -21,6 +33,8 @@ export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const { mutateAsync } = useMutateOnCreateBrand()
 
   const { register, handleSubmit, reset } = useForm<z.infer<typeof createBrandSchema>>({
@@ -33,26 +47,29 @@ export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
   async function onSubmit(data: z.infer<typeof createBrandSchema>) {
     if (!user) return
 
-    await mutateAsync(
-      {
-        loggedUserId: user.id,
-        name: data.name,
-      },
-      {
-        onError: (err) => {
-          if (err.message === 'BrandAlreadyExistsError') {
-            toast({
-              title: 'Ja existe uma marca com este nome.',
-              duration: 3000,
-            })
-          }
-        },
-        onSuccess: () => {
-          onClose()
-          reset()
-        },
-      },
-    )
+    try {
+      setIsLoading(true)
+
+      await mutateAsync({ loggedUserId: user.id, name: data.name })
+
+      toast({
+        title: 'Marca criada com sucesso.',
+        duration: 3000,
+      })
+      onClose()
+      reset()
+    } catch (error) {
+      const err = error as Error
+
+      if (err.message === 'BrandAlreadyExistsError') {
+        toast({
+          title: 'Ja existe uma marca com este nome.',
+          duration: 3000,
+        })
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const onSubmitInvalid: SubmitErrorHandler<FieldValues> = (errors) => {
@@ -68,23 +85,46 @@ export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
 
   return (
     <Dialog
-      title="Criar marca"
-      onProceed={handleSubmit(onSubmit, onSubmitInvalid)}
-      proceedButtonLabel="Adicionar marca"
       open={isOpen}
-      onClose={() => {
-        onClose()
-        reset()
+      onOpenChange={(open: boolean) => {
+        if (isLoading) return
+
+        if (!open) {
+          onClose()
+          reset()
+        }
       }}
     >
-      <div className="flex flex-col gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="name" className="text-right">
-            Nome *
-          </Label>
-          <Input id="name" placeholder="Nome do produto" className="col-span-3" required {...register('name')} />
-        </div>
-      </div>
+      <DialogContent className="max-w-[540px]" onKeyDown={(e) => e.stopPropagation()}>
+        <form onSubmit={handleSubmit(onSubmit, onSubmitInvalid)}>
+          <DialogHeader>
+            <DialogTitle>Criar marca</DialogTitle>
+            <VisuallyHidden.Root>
+              <DialogDescription>Criar marca</DialogDescription>
+            </VisuallyHidden.Root>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-8">
+            <div className="grid gap-3">
+              <Label htmlFor="name">Nome</Label>
+              <Input id="name" placeholder="Nome da marca" {...register('name')} />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isLoading}>
+                Cancelar
+              </Button>
+            </DialogClose>
+
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Adicionar marca
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   )
 }
