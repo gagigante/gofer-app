@@ -110,27 +110,22 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
   async function handleDeleteCategory(categoryId: string) {
     if (!user) return
 
-    handleToggleDialog('deleteCategory')
-    setSelectedCategory(undefined)
+    try {
+      await mutateOnDelete({ loggedUserId: user.id, categoryId })
 
-    await mutateOnDelete(
-      { loggedUserId: user.id, categoryId },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Categoria removida com sucesso.',
-            duration: 3000,
-          })
-          onDelete()
-        },
-        onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar a categoria. Tente novamente.',
-            duration: 3000,
-          })
-        },
-      },
-    )
+      toast({
+        title: 'Categoria removida com sucesso.',
+        duration: 3000,
+      })
+    } catch {
+      toast({
+        title: 'Houve um erro ao apagar a categoria. Tente novamente.',
+        duration: 3000,
+      })
+    } finally {
+      setSelectedCategory(undefined)
+      onDelete()
+    }
   }
 
   return (

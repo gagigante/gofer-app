@@ -1,5 +1,15 @@
+import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
+
 import { Button } from '@/view/components/ui/button'
-import { Alert } from '@/view/components/Alert'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/view/components/ui/alert-dialog'
 
 interface DeleteCategoryActionProps {
   isOpen: boolean
@@ -8,26 +18,38 @@ interface DeleteCategoryActionProps {
 }
 
 export const DeleteCategoryAction = ({ isOpen, onDelete, onClose }: DeleteCategoryActionProps) => {
+  const [isLoading, setIsLoading] = useState(false)
+
   return (
-    <Alert
-      isOpen={isOpen}
-      title="Apagar categoria"
-      description={`
-        Deseja mesmo apagar esta categoria?
-        Ao remover a categoria, os produtos associados a ela deixarão de ter uma categoria associada.
-      `}
-      cancelButton={<Button variant="outline">Cancelar</Button>}
-      proceedButton={
-        <Button
-          variant="destructive"
-          onClick={async () => {
-            await onDelete()
-          }}
-        >
-          Apagar
-        </Button>
-      }
-      onClose={onClose}
-    />
+    <AlertDialog open={isOpen}>
+      <AlertDialogContent onKeyDown={(e) => e.stopPropagation()}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Apagar categoria</AlertDialogTitle>
+          <AlertDialogDescription>
+            Deseja mesmo apagar esta categoria? Ao remover a categoria, os produtos associados a ela deixarão de ter uma
+            categoria associada.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <Button variant="outline" disabled={isLoading} onClick={onClose} autoFocus>
+            Cancelar
+          </Button>
+
+          <Button
+            variant="destructive"
+            onClick={async () => {
+              setIsLoading(true)
+              await onDelete()
+              onClose()
+              setIsLoading(false)
+            }}
+            disabled={isLoading}
+          >
+            {isLoading && <Loader2 className="mr-2 w-4 h-4 animate-spin" />}
+            Apagar
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
