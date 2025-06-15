@@ -116,7 +116,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
 
             {obs && (
               <TableRow>
-                <TableCell colSpan={7} className="py-4">
+                <TableCell colSpan={6} className="py-4">
                   <div className="pl-4 space-y-2 border-l-2 border-border">
                     <Label htmlFor="obs">Notas do produto</Label>
                     <Textarea placeholder="Adicione uma nota opcional ao produto" value={obs} readOnly />
