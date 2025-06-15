@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import type * as z from 'zod'
 import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
 import { useDebounce } from 'use-debounce'
 
@@ -16,10 +15,9 @@ import { CategoryDetails } from './components/CategoryDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
-import { useMutateOnDeleteCategory, useMutateOnUpdateCategory } from '@/view/hooks/mutations/categories'
+import { useMutateOnDeleteCategory } from '@/view/hooks/mutations/categories'
 
 import { type CategoryWithProductsQuantity } from '../..'
-import { type createCategorySchema } from './components/CreateCategoryAction/schema'
 
 interface CategoriesTabProps {
   categories: CategoryWithProductsQuantity[]
@@ -31,7 +29,6 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
   const { user } = useAuth()
   const { toast } = useToast()
 
-  const { mutateAsync: mutateOnUpdate } = useMutateOnUpdateCategory()
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteCategory()
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryWithProductsQuantity>()
@@ -59,47 +56,6 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
   function handleRequestCategoryUpdate(category: CategoryWithProductsQuantity) {
     setSelectedCategory(category)
     handleToggleDialog('updateCategory')
-  }
-
-  async function handleUpdateCategory(data: z.infer<typeof createCategorySchema> & { categoryId: string }) {
-    if (!user) return
-
-    await mutateOnUpdate(
-      {
-        loggedUserId: user.id,
-        categoryId: data.categoryId,
-        updatedName: data.name,
-        updatedDescription: data.description,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Categoria atualizada com sucesso.',
-            duration: 3000,
-          })
-
-          handleToggleDialog('updateCategory')
-          setSelectedCategory(undefined)
-        },
-        onError: (err) => {
-          if (err.message === 'CategoryAlreadyExistsError') {
-            toast({
-              title: 'Ja existe uma categoria com este nome.',
-              duration: 3000,
-            })
-            return
-          }
-
-          toast({
-            title: 'Houve um erro ao atualizar a categoria. Tente novamente.',
-            duration: 3000,
-          })
-
-          handleToggleDialog('updateCategory')
-          setSelectedCategory(undefined)
-        },
-      },
-    )
   }
 
   function handleRequestCategoryDeletion(category: CategoryWithProductsQuantity) {
@@ -265,23 +221,9 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
         }}
       />
 
-      <CategoryDetails
-        categoryId={selectedCategory?.id}
-        isOpen={dialogsVisibility.categoryDetails}
-        onClose={() => handleToggleDialog('categoryDetails')}
-      />
-
       <UpdateCategoryAction
         selectedCategory={selectedCategory}
         isOpen={dialogsVisibility.updateCategory}
-        onUpdateCategory={async (updatedCategory) => {
-          if (!selectedCategory) return
-
-          await handleUpdateCategory({
-            categoryId: selectedCategory.id,
-            ...updatedCategory,
-          })
-        }}
         onClose={() => {
           handleToggleDialog('updateCategory')
         }}
