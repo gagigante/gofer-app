@@ -38,7 +38,7 @@ export function Products() {
   const brands = brandsResponse?.brands ?? []
 
   const [categoriesNameFilter, setCategoriesNameFilter] = useState('')
-  const { data: categoriesResponse } = useCategories(
+  const { data: categoriesResponse, isFetching: isFetchingCategories } = useCategories(
     { loggedUserId: user?.id ?? '', name: categoriesNameFilter, page: categoriesPagination },
     {
       enabled: !!user,
@@ -119,6 +119,7 @@ export function Products() {
 
           <CategoriesTab
             categories={categories}
+            isFetching={isFetchingCategories}
             onChangeFilter={(filter) => {
               setCategoriesNameFilter(filter)
               setCategoriesPagination(1)
