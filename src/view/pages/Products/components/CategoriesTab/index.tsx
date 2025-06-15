@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FaEye, FaPencilAlt, FaTrash } from 'react-icons/fa'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
@@ -8,6 +8,8 @@ import { TabsContent } from '@/view/components/ui/tabs'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Button } from '@/view/components/ui/button'
 
+import { TableLoading } from '@/view/components/TableLoading'
+import { TableActionButton } from '@/view/components/TableActionButton'
 import { CreateCategoryAction } from './components/CreateCategoryAction'
 import { UpdateCategoryAction } from './components/UpdateCategoryAction'
 import { DeleteCategoryAction } from './components/DeleteCategoryAction'
@@ -21,11 +23,12 @@ import { type CategoryWithProductsQuantity } from '../..'
 
 interface CategoriesTabProps {
   categories: CategoryWithProductsQuantity[]
+  isFetching: boolean
   onChangeFilter: (nameFilter: string) => void
   onDelete: () => void
 }
 
-export function CategoriesTab({ categories, onChangeFilter, onDelete }: CategoriesTabProps) {
+export function CategoriesTab({ categories, isFetching, onChangeFilter, onDelete }: CategoriesTabProps) {
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -99,120 +102,103 @@ export function CategoriesTab({ categories, onChangeFilter, onDelete }: Categori
         }}
       />
 
-      <Table>
-        {categories.length === 0 && <TableCaption>Nenhuma categoria encontrada.</TableCaption>}
+      {isFetching && <TableLoading columns={3} rows={5} />}
 
-        <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Descrição</TableHead>
-            <TableHead className="min-w-[164px]">Produtos associados</TableHead>
-            <TableHead className="min-w-[160px]"></TableHead>
-          </TableRow>
-        </TableHeader>
+      {!isFetching && (
+        <Table>
+          {categories.length === 0 && <TableCaption>Nenhuma categoria encontrada.</TableCaption>}
 
-        <TableBody>
-          {categories.map(({ id, name, description, products }) => (
-            <TableRow key={id}>
-              <TableCell>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="font-medium line-clamp-1">{name}</p>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>{name}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
-
-              <TableCell>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="font-medium line-clamp-1">{description || 'N/A'}</p>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>{description || 'N/A'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
-
-              <TableCell>
-                <p className="font-medium">{products}</p>
-              </TableCell>
-
-              <TableCell className="text-right space-x-1.5">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const category = categories.find((item) => item.id === id)
-                        if (category) {
-                          setSelectedCategory(category)
-                          handleToggleDialog('categoryDetails')
-                        }
-                      }}
-                    >
-                      <FaEye className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>Ver detalhes da categoria</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const category = categories.find((item) => item.id === id)
-
-                        if (category) {
-                          handleRequestCategoryUpdate(category)
-                        }
-                      }}
-                    >
-                      <FaPencilAlt className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>Editar categoria</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => {
-                        const category = categories.find((item) => item.id === id)
-
-                        if (category) {
-                          handleRequestCategoryDeletion(category)
-                        }
-                      }}
-                    >
-                      <FaTrash className="w-3 h-3" />
-                    </Button>
-                  </TooltipTrigger>
-
-                  <TooltipContent>
-                    <p>Apagar categoria</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead className="min-w-[164px]">Produtos associados</TableHead>
+              <TableHead className="min-w-[160px]"></TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {categories.map(({ id, name, description, products }) => (
+              <TableRow key={id}>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="font-medium line-clamp-1">{name}</p>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                      <p>{name}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="font-medium line-clamp-1">{description || 'N/A'}</p>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                      <p>{description || 'N/A'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+
+                <TableCell>
+                  <p className="font-medium">{products}</p>
+                </TableCell>
+
+                <TableCell className="text-right space-x-1.5">
+                  <TableActionButton
+                    icon={<Eye className="w-3 h-3" />}
+                    variant="outline"
+                    tooltip="Ver detalhes da categoria"
+                    onClick={() => {
+                      const category = categories.find((item) => item.id === id)
+                      if (category) {
+                        setSelectedCategory(category)
+                        handleToggleDialog('categoryDetails')
+                      }
+                    }}
+                  />
+
+                  <TableActionButton
+                    icon={<Pencil className="w-3 h-3" />}
+                    variant="outline"
+                    tooltip="Editar categoria"
+                    onClick={() => {
+                      const category = categories.find((item) => item.id === id)
+
+                      if (category) {
+                        handleRequestCategoryUpdate(category)
+                      }
+                    }}
+                  />
+
+                  <TableActionButton
+                    icon={<Trash2 className="w-3 h-3" />}
+                    variant="destructive"
+                    tooltip="Apagar categoria"
+                    onClick={() => {
+                      const category = categories.find((item) => item.id === id)
+
+                      if (category) {
+                        handleRequestCategoryDeletion(category)
+                      }
+                    }}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <CategoryDetails
+        categoryId={selectedCategory?.id}
+        isOpen={dialogsVisibility.categoryDetails}
+        onClose={() => handleToggleDialog('categoryDetails')}
+      />
 
       <CreateCategoryAction
         isOpen={dialogsVisibility.createCategory}
