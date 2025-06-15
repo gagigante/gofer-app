@@ -56,85 +56,76 @@ export function ProductsTable({ products }: ProductsTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <HeaderCell className="min-w-[200px]">Nome</HeaderCell>
-          <HeaderCell className="w-[150px]" tooltip="Esta coluna representa o preço de custo unitário atual">
-            Preço de custo unitário atual
-          </HeaderCell>
+          <HeaderCell className="min-w-[180px]">Nome</HeaderCell>
           <HeaderCell
-            className="w-[150px]"
-            tooltip="Esta coluna representa o preço de custo unitário praticado no momento da venda"
+            className="w-[160px]"
+            tooltip="Esta coluna representa o preço de custo unitário do produto no momento da venda"
           >
             Preço de custo unitário
           </HeaderCell>
           <HeaderCell
-            className="w-[150px]"
-            tooltip="O preço de um produto pode variar. Esta coluna representa o preço atual de um produto"
-          >
-            Preço unitário atual
-          </HeaderCell>
-          <HeaderCell
-            className="w-[150px]"
-            tooltip="O preço de um produto pode variar. Esta coluna representa o preço atual de um produto"
+            className="w-[160px]"
+            tooltip="Esta coluna representa o preço unitário original do produto no momento da venda"
           >
             Preço unitário
           </HeaderCell>
           <HeaderCell
-            className="w-[150px]"
-            tooltip="Esta coluna representa o preço de um produto praticado no momento da venda"
+            className="w-[160px]"
+            tooltip="Esta coluna representa o preço unitário do produto no praticado no momento da venda"
           >
             Preço unitário para o pedido
           </HeaderCell>
-          <HeaderCell className="w-[150px]">Qtd.</HeaderCell>
+          <HeaderCell className="w-[160px]">Qtd.</HeaderCell>
+
+          <HeaderCell className="w-[160px]" tooltip="Preço unitário para o pedido multiplicado pela quantidade">
+            Total
+          </HeaderCell>
         </TableRow>
       </TableHeader>
 
       <TableBody>
-        {products.map(
-          ({ productId, name, currentPrice, costPrice, price, currentCostPrice, customPrice, quantity, obs }) => (
-            <Fragment key={productId}>
+        {products.map(({ productId, name, costPrice, price, customPrice, quantity, obs }) => (
+          <Fragment key={productId}>
+            <TableRow>
+              <TableCell>
+                <p className="font-medium">{name}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(costPrice ?? 0))}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">{quantity}</p>
+              </TableCell>
+
+              <TableCell>
+                <p className="font-medium">
+                  {formatCurrency(parseCentsToDecimal((customPrice ?? 0) * (quantity ?? 0)))}
+                </p>
+              </TableCell>
+            </TableRow>
+
+            {obs && (
               <TableRow>
-                <TableCell>
-                  <p className="font-medium">{name}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentCostPrice ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(costPrice ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(currentPrice ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{formatCurrency(parseCentsToDecimal(customPrice ?? 0))}</p>
-                </TableCell>
-
-                <TableCell>
-                  <p className="font-medium">{quantity}</p>
+                <TableCell colSpan={7} className="py-4">
+                  <div className="pl-4 space-y-2 border-l-2 border-border">
+                    <Label htmlFor="obs">Notas do produto</Label>
+                    <Textarea placeholder="Adicione uma nota opcional ao produto" value={obs} readOnly />
+                  </div>
                 </TableCell>
               </TableRow>
-
-              {obs && (
-                <TableRow>
-                  <TableCell colSpan={7} className="py-4">
-                    <div className="pl-4 space-y-2 border-l-2 border-border">
-                      <Label htmlFor="obs">Notas do produto</Label>
-                      <Textarea placeholder="Adicione uma nota opcional ao produto" value={obs} readOnly />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </Fragment>
-          ),
-        )}
+            )}
+          </Fragment>
+        ))}
       </TableBody>
     </Table>
   )
