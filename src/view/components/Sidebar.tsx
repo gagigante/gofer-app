@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { FiHome, FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiShoppingCart, FiBox, FiArchive } from 'react-icons/fi'
+import { FiUsers, FiLogOut, FiClipboard, FiDollarSign, FiShoppingCart, FiBox, FiArchive } from 'react-icons/fi'
 
 import { Separator } from '@/view/components/ui/separator'
 import { ScrollArea } from '@/view/components/ui/scroll-area'
@@ -24,21 +24,18 @@ export function Sidebar() {
       <ScrollArea className="flex-1">
         <div className="px-3 py-4">
           <div className="space-y-[6px]">
-            <Button asChild variant={pathname === '/home' ? 'default' : 'ghost'} className="w-full justify-start">
-              <Link to="/home">
-                <FiHome className="w-4 h-4 mr-3" />
-                Home
-              </Link>
-            </Button>
+            {user && user.role !== 'operator' && (
+              <>
+                <Button asChild variant={pathname === '/home' ? 'default' : 'ghost'} className="w-full justify-start">
+                  <Link to="/home">
+                    <FiClipboard className="w-4 h-4 mr-3" />
+                    Relatórios
+                  </Link>
+                </Button>
 
-            <Button variant="ghost" className="w-full justify-start" disabled>
-              {/* <Link to="/home/reports"> */}
-              <FiClipboard className="w-4 h-4 mr-3" />
-              Relatórios
-              {/* </Link> */}
-            </Button>
-
-            <Separator className="my-4" />
+                <Separator className="my-4" />
+              </>
+            )}
 
             <Button
               asChild
