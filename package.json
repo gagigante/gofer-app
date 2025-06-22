@@ -34,6 +34,7 @@
     "@electron-forge/shared-types": "^7.6.0",
     "@electron/fuses": "^1.8.0",
     "@eslint/js": "^9.13.0",
+    "@tailwindcss/container-queries": "^0.1.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/dotenv-webpack": "^7.0.7",
     "@types/electron-squirrel-startup": "^1.0.2",
@@ -85,6 +86,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "handlebars": "^4.7.8",
     "lucide-react": "^0.400.0",
+    "radix-ui": "^1.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
@@ -96,6 +98,6 @@
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.4",
     "zod": "^3.23.8",
-    "radix-ui": "latest"
+    "@tailwindcss/container-queries": "^0.1.1"
   }
 }
