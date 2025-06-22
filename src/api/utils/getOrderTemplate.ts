@@ -41,6 +41,8 @@ interface Data {
   }>
 }
 
+const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' })
+
 export async function getOrderTemplate(data: Data): Promise<Response<string>> {
   const isDev = isElectronInDev()
   const templatePath = isDev
@@ -58,6 +60,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
       orderTotal: string
       orderObs: string | null
       address: Address
+      date: string
     }>(template)
 
     await file.close()
@@ -79,6 +82,7 @@ export async function getOrderTemplate(data: Data): Promise<Response<string>> {
         customer: formattedCustomer,
         address: formatAddress(data),
         orderObs: data.obs,
+        date: FORMATTER.format(new Date(data.createdAt + ' UTC')),
         products: formattedProducts,
         orderTotal: formattedOrderTotal,
       }),
