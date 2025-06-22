@@ -41,7 +41,7 @@ export function Reports() {
 
           <div className="flex items-center gap-2">
             <Button variant="secondary" size="icon" onClick={() => setIsFinancialInfoVisible(!isFinancialInfoVisible)}>
-              {isFinancialInfoVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              {isFinancialInfoVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </Button>
 
             <Button
