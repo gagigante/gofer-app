@@ -26,7 +26,7 @@ export function Login() {
     const user = await login(name, password)
 
     if (user) {
-      navigate(user.role !== 'operator' ? '/home' : '/orders')
+      navigate(user.role !== 'operator' ? '/home' : '/home/orders')
     }
 
     setIsLoading(false)
