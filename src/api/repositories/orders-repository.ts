@@ -1,4 +1,4 @@
-import { and, count, desc, eq, SQL } from 'drizzle-orm'
+import { and, count, desc, eq, gte, lte, SQL } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
@@ -31,21 +31,16 @@ export type OrderResponse = Order & {
 
 export type OrderWithCustomer = Order & { customer: Customer | null }
 
-export class OrdersRepository {
-  public async getOrders(
-    page = 1,
-    itemsPerPage = 15,
-    filterOptions: {
-      customerId?: string
-      draft?: boolean
-    } = {},
-  ): Promise<OrderWithCustomer[]> {
-    const filters: SQL[] = []
+type FilterOptions = {
+  customerId?: string
+  draft?: boolean
+  startDate?: Date
+  endDate?: Date
+}
 
-    if (filterOptions.customerId) filters.push(eq(orders.customerId, filterOptions.customerId))
-    if (filterOptions.draft !== undefined) {
-      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
-    }
+export class OrdersRepository {
+  public async getOrders(page = 1, itemsPerPage = 15, filterOptions: FilterOptions = {}): Promise<OrderWithCustomer[]> {
+    const filters = this.listFilters(filterOptions)
 
     const response = await db
       .select()
@@ -64,13 +59,8 @@ export class OrdersRepository {
     })
   }
 
-  public async countOrders(filterOptions: { customerId?: string; draft?: boolean } = {}): Promise<number> {
-    const filters: SQL[] = []
-
-    if (filterOptions.customerId) filters.push(eq(orders.customerId, filterOptions.customerId))
-    if (filterOptions.draft !== undefined) {
-      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
-    }
+  public async countOrders(filterOptions: FilterOptions = {}): Promise<number> {
+    const filters = this.listFilters(filterOptions)
 
     const [response] = await db
       .select({ count: count() })
@@ -216,5 +206,27 @@ export class OrdersRepository {
 
       await tx.delete(orders).where(eq(orders.id, orderId))
     })
+  }
+
+  private listFilters(filterOptions: FilterOptions = {}): SQL[] {
+    const filters: SQL[] = []
+
+    if (filterOptions.customerId) {
+      filters.push(eq(orders.customerId, filterOptions.customerId))
+    }
+
+    if (filterOptions.draft !== undefined) {
+      filters.push(eq(orders.draft, filterOptions.draft ? 1 : 0))
+    }
+
+    if (filterOptions.startDate) {
+      filters.push(gte(orders.createdAt, filterOptions.startDate.toISOString()))
+    }
+
+    if (filterOptions.endDate) {
+      filters.push(lte(orders.createdAt, filterOptions.endDate.toISOString()))
+    }
+
+    return filters
   }
 }

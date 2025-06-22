@@ -8,6 +8,7 @@ import { brandsApi } from './api/exposes/brands-api'
 import { productsApi } from './api/exposes/products-api'
 import { ordersApi } from './api/exposes/orders-api'
 import { customersApi } from './api/exposes/customers-api'
+import { reportsApi } from './api/exposes/reports-api'
 
 loginApi()
 usersApi()
@@ -16,3 +17,4 @@ brandsApi()
 productsApi()
 ordersApi()
 customersApi()
+reportsApi()
