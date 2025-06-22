@@ -5,14 +5,13 @@ import { Eye, EyeOff, RefreshCcw } from 'lucide-react'
 import { Button } from '@/view/components/ui/button'
 import { PeriodTabs } from './components/PeriodTabs'
 import { BigNumbers } from './components/BigNumbers'
+import { OrdersProfitPerDayChart } from './components/OrdersProfitPerDayChart'
+import { OrdersProfitPerDayChartSkeleton } from './components/OrdersProfitPerDayChartSkeleton'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useOrdersReport } from '@/view/hooks/queries/reports'
 
-// import { parseCentsToDecimal } from '@/view/utils/parsers'
-
 import { type PeriodValue } from '@/api/controllers/reports-controller'
-// import { OrdersProfitPerDayChart } from './components/OrdersProfitPerDayChart'
 
 export function Reports() {
   const { user } = useAuth()
@@ -23,14 +22,14 @@ export function Reports() {
 
   const { data, isFetching } = useOrdersReport({ loggedUserId: user?.id ?? '', period })
 
-  // const chartData =
-  //   data?.orders
-  //     .map((order) => ({
-  //       date: order.date,
-  //       total: parseCentsToDecimal(order.totalPrice),
-  //       cost: parseCentsToDecimal(order.totalCostPrice),
-  //     }))
-  //     .reverse() ?? []
+  const chartData =
+    data?.orders
+      .map((order) => ({
+        date: order.date,
+        total: order.totalPrice,
+        cost: order.totalCostPrice,
+      }))
+      .reverse() ?? []
 
   return (
     <div className="h-full flex flex-col">
@@ -68,7 +67,11 @@ export function Reports() {
           />
         </div>
 
-        {/* <OrdersProfitPerDayChart data={chartData} /> */}
+        {isFetching ? (
+          <OrdersProfitPerDayChartSkeleton />
+        ) : (
+          <OrdersProfitPerDayChart data={chartData} isVisible={isFinancialInfoVisible} />
+        )}
       </div>
     </div>
   )
