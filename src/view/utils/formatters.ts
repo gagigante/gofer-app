@@ -84,6 +84,10 @@ export function formatCurrency(value: number) {
 }
 
 export function maskFinancialValue(value: string) {
+  if (!value || typeof value !== 'string') {
+    return '**'
+  }
+
   if (value.includes('R$')) {
     return 'R$ **'
   }

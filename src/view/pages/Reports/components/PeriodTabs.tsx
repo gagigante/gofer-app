@@ -28,7 +28,7 @@ interface PeriodTabsProps {
 
 export function PeriodTabs({ value, onValueChange }: PeriodTabsProps) {
   return (
-    <Tabs defaultValue={value} onValueChange={(value) => onValueChange(value as PeriodValue)} className="mb-4">
+    <Tabs value={value} onValueChange={(value) => onValueChange(value as PeriodValue)} className="mb-4">
       <TabsList>
         {PERIODS.map((period) => (
           <TabsTrigger className="w-[128px]" value={period.value} key={period.value}>
