@@ -82,3 +82,15 @@ export function formatCurrency(value: number) {
     maximumFractionDigits: 2,
   }).format(value)
 }
+
+export function maskFinancialValue(value: string) {
+  if (!value || typeof value !== 'string') {
+    return '**'
+  }
+
+  if (value.includes('R$')) {
+    return 'R$ **'
+  }
+
+  return '**'
+}

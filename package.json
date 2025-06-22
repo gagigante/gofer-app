@@ -2,7 +2,7 @@
   "name": "gofer-app",
   "productName": "gofer-app",
   "description": "Gofer app",
-  "version": "1.21.0",
+  "version": "1.22.0",
   "author": {
     "name": "Gabriel Gigante",
     "email": "gabrielgigante29@gmail.com"
@@ -98,7 +98,6 @@
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.4",
-    "zod": "^3.23.8",
-    "@tailwindcss/container-queries": "^0.1.1"
+    "zod": "^3.23.8"
   }
 }

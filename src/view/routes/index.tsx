@@ -1,7 +1,7 @@
 import { createHashRouter } from 'react-router-dom'
 
 import { Login } from '@/view/pages/Login'
-import { Home } from '@/view/pages/Home'
+import { Reports } from '@/view/pages/Reports'
 import { Users } from '@/view/pages/Users'
 import { Budgets } from '@/view/pages/Budgets'
 import { Orders } from '@/view/pages/Orders'
@@ -33,7 +33,7 @@ export const router = createHashRouter([
     children: [
       {
         path: '',
-        element: <Home />,
+        element: <Reports />,
       },
       {
         path: 'users',
