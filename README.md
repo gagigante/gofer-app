@@ -1,6 +1,10 @@
 # Gofer App 
 
+[![codecov](https://codecov.io/gh/gagigante/gofer-app/graph/badge.svg?token=XX00HEI15E)](https://codecov.io/gh/gagigante/gofer-app)
+
 Gofer App é uma aplicação desktop desenvolvida com Electron que oferece um dashboard completo para análise de performance de negócios, com foco em métricas de vendas, produtos e clientes.
+
+![app](docs/readme.png)
 
 ## 🚀 Tecnologias
 
