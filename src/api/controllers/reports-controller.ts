@@ -66,11 +66,10 @@ export class ReportsController {
       profit: number
     }>(
       (acc, order) => {
-        return {
-          ...acc,
-          revenue: acc.revenue + order.totalPrice,
-          profit: acc.profit + (order.totalPrice - order.totalCostPrice),
-        }
+        acc.revenue += order.totalPrice
+        acc.profit += order.totalPrice - order.totalCostPrice
+
+        return acc
       },
       { revenue: 0, profit: 0 },
     )
@@ -113,7 +112,9 @@ export class ReportsController {
 
   private groupOrdersByDate(orders: Order[]): OrdersValuePerDay[] {
     const ordersByDateMap = orders.reduce((acc, order) => {
-      const date = order.createdAt!.split(' ')[0]
+      if (!order.createdAt) return acc
+
+      const date = order.createdAt.includes('T') ? order.createdAt.split('T')[0] : order.createdAt.split(' ')[0]
 
       const dayOrdersSummary = acc.get(date)
 
