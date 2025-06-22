@@ -7,7 +7,7 @@ export default defineConfig({
     setupFiles: ['./vitest-setup.ts'],
     coverage: {
       include: ['src/**/*.ts', 'src/**/*.tsx'],
-      exclude: ['src/api/db', 'src/api/env', 'src/api/db/migrations', 'src/api/db/seeders', 'src/view'],
+      exclude: ['src/view', 'src/api/db', 'src/api/env', 'src/api/db/migrations', 'src/api/db/seeders'],
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
     },
