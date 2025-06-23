@@ -28,15 +28,17 @@ interface OrdersProfitPerDayChartProps {
   isVisible: boolean
 }
 
+const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium' })
+
 export function OrdersProfitPerDayChart({ data, isVisible }: OrdersProfitPerDayChartProps) {
   const formattedData = isVisible
     ? data.map((item) => ({
-        ...item,
+        date: FORMATTER.format(new Date(`${item.date}T12:00:00`)),
         cost: parseCentsToDecimal(item.cost),
         total: parseCentsToDecimal(item.total),
       }))
     : Array.from({ length: data.length }, (_, index) => ({
-        date: data[index].date,
+        date: FORMATTER.format(new Date(`${data[index].date}T12:00:00`)),
         cost: 0,
         total: 0,
       }))
@@ -70,37 +72,11 @@ export function OrdersProfitPerDayChart({ data, isVisible }: OrdersProfitPerDayC
 
             <CartesianGrid vertical={false} />
 
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value + ' UTC')
-                return date.toLocaleDateString('pt-BR', {
-                  month: 'short',
-                  day: 'numeric',
-                })
-              }}
-            />
+            <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} minTickGap={32} />
 
             <ChartTooltip
               cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    const date = new Date(value + ' UTC')
-                    return date.toLocaleDateString('pt-BR', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })
-                  }}
-                  formatter={(value) => formatCurrency(value as number)}
-                  indicator="line"
-                />
-              }
+              content={<ChartTooltipContent formatter={(value) => formatCurrency(value as number)} indicator="line" />}
             />
 
             <YAxis
