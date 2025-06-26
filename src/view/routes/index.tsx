@@ -7,6 +7,7 @@ import { Budgets } from '@/view/pages/Budgets'
 import { Orders } from '@/view/pages/Orders'
 import { OrderDetails } from '@/view/pages/OrderDetails'
 import { CreateOrder } from '@/view/pages/CreateOrder'
+import { BrandDetail } from '@/view/pages/BrandDetail'
 import { CreateCustomer } from '@/view/pages/CreateCustomer'
 import { UpdateCustomer } from '@/view/pages/UpdateCustomer'
 import { Customers } from '@/view/pages/Customers'
@@ -74,6 +75,10 @@ export const router = createHashRouter([
       {
         path: 'products',
         element: <Products />,
+      },
+      {
+        path: 'products/brands/:brand_id',
+        element: <BrandDetail />,
       },
       {
         path: 'products/new',
