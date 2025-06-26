@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
 import { BrandsRepository } from '@/api/repositories/brands-repository'
-import { ProductsRepository } from '@/api/repositories/products-repository'
 
 import { AuthMiddleware } from '@/api/middlewares/auth'
 
@@ -11,7 +10,7 @@ import { BrandAlreadyExistsError } from '@/api/errors/BrandAlreadyExistsError'
 import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Response } from '@/api/types/response'
-import { Product, type Brand } from '@/api/db/schema'
+import { type Brand } from '@/api/db/schema'
 
 export interface ListBrandsRequest {
   loggedUserId: string
@@ -32,7 +31,7 @@ export interface GetBrandRequest {
   brandId: string
 }
 
-export type GetBrandResponse = Response<Brand & { products: Product[] }>
+export type GetBrandResponse = Response<Brand>
 
 export interface CreateBrandRequest {
   loggedUserId: string
@@ -59,13 +58,11 @@ export type UpdateBrandResponse = Response<Brand>
 export class BrandsController {
   private readonly usersRepository: UsersRepository
   private readonly brandsRepository: BrandsRepository
-  private readonly productsRepository: ProductsRepository
   private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.brandsRepository = new BrandsRepository()
-    this.productsRepository = new ProductsRepository()
     this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
@@ -102,9 +99,7 @@ export class BrandsController {
       return { data: null, err }
     }
 
-    const products = await this.productsRepository.getProductsByBrandId(brand.id)
-
-    return { data: { ...brand, products }, err: null }
+    return { data: brand, err: null }
   }
 
   public async createBrand({ loggedUserId, name }: CreateBrandRequest): Promise<CreateBrandResponse> {
