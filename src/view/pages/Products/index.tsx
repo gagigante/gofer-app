@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 
 import { Tabs, TabsList, TabsTrigger } from '@/view/components/ui/tabs'
 import { Button } from '@/view/components/ui/button'
@@ -20,12 +20,13 @@ export type BrandWithProductsQuantity = Brand & { products: number }
 
 export function Products() {
   const { user } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
 
   const [brandsPagination, setBrandsPagination] = useState(1)
   const [categoriesPagination, setCategoriesPagination] = useState(1)
   const [productsPagination, setProductsPagination] = useState(1)
 
-  const [activeTab, setActiveTab] = useState<'categories' | 'products' | 'brands'>('products')
+  const activeTab = (searchParams.get('tab') as 'categories' | 'products' | 'brands') || 'products'
 
   const [brandsNameFilter, setBrandsNameFilter] = useState('')
   const { data: brandsResponse, isFetching: isFetchingBrands } = useBrands(
@@ -97,9 +98,13 @@ export function Products() {
         <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Gerenciar produtos</h2>
 
         <Tabs
-          defaultValue="products"
+          value={activeTab}
           onValueChange={(tab) => {
-            setActiveTab(tab as 'categories' | 'products' | 'brands')
+            setSearchParams((prev) => {
+              prev.set('tab', tab)
+
+              return prev
+            })
           }}
           className="w-full"
         >
