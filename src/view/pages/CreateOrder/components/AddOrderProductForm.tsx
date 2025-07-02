@@ -32,7 +32,9 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
   const { data: productsResponse, isFetching } = useProducts(
     {
       loggedUserId: user?.id ?? '',
-      name: filter,
+      filterOptions: {
+        name: filter,
+      },
       page: 1,
     },
     {

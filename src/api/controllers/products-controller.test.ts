@@ -433,7 +433,9 @@ describe('products-controller', () => {
 
       const response = await productsController.listProducts({
         loggedUserId: 'test-user-id',
-        name: 'a pro',
+        filterOptions: {
+          name: 'a pro',
+        },
       })
 
       expect(response.data?.products).length(1)

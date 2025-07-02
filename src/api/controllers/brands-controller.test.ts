@@ -210,7 +210,6 @@ describe('brands-controller', () => {
       expect(response.data).toStrictEqual({
         id: 'brand-id',
         name: 'brand name',
-        products: [],
       })
       expect(response.err).toBeNull()
     })
@@ -221,11 +220,6 @@ describe('brands-controller', () => {
         name: 'brand name',
       })
 
-      await db.insert(products).values({
-        id: 'product-id',
-        brandId: 'brand-id',
-      })
-
       const response = await brandsController.getBrand({
         loggedUserId: 'test-user-id',
         brandId: 'brand-id',
@@ -234,26 +228,6 @@ describe('brands-controller', () => {
       expect(response.data).toStrictEqual({
         id: 'brand-id',
         name: 'brand name',
-        products: [
-          {
-            id: 'product-id',
-            availableQuantity: 0,
-            barCode: null,
-            brandId: 'brand-id',
-            categoryId: null,
-            cest: null,
-            cestDescription: null,
-            cestSegment: null,
-            costPrice: 0,
-            description: null,
-            fastId: null,
-            icms: null,
-            minimumQuantity: 0,
-            name: null,
-            ncm: null,
-            price: 0,
-          },
-        ],
       })
       expect(response.err).toBeNull()
     })

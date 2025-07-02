@@ -1,6 +1,10 @@
 import { randomUUID } from 'node:crypto'
 
-import { ProductsRepository, type ProductWithCategoryAndBrand } from '../repositories/products-repository'
+import {
+  ProductsRepository,
+  type FilterOptions,
+  type ProductWithCategoryAndBrand,
+} from '../repositories/products-repository'
 import { UsersRepository } from '../repositories/users-repository'
 import { AuthMiddleware } from '../middlewares/auth'
 
@@ -14,9 +18,9 @@ import { type Response } from '@/api/types/response'
 
 export interface ListProductsRequest {
   loggedUserId: string
-  name?: string
   page?: number
   itemsPerPage?: number
+  filterOptions?: FilterOptions
 }
 
 export type ListProductsResponse = Response<{
@@ -93,7 +97,7 @@ export class ProductsController {
 
   public async listProducts({
     loggedUserId,
-    name = '',
+    filterOptions = {},
     page = 1,
     itemsPerPage = 15,
   }: ListProductsRequest): Promise<ListProductsResponse> {
@@ -102,8 +106,8 @@ export class ProductsController {
       return { data: null, err }
     }
 
-    const total = await this.productsRepository.countProducts({ name })
-    const products = await this.productsRepository.getProducts(page, itemsPerPage, { name })
+    const total = await this.productsRepository.countProducts(filterOptions)
+    const products = await this.productsRepository.getProducts(page, itemsPerPage, filterOptions)
 
     const data = { products, total, page, itemsPerPage }
 

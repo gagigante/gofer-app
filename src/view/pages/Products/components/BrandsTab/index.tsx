@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
+import { useNavigate } from 'react-router-dom'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
@@ -12,7 +13,6 @@ import { TableActionButton } from '@/view/components/TableActionButton'
 import { CreateBrandAction } from './components/CreateBrandAction'
 import { DeleteBrandAction } from './components/DeleteBrandAction'
 import { UpdateBrandAction } from './components/UpdateBrandAction'
-import { BrandDetails } from './components/BrandDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
@@ -28,6 +28,7 @@ interface BrandsTabProps {
 }
 
 export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: BrandsTabProps) {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -36,7 +37,6 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
   const [selectedBrand, setSelectedBrand] = useState<BrandWithProductsQuantity>()
   const [dialogsVisibility, setDialogsVisibility] = useState({
     createBrand: false,
-    brandDetails: false,
     updateBrand: false,
     deleteBrand: false,
   })
@@ -142,8 +142,7 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
                     onClick={() => {
                       const brand = brands.find((item) => item.id === id)
                       if (brand) {
-                        setSelectedBrand(brand)
-                        handleToggleDialog('brandDetails')
+                        navigate(`brands/${brand.id}`)
                       }
                     }}
                   />
@@ -179,12 +178,6 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
           </TableBody>
         </Table>
       )}
-
-      <BrandDetails
-        brandId={selectedBrand?.id}
-        isOpen={dialogsVisibility.brandDetails}
-        onClose={() => handleToggleDialog('brandDetails')}
-      />
 
       <CreateBrandAction
         isOpen={dialogsVisibility.createBrand}

@@ -10,14 +10,17 @@ import { type Brand, type Category, NewProduct, type Product, brands, categories
 
 export type ProductWithCategoryAndBrand = Product & { category: Category | null } & { brand: Brand | null }
 
+export interface FilterOptions {
+  ids?: string[]
+  name?: string
+  brandId?: string
+}
+
 export class ProductsRepository {
   public async getProducts(
     page = 1,
     itemsPerPage = 15,
-    filterOptions: {
-      ids?: string[]
-      name?: string
-    } = {},
+    filterOptions: FilterOptions = {},
   ): Promise<Array<ProductWithCategoryAndBrand>> {
     const filters = this.listFilters(filterOptions)
 
@@ -46,18 +49,7 @@ export class ProductsRepository {
     return response
   }
 
-  public async getProductsByBrandId(brandId: string): Promise<Product[]> {
-    const response = await db.select().from(products).where(eq(products.brandId, brandId))
-
-    return response
-  }
-
-  public async countProducts(
-    filterOptions: {
-      ids?: string[]
-      name?: string
-    } = {},
-  ): Promise<number> {
+  public async countProducts(filterOptions: FilterOptions = {}): Promise<number> {
     const filters = this.listFilters(filterOptions)
 
     const [response] = await db
@@ -174,11 +166,12 @@ export class ProductsRepository {
     }
   }
 
-  private listFilters(filterOptions: { ids?: string[]; name?: string }): SQL[] {
+  private listFilters(filterOptions: FilterOptions): SQL[] {
     const filters: SQL[] = []
 
     if (filterOptions.ids) filters.push(inArray(products.id, filterOptions.ids))
     if (filterOptions.name) filters.push(like(products.name, `%${filterOptions.name}%`))
+    if (filterOptions.brandId) filters.push(eq(products.brandId, filterOptions.brandId))
 
     return filters
   }
