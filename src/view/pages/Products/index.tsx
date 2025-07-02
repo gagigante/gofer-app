@@ -52,7 +52,9 @@ export function Products() {
   const { data: productsResponse } = useProducts(
     {
       loggedUserId: user?.id ?? '',
-      name: productsNameFilter,
+      filterOptions: {
+        name: productsNameFilter,
+      },
       page: productsPagination,
     },
     {
