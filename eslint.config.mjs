@@ -34,6 +34,7 @@ export default [
       'react/react-in-jsx-scope': 'off',
       'react/no-unknown-property': 'off',
       '@typescript-eslint/no-require-imports': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
 ]
