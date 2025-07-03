@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
+import { useNavigate } from 'react-router-dom'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
@@ -13,7 +14,6 @@ import { TableActionButton } from '@/view/components/TableActionButton'
 import { CreateCategoryAction } from './components/CreateCategoryAction'
 import { UpdateCategoryAction } from './components/UpdateCategoryAction'
 import { DeleteCategoryAction } from './components/DeleteCategoryAction'
-import { CategoryDetails } from './components/CategoryDetails'
 
 import { useAuth } from '@/view/hooks/useAuth'
 import { useToast } from '@/view/components/ui/use-toast'
@@ -29,6 +29,7 @@ interface CategoriesTabProps {
 }
 
 export function CategoriesTab({ categories, isFetching, onChangeFilter, onDelete }: CategoriesTabProps) {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
 
@@ -37,7 +38,6 @@ export function CategoriesTab({ categories, isFetching, onChangeFilter, onDelete
   const [selectedCategory, setSelectedCategory] = useState<CategoryWithProductsQuantity>()
   const [dialogsVisibility, setDialogsVisibility] = useState({
     createCategory: false,
-    categoryDetails: false,
     updateCategory: false,
     deleteCategory: false,
   })
@@ -156,8 +156,7 @@ export function CategoriesTab({ categories, isFetching, onChangeFilter, onDelete
                     onClick={() => {
                       const category = categories.find((item) => item.id === id)
                       if (category) {
-                        setSelectedCategory(category)
-                        handleToggleDialog('categoryDetails')
+                        navigate(`categories/${id}`)
                       }
                     }}
                   />
@@ -193,12 +192,6 @@ export function CategoriesTab({ categories, isFetching, onChangeFilter, onDelete
           </TableBody>
         </Table>
       )}
-
-      <CategoryDetails
-        categoryId={selectedCategory?.id}
-        isOpen={dialogsVisibility.categoryDetails}
-        onClose={() => handleToggleDialog('categoryDetails')}
-      />
 
       <CreateCategoryAction
         isOpen={dialogsVisibility.createCategory}
