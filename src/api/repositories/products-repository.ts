@@ -14,6 +14,7 @@ export interface FilterOptions {
   ids?: string[]
   name?: string
   brandId?: string
+  categoryId?: string
 }
 
 export class ProductsRepository {
@@ -172,6 +173,7 @@ export class ProductsRepository {
     if (filterOptions.ids) filters.push(inArray(products.id, filterOptions.ids))
     if (filterOptions.name) filters.push(like(products.name, `%${filterOptions.name}%`))
     if (filterOptions.brandId) filters.push(eq(products.brandId, filterOptions.brandId))
+    if (filterOptions.categoryId) filters.push(eq(products.categoryId, filterOptions.categoryId))
 
     return filters
   }

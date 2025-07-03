@@ -106,7 +106,7 @@ export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
 
           <div className="grid gap-4 py-8">
             <div className="grid gap-3">
-              <Label htmlFor="name">Nome</Label>
+              <Label htmlFor="name">Nome *</Label>
               <Input id="name" placeholder="Nome da marca" {...register('name')} />
             </div>
           </div>

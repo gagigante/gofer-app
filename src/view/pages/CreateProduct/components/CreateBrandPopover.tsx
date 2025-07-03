@@ -92,7 +92,7 @@ export function CreateBrandPopover() {
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name">Nome</Label>
+            <Label htmlFor="name">Nome *</Label>
             <Input id="name" className="col-span-3 h-8" placeholder="Nome da marca" {...register('name')} />
           </div>
 

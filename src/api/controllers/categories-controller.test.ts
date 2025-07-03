@@ -220,7 +220,6 @@ describe('categories-controller', () => {
         id: 'category-id',
         name: 'category name',
         description: null,
-        products: [],
       })
       expect(response.err).toBeNull()
     })
@@ -229,11 +228,6 @@ describe('categories-controller', () => {
       await db.insert(categories).values({
         id: 'category-id',
         name: 'category name',
-      })
-
-      await db.insert(products).values({
-        id: 'product-id',
-        categoryId: 'category-id',
       })
 
       const response = await categoriesController.getCategory({
@@ -245,26 +239,6 @@ describe('categories-controller', () => {
         id: 'category-id',
         name: 'category name',
         description: null,
-        products: [
-          {
-            id: 'product-id',
-            availableQuantity: 0,
-            barCode: null,
-            brandId: null,
-            categoryId: 'category-id',
-            cest: null,
-            cestDescription: null,
-            cestSegment: null,
-            costPrice: 0,
-            description: null,
-            fastId: null,
-            icms: null,
-            minimumQuantity: 0,
-            name: null,
-            ncm: null,
-            price: 0,
-          },
-        ],
       })
       expect(response.err).toBeNull()
     })

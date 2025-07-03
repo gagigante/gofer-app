@@ -10,7 +10,7 @@ import { CategoryAlreadyExistsError } from '@/api/errors/CategoryAlreadyExistsEr
 import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Response } from '@/api/types/response'
-import { Product, type Category } from '@/api/db/schema'
+import { type Category } from '@/api/db/schema'
 
 export interface ListCategoriesRequest {
   loggedUserId: string
@@ -31,7 +31,7 @@ export interface GetCategoryRequest {
   categoryId: string
 }
 
-export type GetCategoryResponse = Response<Category & { products: Product[] }>
+export type GetCategoryResponse = Response<Category>
 
 export interface CreateCategoryRequest {
   loggedUserId: string
@@ -103,9 +103,7 @@ export class CategoriesController {
       return { data: null, err }
     }
 
-    const products = await this.productsRepository.getProductsByCategoryId(category.id)
-
-    return { data: { ...category, products }, err: null }
+    return { data: category, err: null }
   }
 
   public async createCategory({
