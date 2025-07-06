@@ -28,8 +28,8 @@ export function useMutateOnCreateUser() {
 
       return data
     },
-    onSuccess: async (response) => {
-      await queryClient.invalidateQueries({ queryKey: ['users'] })
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
 
       return response
     },

@@ -65,37 +65,35 @@ export function Users() {
   async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
     if (!user) return
 
-    await mutateOnCreate(
-      {
+    try {
+      await mutateOnCreate({
         loggedUserId: user.id,
         name: data.name,
         password: data.password,
         role: data.role,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Usuário criado com sucesso',
-            duration: 3000,
-          })
-          setIsCreateUserDialogOpen(false)
-        },
-        onError: (err) => {
-          if (err.message === 'UserAlreadyExistsError') {
-            toast({
-              title: 'Já existe um usuário com esse nome.',
-              duration: 3000,
-            })
-            return
-          }
+      })
 
-          toast({
-            title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
-            duration: 3000,
-          })
-        },
-      },
-    )
+      toast({
+        title: 'Usuário criado com sucesso',
+        duration: 3000,
+      })
+      setIsCreateUserDialogOpen(false)
+    } catch (error) {
+      const err = error as Error
+
+      if (err.message === 'UserAlreadyExistsError') {
+        toast({
+          title: 'Já existe um usuário com esse nome.',
+          duration: 3000,
+        })
+        return
+      }
+
+      toast({
+        title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
+        duration: 3000,
+      })
+    }
   }
 
   async function handleUpdateUser(data: z.infer<typeof updateUserSchema>) {
