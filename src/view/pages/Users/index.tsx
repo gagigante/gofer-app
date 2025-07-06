@@ -138,28 +138,22 @@ export function Users() {
   async function handleDeleteUser(userId: string) {
     if (!user) return
 
-    await mutateOnDelete(
-      {
-        loggedUserId: user.id,
-        userId,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Usuário removido com sucesso.',
-            duration: 3000,
-          })
-          setIsDeleteUserAlertOpen(false)
-        },
-        onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar o usuário. Tente novamente.',
-            duration: 3000,
-          })
-          setIsDeleteUserAlertOpen(false)
-        },
-      },
-    )
+    try {
+      await mutateOnDelete({ loggedUserId: user.id, userId })
+
+      toast({
+        title: 'Usuário removido com sucesso.',
+        duration: 3000,
+      })
+    } catch {
+      toast({
+        title: 'Houve um erro ao apagar o usuário. Tente novamente.',
+        duration: 3000,
+      })
+    } finally {
+      setSelectedUser(undefined)
+      setIsDeleteUserAlertOpen(false)
+    }
   }
 
   return (
