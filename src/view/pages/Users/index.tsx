@@ -3,7 +3,6 @@ import type * as z from 'zod'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
 import { Badge } from '@/view/components/ui/badge'
@@ -13,6 +12,7 @@ import { TableLoading } from '@/view/components/TableLoading'
 import { DeleteUserAction } from './components/DeleteUserAction'
 import { UpdateUserAction } from './components/UpdateUserAction'
 import { CreateUserAction } from './components/CreateUserAction'
+import { TableActionButton } from '@/view/components/TableActionButton'
 
 import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -99,38 +99,36 @@ export function Users() {
   async function handleUpdateUser(data: z.infer<typeof updateUserSchema>) {
     if (!user) return
 
-    await mutateOnUpdate(
-      {
+    try {
+      await mutateOnUpdate({
         loggedUserId: user.id,
         updatedName: data.name,
         currentPassword: data.password,
         newPassword: data.newPassword,
         newPasswordConfirmation: data.newPasswordConfirmation,
-      },
-      {
-        onSuccess: () => {
-          toast({
-            title: 'Usuário atualizado com sucesso',
-            duration: 3000,
-          })
-          setIsUpdateUserDialogOpen(false)
-        },
-        onError: (err) => {
-          if (err.message === 'IncorrectCredentialsError') {
-            toast({
-              title: 'Senha incorreta.',
-              duration: 3000,
-            })
-            return
-          }
+      })
 
-          toast({
-            title: 'Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.',
-            duration: 3000,
-          })
-        },
-      },
-    )
+      toast({
+        title: 'Usuário atualizado com sucesso',
+        duration: 3000,
+      })
+      setIsUpdateUserDialogOpen(false)
+    } catch (error) {
+      const err = error as Error
+
+      if (err.message === 'IncorrectCredentialsError') {
+        toast({
+          title: 'Senha incorreta.',
+          duration: 3000,
+        })
+        return
+      }
+
+      toast({
+        title: 'Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.',
+        duration: 3000,
+      })
+    }
   }
 
   async function handleDeleteUser(userId: string) {
@@ -207,54 +205,33 @@ export function Users() {
 
                     <TableCell className="text-right space-x-1.5">
                       {isEditable && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const user = users.find((item) => item.id === id)
+                        <TableActionButton
+                          variant="outline"
+                          icon={<Pencil className="w-3 h-3" />}
+                          tooltip="Editar usuário"
+                          onClick={() => {
+                            const user = users.find((item) => item.id === id)
 
-                                if (user) {
-                                  handleRequestUserEdition(user)
-                                }
-                              }}
-                            >
-                              <Pencil className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-
-                          <TooltipContent>
-                            <p>Editar usuário</p>
-                          </TooltipContent>
-                        </Tooltip>
+                            if (user) {
+                              handleRequestUserEdition(user)
+                            }
+                          }}
+                        />
                       )}
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Button
-                              className="pointer-events-auto"
-                              variant="destructive"
-                              size="sm"
-                              disabled={!isDeletable}
-                              onClick={() => {
-                                const user = users.find((item) => item.id === id)
+                      <TableActionButton
+                        variant="destructive"
+                        icon={<Trash2 className="w-3 h-3" />}
+                        tooltip="Apagar usuário"
+                        onClick={() => {
+                          const user = users.find((item) => item.id === id)
 
-                                if (user) {
-                                  handleRequestUserDeletion(user)
-                                }
-                              }}
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </span>
-                        </TooltipTrigger>
-
-                        <TooltipContent>
-                          <p>Apagar usuário</p>
-                        </TooltipContent>
-                      </Tooltip>
+                          if (user) {
+                            handleRequestUserDeletion(user)
+                          }
+                        }}
+                        disabled={!isDeletable}
+                      />
                     </TableCell>
                   </TableRow>
                 )

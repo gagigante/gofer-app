@@ -53,8 +53,8 @@ export function useMutateOnUpdateUser() {
 
       return data
     },
-    onSuccess: async (response) => {
-      await Promise.all([queryClient.invalidateQueries({ queryKey: ['users'] })])
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] })
 
       return response
     },

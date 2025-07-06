@@ -107,7 +107,7 @@ export const CreateUserAction = ({ isOpen, onCreateUser, onClose }: CreateUserAc
             </div>
 
             <div className="grid gap-3">
-              <Label htmlFor="name">Senha *</Label>
+              <Label htmlFor="password">Senha *</Label>
               <Input
                 id="password"
                 className={`col-span-3 ${errors.password && 'border-red-500'}`}
