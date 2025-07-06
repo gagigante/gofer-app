@@ -140,7 +140,7 @@ export function BrandDetails() {
                     <p className="font-medium">{product.name}</p>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="flex items-center justify-end">
                     <TableActionButton
                       tooltip="Desassociar produto desta marca"
                       variant="outline"

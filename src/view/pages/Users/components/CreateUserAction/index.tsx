@@ -1,12 +1,23 @@
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { Controller, type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import type * as z from 'zod'
 
 import { Input } from '@/view/components/ui/input'
 import { Label } from '@/view/components/ui/label'
-import { Dialog } from '@/view/components/Dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/view/components/ui/select'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/view/components/ui/dialog'
+import { Button } from '@/view/components/ui/button'
+import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from '@/view/components/ui/select'
 
 import { useToast } from '@/view/components/ui/use-toast'
 
@@ -20,6 +31,8 @@ interface CreateUserActionProps {
 
 export const CreateUserAction = ({ isOpen, onCreateUser, onClose }: CreateUserActionProps) => {
   const { toast } = useToast()
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const {
     control,
@@ -44,8 +57,10 @@ export const CreateUserAction = ({ isOpen, onCreateUser, onClose }: CreateUserAc
   }, [isOpen])
 
   async function onSubmit(data: z.infer<typeof createUserSchema>) {
-    onCreateUser(data)
+    setIsLoading(true)
+    await onCreateUser(data)
     reset()
+    setIsLoading(false)
   }
 
   const onSubmitInvalid: SubmitErrorHandler<FieldValues> = (errors) => {
@@ -61,66 +76,84 @@ export const CreateUserAction = ({ isOpen, onCreateUser, onClose }: CreateUserAc
 
   return (
     <Dialog
-      title="Adicionar novo usuário"
-      onProceed={handleSubmit(onSubmit, onSubmitInvalid)}
-      proceedButtonLabel="Adicionar usuário"
       open={isOpen}
-      onClose={() => {
-        onClose()
+      onOpenChange={(open: boolean) => {
+        if (isLoading) return
+
+        if (!open) {
+          onClose()
+          reset()
+        }
       }}
     >
-      <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="name" className="text-right">
-            Nome
-          </Label>
+      <DialogContent className="max-w-[540px]" onKeyDown={(e) => e.stopPropagation()}>
+        <form onSubmit={handleSubmit(onSubmit, onSubmitInvalid)}>
+          <DialogHeader>
+            <DialogTitle>Criar usuário</DialogTitle>
+            <VisuallyHidden.Root>
+              <DialogDescription>Criar usuário</DialogDescription>
+            </VisuallyHidden.Root>
+          </DialogHeader>
 
-          <Input
-            id="name"
-            className={`col-span-3 ${errors.name && 'border-red-500'}`}
-            placeholder="Usuário"
-            required
-            {...register('name')}
-          />
-        </div>
+          <div className="grid gap-4 py-8">
+            <div className="grid gap-3">
+              <Label htmlFor="name">Nome *</Label>
+              <Input
+                id="name"
+                className={`col-span-3 ${errors.name && 'border-red-500'}`}
+                placeholder="Usuário"
+                {...register('name')}
+              />
+            </div>
 
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="password" className="text-right">
-            Senha
-          </Label>
+            <div className="grid gap-3">
+              <Label htmlFor="password">Senha *</Label>
+              <Input
+                id="password"
+                className={`col-span-3 ${errors.password && 'border-red-500'}`}
+                placeholder="Senha"
+                type="password"
+                {...register('password')}
+              />
+            </div>
 
-          <Input
-            id="password"
-            className={`col-span-3 ${errors.password && 'border-red-500'}`}
-            placeholder="Senha"
-            type="password"
-            required
-            {...register('password')}
-          />
-        </div>
+            <div className="grid gap-3">
+              <Label htmlFor="role" className="text-left">
+                Cargo *
+              </Label>
 
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="role" className="text-right">
-            Cargo
-          </Label>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <Select value={value} onValueChange={onChange}>
+                    <SelectTrigger id="role" className="col-span-3">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      <SelectItem value="admin">Administrador</SelectItem>
+                      <SelectItem value="operator">Operador</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
+          </div>
 
-          <Controller
-            name="role"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <Select value={value} onValueChange={onChange}>
-                <SelectTrigger id="role" className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent position="popper">
-                  <SelectItem value="admin">Administrador</SelectItem>
-                  <SelectItem value="operator">Operador</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </div>
-      </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isLoading}>
+                Cancelar
+              </Button>
+            </DialogClose>
+
+            <Button type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Adicionar usuário
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   )
 }

@@ -10,9 +10,17 @@ interface ActionButtonProps {
   tooltip: string
   customLoading?: boolean
   onClick: () => void | Promise<void>
+  disabled?: boolean
 }
 
-export function TableActionButton({ onClick, icon, variant, tooltip, customLoading = false }: ActionButtonProps) {
+export function TableActionButton({
+  onClick,
+  icon,
+  variant,
+  tooltip,
+  customLoading = false,
+  disabled = false,
+}: ActionButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   return (
@@ -26,7 +34,7 @@ export function TableActionButton({ onClick, icon, variant, tooltip, customLoadi
             await onClick()
             setIsLoading(false)
           }}
-          disabled={isLoading || customLoading}
+          disabled={isLoading || customLoading || disabled}
         >
           {isLoading || customLoading ? <Loader2 className="animate-spin w-3 h-3" /> : icon}
         </Button>
