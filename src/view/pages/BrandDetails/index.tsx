@@ -42,14 +42,20 @@ export function BrandDetails() {
     },
   )
 
-  const { data: productsData, isFetching: isProductsLoading } = useProducts({
-    loggedUserId: user?.id ?? '',
-    filterOptions: {
-      brandId: brand_id ?? '',
-      name: nameFilter,
+  const { data: productsData, isFetching: isProductsLoading } = useProducts(
+    {
+      loggedUserId: user?.id ?? '',
+      filterOptions: {
+        brandId: brand_id ?? '',
+        name: nameFilter,
+      },
+      page: pagination,
     },
-    page: pagination,
-  })
+    {
+      enabled: !!user && !!brand_id,
+      placeholderData: (previousData) => previousData,
+    },
+  )
 
   const products = productsData?.products ?? []
 

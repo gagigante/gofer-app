@@ -43,14 +43,20 @@ export function CategoryDetails() {
     },
   )
 
-  const { data: productsData, isFetching: isProductsLoading } = useProducts({
-    loggedUserId: user?.id ?? '',
-    filterOptions: {
-      categoryId: category_id ?? '',
-      name: nameFilter,
+  const { data: productsData, isFetching: isProductsLoading } = useProducts(
+    {
+      loggedUserId: user?.id ?? '',
+      filterOptions: {
+        categoryId: category_id ?? '',
+        name: nameFilter,
+      },
+      page: pagination,
     },
-    page: pagination,
-  })
+    {
+      enabled: !!user && !!category_id,
+      placeholderData: (previousData) => previousData,
+    },
+  )
 
   const products = productsData?.products ?? []
 
