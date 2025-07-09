@@ -42,14 +42,20 @@ export function BrandDetails() {
     },
   )
 
-  const { data: productsData, isFetching: isProductsLoading } = useProducts({
-    loggedUserId: user?.id ?? '',
-    filterOptions: {
-      brandId: brand_id ?? '',
-      name: nameFilter,
+  const { data: productsData, isFetching: isProductsLoading } = useProducts(
+    {
+      loggedUserId: user?.id ?? '',
+      filterOptions: {
+        brandId: brand_id ?? '',
+        name: nameFilter,
+      },
+      page: pagination,
     },
-    page: pagination,
-  })
+    {
+      enabled: !!user && !!brand_id,
+      placeholderData: (previousData) => previousData,
+    },
+  )
 
   const products = productsData?.products ?? []
 
@@ -118,7 +124,7 @@ export function BrandDetails() {
 
             <TableHeader>
               <TableRow>
-                <TableHead>ID. rápido</TableHead>
+                <TableHead className="min-w-8">ID. rápido</TableHead>
                 <TableHead>Cód. de barras</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead></TableHead>

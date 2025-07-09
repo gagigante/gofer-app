@@ -43,14 +43,20 @@ export function CategoryDetails() {
     },
   )
 
-  const { data: productsData, isFetching: isProductsLoading } = useProducts({
-    loggedUserId: user?.id ?? '',
-    filterOptions: {
-      categoryId: category_id ?? '',
-      name: nameFilter,
+  const { data: productsData, isFetching: isProductsLoading } = useProducts(
+    {
+      loggedUserId: user?.id ?? '',
+      filterOptions: {
+        categoryId: category_id ?? '',
+        name: nameFilter,
+      },
+      page: pagination,
     },
-    page: pagination,
-  })
+    {
+      enabled: !!user && !!category_id,
+      placeholderData: (previousData) => previousData,
+    },
+  )
 
   const products = productsData?.products ?? []
 
@@ -143,7 +149,7 @@ export function CategoryDetails() {
 
             <TableHeader>
               <TableRow>
-                <TableHead>ID. rápido</TableHead>
+                <TableHead className="min-w-8">ID. rápido</TableHead>
                 <TableHead>Cód. de barras</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead></TableHead>
