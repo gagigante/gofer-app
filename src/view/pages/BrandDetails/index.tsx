@@ -124,7 +124,7 @@ export function BrandDetails() {
 
             <TableHeader>
               <TableRow>
-                <TableHead>ID. rápido</TableHead>
+                <TableHead className="min-w-8">ID. rápido</TableHead>
                 <TableHead>Cód. de barras</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead></TableHead>
