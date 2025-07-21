@@ -106,23 +106,12 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
             <TableHead className="max-w-[116px]">Marca</TableHead>
             <TableHead className="max-w-[116px]">Categoria</TableHead>
             <TableHead>Preço</TableHead>
-            <TableHead className="max-w-[116px]">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <p className="line-clamp-1">Qtd. disponível em estoque</p>
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  <p>Qtd. disponível em estoque</p>
-                </TooltipContent>
-              </Tooltip>
-            </TableHead>
             <TableHead className="min-w-[116px]"></TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {products.map(({ id, name, category, brand, price, availableQuantity }) => (
+          {products.map(({ id, name, category, brand, price }) => (
             <TableRow key={id}>
               <TableCell>
                 <Tooltip>
@@ -162,10 +151,6 @@ export function ProductsTab({ products, onChangeFilter }: ProductsTabProps) {
 
               <TableCell>
                 <p className="font-medium">{formatCurrency(parseCentsToDecimal(price ?? 0))}</p>
-              </TableCell>
-
-              <TableCell>
-                <p className="font-medium">{availableQuantity}</p>
               </TableCell>
 
               <TableCell className="text-right space-x-1.5">
