@@ -124,7 +124,7 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
                       <p className="font-medium line-clamp-1">{name}</p>
                     </TooltipTrigger>
 
-                    <TooltipContent>
+                    <TooltipContent align="start">
                       <p>{name}</p>
                     </TooltipContent>
                   </Tooltip>
