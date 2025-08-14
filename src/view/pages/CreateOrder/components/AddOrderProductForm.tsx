@@ -26,6 +26,8 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
   const quantityInputRef = useRef<HTMLInputElement>(null)
 
   const [filter, setFilter] = useState('')
+  const isNumericFilter = filter.match(/^\d+$/)
+
   const [selectedProduct, setSelectedProduct] = useState<ProductOption>()
   const [quantity, setQuantity] = useState(1)
 
@@ -33,7 +35,8 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
     {
       loggedUserId: user?.id ?? '',
       filterOptions: {
-        name: filter,
+        name: isNumericFilter ? undefined : filter,
+        barCode: isNumericFilter ? filter : undefined,
       },
       page: 1,
     },
@@ -91,8 +94,8 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
 
           <Combobox
             placeholder="Selecione um produto"
-            searchPlaceholder="Pesquisar por nome de produto"
-            emptyPlaceholder="Nenhum produto encontrado."
+            searchPlaceholder="Pesquisar por nome de produto ou código de barras"
+            emptyPlaceholder="Nenhum produto encontrado pelo termo de busca."
             options={products}
             isLoading={isFetching}
             value={selectedProduct}

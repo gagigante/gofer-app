@@ -13,6 +13,7 @@ export type ProductWithCategoryAndBrand = Product & { category: Category | null 
 export interface FilterOptions {
   ids?: string[]
   name?: string
+  barCode?: string
   brandId?: string
   categoryId?: string
 }
@@ -172,6 +173,7 @@ export class ProductsRepository {
 
     if (filterOptions.ids) filters.push(inArray(products.id, filterOptions.ids))
     if (filterOptions.name) filters.push(like(products.name, `%${filterOptions.name}%`))
+    if (filterOptions.barCode) filters.push(like(products.barCode, `%${filterOptions.barCode}%`))
     if (filterOptions.brandId) filters.push(eq(products.brandId, filterOptions.brandId))
     if (filterOptions.categoryId) filters.push(eq(products.categoryId, filterOptions.categoryId))
 
