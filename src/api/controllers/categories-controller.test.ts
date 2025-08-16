@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest'
+import { eq } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 import { categories, products, users } from '@/api/db/schema'
@@ -9,7 +10,6 @@ import { WithoutPermissionError } from '../errors/WithoutPermissionError'
 import { InvalidParamsError } from '../errors/InvalidParamsError'
 import { CategoryAlreadyExistsError } from '../errors/CategoryAlreadyExistsError'
 import { NotFoundError } from '../errors/NotFoundError'
-import { eq } from 'drizzle-orm'
 
 describe('categories-controller', () => {
   const categoriesController = new CategoriesController()
@@ -180,6 +180,112 @@ describe('categories-controller', () => {
       expect(response.data?.page).toBe(1)
       expect(response.data?.total).toBe(2)
       expect(response.data?.itemsPerPage).toBe(15)
+      expect(response.err).toBeNull()
+    })
+
+    test('should be able to list categories with different ordering options', async () => {
+      const CATEGORIES = [
+        {
+          id: 'category-1',
+          name: 'b category',
+          description: null,
+        },
+        {
+          id: 'category-2',
+          name: 'a category',
+          description: null,
+        },
+        {
+          id: 'category-3',
+          name: 'c category',
+          description: null,
+        },
+      ]
+
+      await db.insert(categories).values(CATEGORIES)
+
+      // Add different number of products to each category
+      await db.insert(products).values([
+        {
+          id: 'product-id-1',
+          categoryId: 'category-1',
+        },
+        {
+          id: 'product-id-2',
+          categoryId: 'category-1',
+        },
+        {
+          id: 'product-id-3',
+          categoryId: 'category-2',
+        },
+        {
+          id: 'product-id-4',
+          categoryId: 'category-3',
+        },
+        {
+          id: 'product-id-5',
+          categoryId: 'category-3',
+        },
+        {
+          id: 'product-id-6',
+          categoryId: 'category-3',
+        },
+      ])
+
+      // Test ordering by name ascending (default)
+      let response = await categoriesController.listCategories({
+        loggedUserId: 'test-user-id',
+      })
+
+      expect(response.data?.categories).length(3)
+      expect(response.data?.categories[0].name).toBe('a category')
+      expect(response.data?.categories[1].name).toBe('b category')
+      expect(response.data?.categories[2].name).toBe('c category')
+      expect(response.err).toBeNull()
+
+      // Test ordering by name descending
+      response = await categoriesController.listCategories({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'name',
+          order: 'desc',
+        },
+      })
+
+      expect(response.data?.categories).length(3)
+      expect(response.data?.categories[0].name).toBe('c category')
+      expect(response.data?.categories[1].name).toBe('b category')
+      expect(response.data?.categories[2].name).toBe('a category')
+      expect(response.err).toBeNull()
+
+      // Test ordering by products ascending
+      response = await categoriesController.listCategories({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'products',
+          order: 'asc',
+        },
+      })
+
+      expect(response.data?.categories).length(3)
+      expect(response.data?.categories[0].products).toBe(1)
+      expect(response.data?.categories[1].products).toBe(2)
+      expect(response.data?.categories[2].products).toBe(3)
+      expect(response.err).toBeNull()
+
+      // Test ordering by products descending
+      response = await categoriesController.listCategories({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'products',
+          order: 'desc',
+        },
+      })
+
+      expect(response.data?.categories).length(3)
+      expect(response.data?.categories[0].products).toBe(3)
+      expect(response.data?.categories[1].products).toBe(2)
+      expect(response.data?.categories[2].products).toBe(1)
       expect(response.err).toBeNull()
     })
   })

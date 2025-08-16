@@ -1,8 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
-import { CategoriesRepository } from '@/api/repositories/categories-repository'
-import { ProductsRepository } from '@/api/repositories/products-repository'
+import { CategoriesRepository, type OrderBy } from '@/api/repositories/categories-repository'
 import { AuthMiddleware } from '@/api/middlewares/auth'
 
 import { NotFoundError } from '@/api/errors/NotFoundError'
@@ -17,6 +16,7 @@ export interface ListCategoriesRequest {
   name?: string
   page?: number
   itemsPerPage?: number
+  orderBy?: OrderBy
 }
 
 export type ListCategoriesResponse = Response<{
@@ -60,13 +60,11 @@ export type UpdateCategoryResponse = Response<Category>
 export class CategoriesController {
   private readonly usersRepository: UsersRepository
   private readonly categoriesRepository: CategoriesRepository
-  private readonly productsRepository: ProductsRepository
   private readonly authMiddleware: AuthMiddleware
 
   constructor() {
     this.usersRepository = new UsersRepository()
     this.categoriesRepository = new CategoriesRepository()
-    this.productsRepository = new ProductsRepository()
     this.authMiddleware = new AuthMiddleware(this.usersRepository)
   }
 
@@ -75,6 +73,10 @@ export class CategoriesController {
     name = '',
     page = 1,
     itemsPerPage = 15,
+    orderBy = {
+      column: 'name',
+      order: 'asc',
+    },
   }: ListCategoriesRequest): Promise<ListCategoriesResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -82,7 +84,7 @@ export class CategoriesController {
     }
 
     const total = await this.categoriesRepository.countCategories(name)
-    const categories = await this.categoriesRepository.getCategories(name, page, itemsPerPage)
+    const categories = await this.categoriesRepository.getCategories(name, page, itemsPerPage, orderBy)
 
     const data = { categories, total, page, itemsPerPage }
 

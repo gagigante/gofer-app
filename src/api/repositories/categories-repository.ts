@@ -1,11 +1,40 @@
-import { asc, count, eq, like, sql } from 'drizzle-orm'
+import { asc, count, desc, eq, like, sql } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
 import { type Category, type NewCategory, categories, products } from '@/api/db/schema'
 
+export interface OrderBy {
+  column: Extract<keyof Category, 'name'> | 'products'
+  order: 'asc' | 'desc'
+}
+
 export class CategoriesRepository {
-  public async getCategories(name = '', page = 1, itemsPerPage = 15): Promise<Array<Category & { products: number }>> {
+  public async getCategories(
+    name = '',
+    page = 1,
+    itemsPerPage = 15,
+    orderBy: OrderBy = {
+      column: 'name',
+      order: 'asc',
+    },
+  ): Promise<Array<Category & { products: number }>> {
+    function getOrderBy(orderBy: OrderBy) {
+      if (orderBy.order === 'asc') {
+        if (orderBy.column === 'products') {
+          return asc(sql<number>`COUNT(${products.id})`)
+        }
+
+        return asc(categories[orderBy.column])
+      }
+
+      if (orderBy.column === 'products') {
+        return desc(sql<number>`COUNT(${products.id})`)
+      }
+
+      return desc(categories[orderBy.column])
+    }
+
     const response = await db
       .select({
         category: categories,
@@ -15,7 +44,7 @@ export class CategoriesRepository {
       .leftJoin(products, eq(categories.id, products.categoryId))
       .where(like(categories.name, `%${name}%`))
       .groupBy(categories.name)
-      .orderBy(asc(categories.name))
+      .orderBy(getOrderBy(orderBy))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
 
