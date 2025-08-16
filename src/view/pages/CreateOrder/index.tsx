@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useLocation } from 'react-router-dom'
-import { FaInfoCircle } from 'react-icons/fa'
+// import { FaInfoCircle } from 'react-icons/fa'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
+// import { Alert, AlertDescription, AlertTitle } from '@/view/components/ui/alert'
 import { AddOrderProductForm } from './components/AddOrderProductForm'
 import { CustomerFormSection } from './components/CustomerFormSection'
 import { AddressFormSection } from './components/AddressFormSection'
@@ -12,10 +12,10 @@ import { ObsFormSection } from './components/ObsFormSection'
 import { OrderProductsTable } from './components/OrderProductsTable'
 import { Footer } from './components/Footer'
 
-import { useToast } from '@/view/components/ui/use-toast'
-import { useAuth } from '@/view/hooks/useAuth'
-import { useBarcode } from '@/view/hooks/useBarcode'
-import { useProductByBarcode } from '@/view/hooks/queries/products'
+// import { useToast } from '@/view/components/ui/use-toast'
+// import { useAuth } from '@/view/hooks/useAuth'
+// import { useBarcode } from '@/view/hooks/useBarcode'
+// import { useProductByBarcode } from '@/view/hooks/queries/products'
 
 import { type CreateOrderSchema, createOrderSchema } from './schema'
 import { type Product } from '@/api/db/schema'
@@ -23,9 +23,9 @@ import { type GetOrderResponse } from '@/api/controllers/orders-controller'
 
 export function CreateOrder() {
   const { state } = useLocation()
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const { barcode, clearBarcodeState } = useBarcode()
+  // const { user } = useAuth()
+  // const { toast } = useToast()
+  // const { barcode, clearBarcodeState } = useBarcode()
 
   const form = useForm<CreateOrderSchema>({
     resolver: zodResolver(createOrderSchema),
@@ -41,25 +41,25 @@ export function CreateOrder() {
     },
   })
 
-  const { data, error } = useProductByBarcode(
-    { loggedUserId: user?.id ?? '', barcode: barcode },
-    {
-      enabled: !!user?.id && !!barcode,
-      retry: false,
-    },
-  )
+  // const { data, error } = useProductByBarcode(
+  //   { loggedUserId: user?.id ?? '', barcode: barcode },
+  //   {
+  //     enabled: !!user?.id && !!barcode,
+  //     retry: false,
+  //   },
+  // )
 
-  useEffect(() => {
-    if (error) {
-      if (error.message === 'NotFoundError') {
-        toast({
-          title: 'Não foi possível encontrar um produto com este código de barras.',
-          duration: 3000,
-        })
-        clearBarcodeState()
-      }
-    }
-  }, [error])
+  // useEffect(() => {
+  //   if (error) {
+  //     if (error.message === 'NotFoundError') {
+  //       toast({
+  //         title: 'Não foi possível encontrar um produto com este código de barras.',
+  //         duration: 3000,
+  //       })
+  //       clearBarcodeState()
+  //     }
+  //   }
+  // }, [error])
 
   const products = form.watch('products')
 
@@ -113,7 +113,7 @@ export function CreateOrder() {
           obs: '',
         },
       ])
-      clearBarcodeState()
+      // clearBarcodeState()
       return
     }
 
@@ -134,7 +134,7 @@ export function CreateOrder() {
         },
         ...products,
       ])
-      clearBarcodeState()
+      // clearBarcodeState()
       return
     }
 
@@ -153,7 +153,7 @@ export function CreateOrder() {
     })
 
     form.setValue('products', updatedProducts)
-    clearBarcodeState()
+    // clearBarcodeState()
     return
   }
 
@@ -175,15 +175,15 @@ export function CreateOrder() {
         <div className="flex-1 px-3 py-6 overflow-auto">
           <h2 className="mb-8 text-3xl font-semibold tracking-tight">Criar novo pedido ou orçamento</h2>
 
-          <Alert>
+          {/* <Alert>
             <FaInfoCircle className="h-4 w-4" />
             <AlertTitle>Busca de produtos por código de barra</AlertTitle>
             <AlertDescription>
               Você pode escanear o código de barras de um produto para adiciona-lo ao pedido.
             </AlertDescription>
-          </Alert>
+          </Alert> */}
 
-          <AddOrderProductForm preSelectedProduct={data ?? null} onSubmit={handleAddProductToOrder} />
+          <AddOrderProductForm preSelectedProduct={null} onSubmit={handleAddProductToOrder} />
           <OrderProductsTable />
           <ObsFormSection />
           <CustomerFormSection />
