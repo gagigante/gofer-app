@@ -11,10 +11,10 @@ import {
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 export function useCategories(
-  { loggedUserId, name = '', page = 1, itemsPerPage = ITEMS_PER_PAGE }: ListCategoriesRequest,
+  { loggedUserId, name = '', page = 1, itemsPerPage = ITEMS_PER_PAGE, orderBy }: ListCategoriesRequest,
   options?: Omit<UseQueryOptions<ListCategoriesResponse['data']>, 'queryKey'>,
 ) {
-  const key = ['categories', JSON.stringify({ name, page, itemsPerPage })]
+  const key = ['categories', JSON.stringify({ name, page, itemsPerPage, orderBy })]
 
   return useQuery({
     queryKey: key,
@@ -24,6 +24,7 @@ export function useCategories(
         name,
         page,
         itemsPerPage,
+        orderBy,
       })
 
       if (err) {

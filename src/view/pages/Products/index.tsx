@@ -14,6 +14,7 @@ import { useProducts } from '@/view/hooks/queries/products'
 import { useBrands } from '@/view/hooks/queries/brands'
 
 import { type Brand, type Category } from '@/api/db/schema'
+import { type OrderBy as CategoriesOrderBy } from '@/api/repositories/categories-repository'
 
 export type CategoryWithProductsQuantity = Category & { products: number }
 export type BrandWithProductsQuantity = Brand & { products: number }
@@ -39,8 +40,17 @@ export function Products() {
   const brands = brandsResponse?.brands ?? []
 
   const [categoriesNameFilter, setCategoriesNameFilter] = useState('')
+  const [categoriesOrderBy, setCategoriesOrderBy] = useState<CategoriesOrderBy>({
+    column: 'name',
+    order: 'asc',
+  })
   const { data: categoriesResponse, isFetching: isFetchingCategories } = useCategories(
-    { loggedUserId: user?.id ?? '', name: categoriesNameFilter, page: categoriesPagination },
+    {
+      loggedUserId: user?.id ?? '',
+      name: categoriesNameFilter,
+      page: categoriesPagination,
+      orderBy: categoriesOrderBy,
+    },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -49,7 +59,7 @@ export function Products() {
   const categories = categoriesResponse?.categories ?? []
 
   const [productsNameFilter, setProductsNameFilter] = useState('')
-  const { data: productsResponse } = useProducts(
+  const { data: productsResponse, isFetching: isFetchingProducts } = useProducts(
     {
       loggedUserId: user?.id ?? '',
       filterOptions: {
@@ -118,6 +128,7 @@ export function Products() {
 
           <ProductsTab
             products={products}
+            isFetching={isFetchingProducts}
             onChangeFilter={(filter) => {
               setProductsNameFilter(filter)
               setProductsPagination(1)
@@ -127,9 +138,13 @@ export function Products() {
           <CategoriesTab
             categories={categories}
             isFetching={isFetchingCategories}
+            orderBy={categoriesOrderBy}
             onChangeFilter={(filter) => {
               setCategoriesNameFilter(filter)
               setCategoriesPagination(1)
+            }}
+            onOrderByChange={(orderBy) => {
+              setCategoriesOrderBy(orderBy)
             }}
             onDelete={() => {
               setCategoriesPagination(1)
