@@ -11,10 +11,10 @@ import {
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 export function useBrands(
-  { loggedUserId, name = '', page = 1, itemsPerPage = ITEMS_PER_PAGE }: ListBrandsRequest,
+  { loggedUserId, name = '', page = 1, itemsPerPage = ITEMS_PER_PAGE, orderBy }: ListBrandsRequest,
   options?: Omit<UseQueryOptions<ListBrandsResponse['data']>, 'queryKey'>,
 ) {
-  const key = ['brands', JSON.stringify({ name, page, itemsPerPage })]
+  const key = ['brands', JSON.stringify({ name, page, itemsPerPage, orderBy })]
 
   return useQuery({
     queryKey: key,
@@ -24,6 +24,7 @@ export function useBrands(
         name,
         page,
         itemsPerPage,
+        orderBy,
       })
 
       if (err) {

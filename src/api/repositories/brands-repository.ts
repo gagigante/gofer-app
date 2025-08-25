@@ -1,11 +1,40 @@
-import { asc, count, eq, like, sql } from 'drizzle-orm'
+import { asc, count, desc, eq, like, sql } from 'drizzle-orm'
 
 import { db } from '@/api/db/client'
 
 import { type Brand, type NewBrand, brands, products } from '@/api/db/schema'
 
+export interface OrderBy {
+  column: Extract<keyof Brand, 'name'> | 'products'
+  order: 'asc' | 'desc'
+}
+
 export class BrandsRepository {
-  public async getBrands(name = '', page = 1, itemsPerPage = 15): Promise<Array<Brand & { products: number }>> {
+  public async getBrands(
+    name = '',
+    page = 1,
+    itemsPerPage = 15,
+    orderBy: OrderBy = {
+      column: 'name',
+      order: 'asc',
+    },
+  ): Promise<Array<Brand & { products: number }>> {
+    function getOrderBy(orderBy: OrderBy) {
+      if (orderBy.order === 'asc') {
+        if (orderBy.column === 'products') {
+          return asc(sql<number>`COUNT(${products.id})`)
+        }
+
+        return asc(brands[orderBy.column])
+      }
+
+      if (orderBy.column === 'products') {
+        return desc(sql<number>`COUNT(${products.id})`)
+      }
+
+      return desc(brands[orderBy.column])
+    }
+
     const response = await db
       .select({
         brand: brands,
@@ -15,7 +44,7 @@ export class BrandsRepository {
       .leftJoin(products, eq(brands.id, products.brandId))
       .where(like(brands.name, `%${name}%`))
       .groupBy(brands.name)
-      .orderBy(asc(brands.name))
+      .orderBy(getOrderBy(orderBy))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
 
