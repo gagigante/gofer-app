@@ -110,6 +110,110 @@ describe('brands-controller', () => {
       expect(response.err).toBeNull()
     })
 
+    test('should be able to order brands by name and product count', async () => {
+      const BRANDS = [
+        {
+          id: 'brand-3',
+          name: 'c brand',
+        },
+        {
+          id: 'brand-1',
+          name: 'a brand',
+        },
+        {
+          id: 'brand-5',
+          name: 'e brand',
+        },
+        {
+          id: 'brand-2',
+          name: 'b brand',
+        },
+        {
+          id: 'brand-4',
+          name: 'd brand',
+        },
+      ]
+
+      await db.insert(brands).values(BRANDS)
+
+      await db.insert(products).values([
+        { id: 'product-1', brandId: 'brand-1' },
+        { id: 'product-2', brandId: 'brand-2' },
+        { id: 'product-3', brandId: 'brand-2' },
+        { id: 'product-4', brandId: 'brand-3' },
+        { id: 'product-5', brandId: 'brand-3' },
+        { id: 'product-6', brandId: 'brand-3' },
+        { id: 'product-7', brandId: 'brand-5' },
+        { id: 'product-8', brandId: 'brand-5' },
+        { id: 'product-9', brandId: 'brand-5' },
+        { id: 'product-10', brandId: 'brand-5' },
+      ])
+
+      let response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'name',
+          order: 'asc',
+        },
+      })
+
+      expect(response.data?.brands).length(5)
+      expect(response.data?.brands[0].name).toBe('a brand')
+      expect(response.data?.brands[1].name).toBe('b brand')
+      expect(response.data?.brands[2].name).toBe('c brand')
+      expect(response.data?.brands[3].name).toBe('d brand')
+      expect(response.data?.brands[4].name).toBe('e brand')
+      expect(response.err).toBeNull()
+
+      response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'name',
+          order: 'desc',
+        },
+      })
+
+      expect(response.data?.brands).length(5)
+      expect(response.data?.brands[0].name).toBe('e brand')
+      expect(response.data?.brands[1].name).toBe('d brand')
+      expect(response.data?.brands[2].name).toBe('c brand')
+      expect(response.data?.brands[3].name).toBe('b brand')
+      expect(response.data?.brands[4].name).toBe('a brand')
+      expect(response.err).toBeNull()
+
+      response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'products',
+          order: 'asc',
+        },
+      })
+
+      expect(response.data?.brands).length(5)
+      expect(response.data?.brands[0].name).toBe('d brand')
+      expect(response.data?.brands[1].name).toBe('a brand')
+      expect(response.data?.brands[2].name).toBe('b brand')
+      expect(response.data?.brands[3].name).toBe('c brand')
+      expect(response.data?.brands[4].name).toBe('e brand')
+      expect(response.err).toBeNull()
+
+      response = await brandsController.listBrands({
+        loggedUserId: 'test-user-id',
+        orderBy: {
+          column: 'products',
+          order: 'desc',
+        },
+      })
+
+      expect(response.data?.brands).length(5)
+      expect(response.data?.brands[0].name).toBe('e brand')
+      expect(response.data?.brands[1].name).toBe('c brand')
+      expect(response.data?.brands[2].name).toBe('b brand')
+      expect(response.data?.brands[3].name).toBe('a brand')
+      expect(response.data?.brands[4].name).toBe('d brand')
+      expect(response.err).toBeNull()
+    })
+
     test('should be able to list brands with filter by name', async () => {
       const BRANDS = [
         {

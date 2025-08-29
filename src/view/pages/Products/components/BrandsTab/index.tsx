@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Eye, Pencil, Trash2 } from 'lucide-react'
+import { ArrowDownUp, Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { useNavigate } from 'react-router-dom'
 
@@ -19,15 +19,18 @@ import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnDeleteBrand } from '@/view/hooks/mutations/brands'
 
 import { type BrandWithProductsQuantity } from '../..'
+import { type OrderBy } from '@/api/repositories/brands-repository'
 
 interface BrandsTabProps {
   brands: BrandWithProductsQuantity[]
   isFetching: boolean
+  orderBy: OrderBy
   onChangeFilter: (nameFilter: string) => void
   onDelete: () => void
+  onOrderByChange: (orderBy: OrderBy) => void
 }
 
-export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: BrandsTabProps) {
+export function BrandsTab({ brands, isFetching, orderBy, onChangeFilter, onDelete, onOrderByChange }: BrandsTabProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { toast } = useToast()
@@ -109,8 +112,42 @@ export function BrandsTab({ brands, isFetching, onChangeFilter, onDelete }: Bran
 
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead className="min-w-[164px]">Produtos associados</TableHead>
+              <TableHead>
+                <button
+                  className="flex items-center gap-1"
+                  onClick={() => {
+                    const newOrder = (() => {
+                      if (orderBy.column === 'name') {
+                        return orderBy.order === 'asc' ? 'desc' : 'asc'
+                      }
+
+                      return 'asc'
+                    })()
+
+                    onOrderByChange({ column: 'name', order: newOrder })
+                  }}
+                >
+                  Nome <ArrowDownUp className="w-3 h-3" />
+                </button>
+              </TableHead>
+              <TableHead className="min-w-[164px]">
+                <button
+                  className="flex items-center gap-1 text-start"
+                  onClick={() => {
+                    const newOrder = (() => {
+                      if (orderBy.column === 'products') {
+                        return orderBy.order === 'asc' ? 'desc' : 'asc'
+                      }
+
+                      return 'asc'
+                    })()
+
+                    onOrderByChange({ column: 'products', order: newOrder })
+                  }}
+                >
+                  Produtos associados <ArrowDownUp className="w-3 h-3" />
+                </button>
+              </TableHead>
               <TableHead className="min-w-[160px]"></TableHead>
             </TableRow>
           </TableHeader>

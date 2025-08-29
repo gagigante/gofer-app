@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import {
   ProductsRepository,
+  type OrderBy,
   type FilterOptions,
   type ProductWithCategoryAndBrand,
 } from '../repositories/products-repository'
@@ -21,6 +22,7 @@ export interface ListProductsRequest {
   page?: number
   itemsPerPage?: number
   filterOptions?: FilterOptions
+  orderBy?: OrderBy
 }
 
 export type ListProductsResponse = Response<{
@@ -100,6 +102,10 @@ export class ProductsController {
     filterOptions = {},
     page = 1,
     itemsPerPage = 15,
+    orderBy = {
+      column: 'name',
+      order: 'asc',
+    },
   }: ListProductsRequest): Promise<ListProductsResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -107,7 +113,7 @@ export class ProductsController {
     }
 
     const total = await this.productsRepository.countProducts(filterOptions)
-    const products = await this.productsRepository.getProducts(page, itemsPerPage, filterOptions)
+    const products = await this.productsRepository.getProducts(page, itemsPerPage, filterOptions, orderBy)
 
     const data = { products, total, page, itemsPerPage }
 

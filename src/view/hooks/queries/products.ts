@@ -11,10 +11,10 @@ import { type apiName, type ProductsApi } from '@/api/exposes/products-api'
 import { ITEMS_PER_PAGE } from '@/view/constants/ITEMS_PER_PAGE'
 
 export function useProducts(
-  { loggedUserId, filterOptions = {}, page = 1, itemsPerPage = ITEMS_PER_PAGE }: ListProductsRequest,
+  { loggedUserId, filterOptions = {}, page = 1, itemsPerPage = ITEMS_PER_PAGE, orderBy }: ListProductsRequest,
   options?: Omit<UseQueryOptions<ListProductsResponse['data']>, 'queryKey'>,
 ) {
-  const key = ['products', JSON.stringify({ filterOptions, page, itemsPerPage })]
+  const key = ['products', JSON.stringify({ filterOptions, page, itemsPerPage, orderBy })]
 
   return useQuery({
     queryKey: key,
@@ -24,6 +24,7 @@ export function useProducts(
         filterOptions,
         page,
         itemsPerPage,
+        orderBy,
       })
 
       if (err) {

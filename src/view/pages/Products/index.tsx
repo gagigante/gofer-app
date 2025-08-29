@@ -15,6 +15,7 @@ import { useBrands } from '@/view/hooks/queries/brands'
 
 import { type Brand, type Category } from '@/api/db/schema'
 import { type OrderBy as CategoriesOrderBy } from '@/api/repositories/categories-repository'
+import { type OrderBy as BrandsOrderBy } from '@/api/repositories/brands-repository'
 
 export type CategoryWithProductsQuantity = Category & { products: number }
 export type BrandWithProductsQuantity = Brand & { products: number }
@@ -30,8 +31,12 @@ export function Products() {
   const activeTab = (searchParams.get('tab') as 'categories' | 'products' | 'brands') || 'products'
 
   const [brandsNameFilter, setBrandsNameFilter] = useState('')
+  const [brandsOrderBy, setBrandsOrderBy] = useState<BrandsOrderBy>({
+    column: 'name',
+    order: 'asc',
+  })
   const { data: brandsResponse, isFetching: isFetchingBrands } = useBrands(
-    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: brandsPagination },
+    { loggedUserId: user?.id ?? '', name: brandsNameFilter, page: brandsPagination, orderBy: brandsOrderBy },
     {
       enabled: !!user,
       placeholderData: (previousData) => previousData,
@@ -154,9 +159,13 @@ export function Products() {
           <BrandsTab
             brands={brands}
             isFetching={isFetchingBrands}
+            orderBy={brandsOrderBy}
             onChangeFilter={(filter) => {
               setBrandsNameFilter(filter)
               setBrandsPagination(1)
+            }}
+            onOrderByChange={(orderBy) => {
+              setBrandsOrderBy(orderBy)
             }}
             onDelete={() => {
               setBrandsPagination(1)

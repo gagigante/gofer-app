@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import { UsersRepository } from '@/api/repositories/users-repository'
-import { BrandsRepository } from '@/api/repositories/brands-repository'
+import { BrandsRepository, type OrderBy } from '@/api/repositories/brands-repository'
 
 import { AuthMiddleware } from '@/api/middlewares/auth'
 
@@ -17,6 +17,7 @@ export interface ListBrandsRequest {
   name?: string
   page?: number
   itemsPerPage?: number
+  orderBy?: OrderBy
 }
 
 export type ListBrandsResponse = Response<{
@@ -71,6 +72,10 @@ export class BrandsController {
     name = '',
     page = 1,
     itemsPerPage = 15,
+    orderBy = {
+      column: 'name',
+      order: 'asc',
+    },
   }: ListBrandsRequest): Promise<ListBrandsResponse> {
     const { err } = await this.authMiddleware.handle(loggedUserId)
     if (err) {
@@ -78,7 +83,7 @@ export class BrandsController {
     }
 
     const total = await this.brandsRepository.countBrands(name)
-    const brands = await this.brandsRepository.getBrands(name, page, itemsPerPage)
+    const brands = await this.brandsRepository.getBrands(name, page, itemsPerPage, orderBy)
 
     const data = { brands, total, page, itemsPerPage }
 
