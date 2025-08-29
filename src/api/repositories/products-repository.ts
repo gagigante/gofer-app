@@ -1,4 +1,4 @@
-import { and, asc, count, eq, inArray, like, max, SQL } from 'drizzle-orm'
+import { and, asc, count, desc, eq, inArray, like, max, SQL } from 'drizzle-orm'
 import { type LibsqlError } from '@libsql/client'
 
 import { db } from '../db/client'
@@ -18,13 +18,29 @@ export interface FilterOptions {
   categoryId?: string
 }
 
+export interface OrderBy {
+  column: Extract<keyof Product, 'name'>
+  order: 'asc' | 'desc'
+}
+
 export class ProductsRepository {
   public async getProducts(
     page = 1,
     itemsPerPage = 15,
     filterOptions: FilterOptions = {},
+    orderBy: OrderBy = {
+      column: 'name',
+      order: 'asc',
+    },
   ): Promise<Array<ProductWithCategoryAndBrand>> {
     const filters = this.listFilters(filterOptions)
+
+    function getOrderBy(orderBy: OrderBy) {
+      if (orderBy.order === 'asc') {
+        return asc(products[orderBy.column])
+      }
+      return desc(products[orderBy.column])
+    }
 
     const response = await db
       .select()
@@ -32,7 +48,7 @@ export class ProductsRepository {
       .leftJoin(categories, eq(products.categoryId, categories.id))
       .leftJoin(brands, eq(products.brandId, brands.id))
       .where(and(...filters))
-      .orderBy(asc(products.name))
+      .orderBy(getOrderBy(orderBy))
       .offset(page === 1 ? 0 : (page - 1) * itemsPerPage)
       .limit(itemsPerPage)
 

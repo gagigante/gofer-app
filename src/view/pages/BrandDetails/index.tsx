@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Unlink } from 'lucide-react'
+import { ArrowDownUp, Unlink } from 'lucide-react'
 
 import { Button } from '@/view/components/ui/button'
 import { Label } from '@/view/components/ui/label'
@@ -18,7 +18,7 @@ import { useBrand } from '@/view/hooks/queries/brands'
 import { useProducts } from '@/view/hooks/queries/products'
 import { useMutateOnUpdateProduct } from '@/view/hooks/mutations/products'
 
-import { type ProductWithCategoryAndBrand } from '@/api/repositories/products-repository'
+import { type OrderBy, type ProductWithCategoryAndBrand } from '@/api/repositories/products-repository'
 import { type UpdateProductRequest } from '@/api/controllers/products-controller'
 
 export function BrandDetails() {
@@ -31,6 +31,11 @@ export function BrandDetails() {
   const [nameFilter, setNameFilter] = useState('')
   const [selectedProduct, setSelectedProduct] = useState<ProductWithCategoryAndBrand>()
   const [isRemoveProductFromBrandActionOpen, setIsRemoveProductFromBrandActionOpen] = useState(false)
+
+  const [productsOrderBy, setProductsOrderBy] = useState<OrderBy>({
+    column: 'name',
+    order: 'asc',
+  })
 
   const { data: brandData, isFetching: isBrandLoading } = useBrand(
     {
@@ -50,6 +55,7 @@ export function BrandDetails() {
         name: nameFilter,
       },
       page: pagination,
+      orderBy: productsOrderBy,
     },
     {
       enabled: !!user && !!brand_id,
@@ -126,7 +132,24 @@ export function BrandDetails() {
               <TableRow>
                 <TableHead className="min-w-28">ID. rápido</TableHead>
                 <TableHead>Cód. de barras</TableHead>
-                <TableHead>Nome</TableHead>
+                <TableHead>
+                  <button
+                    className="flex items-center gap-1"
+                    onClick={() => {
+                      const newOrder = (() => {
+                        if (productsOrderBy.column === 'name') {
+                          return productsOrderBy.order === 'asc' ? 'desc' : 'asc'
+                        }
+
+                        return 'asc'
+                      })()
+
+                      setProductsOrderBy({ column: 'name', order: newOrder })
+                    }}
+                  >
+                    Nome <ArrowDownUp className="w-3 h-3" />
+                  </button>
+                </TableHead>
                 <TableHead></TableHead>
               </TableRow>
             </TableHeader>
