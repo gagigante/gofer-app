@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Loader2 } from 'lucide-react'
 import { Link, useNavigate, type NavigateOptions } from 'react-router-dom'
 import { useFormContext } from 'react-hook-form'
 
 import { Button } from '@/view/components/ui/button'
+import { ConfirmationDialog } from './ConfirmationDialog'
 
 import { useMutateOnCreateOrder, useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
@@ -28,6 +28,7 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
   const { toast } = useToast()
 
   const [actionType, setActionType] = useState<'order' | 'budget'>('order')
+  const [isOpen, setIsOpen] = useState(false)
 
   const form = useFormContext<CreateOrderSchema>()
 
@@ -35,6 +36,39 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
   const { mutateAsync: mutateOnDeleteOrder, status: deleteOrderStatus } = useMutateOnDeleteOrder()
 
   const hasDraft = !!draftOrderId
+
+  async function handleRequestCreation(type: 'order' | 'budget') {
+    setActionType(type)
+    setIsOpen(true)
+  }
+
+  function handleConfirmCreation(type: 'order' | 'budget') {
+    if (type === 'order') {
+      form.handleSubmit(handleCreateOrder)()
+    } else {
+      form.handleSubmit(handleCreateBudget)()
+    }
+  }
+
+  async function handleCreateOrder(data: CreateOrderSchema) {
+    await handleCreate(
+      data,
+      false,
+      'Pedido criado com sucesso.',
+      'Algo deu errado ao tentar criar o pedido. Tente novamente.',
+      { to: '..', options: { relative: 'path' } },
+    )
+  }
+
+  async function handleCreateBudget(data: CreateOrderSchema) {
+    await handleCreate(
+      data,
+      true,
+      'Orçamento criado com sucesso.',
+      'Algo deu errado ao tentar criar o orçamento. Tente novamente.',
+      { to: '/home/budgets' },
+    )
+  }
 
   async function handleCreate(
     data: CreateOrderSchema,
@@ -107,26 +141,6 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
     )
   }
 
-  async function handleCreateOrder(data: CreateOrderSchema) {
-    await handleCreate(
-      data,
-      false,
-      'Pedido criado com sucesso.',
-      'Algo deu errado ao tentar criar o pedido. Tente novamente.',
-      { to: '..', options: { relative: 'path' } },
-    )
-  }
-
-  async function handleCreateBudget(data: CreateOrderSchema) {
-    await handleCreate(
-      data,
-      true,
-      'Orçamento criado com sucesso.',
-      'Algo deu errado ao tentar criar o orçamento. Tente novamente.',
-      { to: '/home/budgets' },
-    )
-  }
-
   async function handleDownloadFile(orderId: string) {
     if (!user) return
 
@@ -158,37 +172,29 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
       </p>
 
       <div className="flex gap-2 ml-auto">
-        <Button
-          onClick={form.handleSubmit(handleCreateOrder)}
-          disabled={products.length === 0 || createOrderStatus === 'pending' || deleteOrderStatus === 'pending'}
-        >
-          {(createOrderStatus === 'pending' || deleteOrderStatus === 'pending') && actionType === 'order' && (
-            <Loader2 className="animate-spin w-4 h-4 mr-2" />
-          )}
+        <Button onClick={() => handleRequestCreation('order')} disabled={products.length === 0}>
           Criar pedido
         </Button>
 
-        <Button
-          variant="outline"
-          onClick={form.handleSubmit(handleCreateBudget)}
-          disabled={products.length === 0 || createOrderStatus === 'pending' || deleteOrderStatus === 'pending'}
-        >
-          {(createOrderStatus === 'pending' || deleteOrderStatus === 'pending') && actionType === 'budget' && (
-            <Loader2 className="animate-spin w-4 h-4 mr-2" />
-          )}
+        <Button variant="outline" onClick={() => handleRequestCreation('budget')} disabled={products.length === 0}>
           {hasDraft ? 'Salvar orçamento' : 'Criar orçamento'}
         </Button>
 
-        <Button
-          variant="outline"
-          disabled={createOrderStatus === 'pending' || deleteOrderStatus === 'pending'}
-          asChild={createOrderStatus === 'pending' || deleteOrderStatus === 'pending' ? false : true}
-        >
+        <Button variant="outline" asChild>
           <Link to={origin === 'budget' ? '/home/budgets' : '..'} relative="path">
             Cancelar
           </Link>
         </Button>
       </div>
+
+      <ConfirmationDialog
+        actionType={actionType}
+        hasDraft={hasDraft}
+        isOpen={isOpen}
+        isLoading={createOrderStatus === 'pending' || deleteOrderStatus === 'pending'}
+        onConfirm={() => handleConfirmCreation(actionType)}
+        onClose={() => setIsOpen(false)}
+      />
     </footer>
   )
 }
