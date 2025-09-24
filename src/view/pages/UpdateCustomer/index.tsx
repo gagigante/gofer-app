@@ -2,13 +2,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 
 import { Form } from '@/view/components/ui/form'
 import { Button } from '@/view/components/ui/button'
 import { CustomerForm } from '../CreateCustomer/components/CustomerForm'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnUpdateCustomer } from '@/view/hooks/mutations/customers'
 
 import { createCustomerSchema } from '../CreateCustomer/schema'
@@ -21,7 +21,6 @@ export function UpdateCustomer() {
   } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync } = useMutateOnUpdateCustomer()
 
@@ -52,18 +51,12 @@ export function UpdateCustomer() {
       { loggedUserId: user.id, id: customer.id, ...values },
       {
         onSuccess: () => {
-          toast({
-            title: 'Cliente atualizado com sucesso.',
-            duration: 3000,
-          })
+          toast('Cliente atualizado com sucesso.')
 
           navigate('..', { relative: 'path' })
         },
         onError: () => {
-          toast({
-            title: 'Houve um erro ao atualizar este cliente. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao atualizar este cliente. Tente novamente.')
         },
       },
     )

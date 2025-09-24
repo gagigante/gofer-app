@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Eye, Pencil, Trash2, ArrowDownUp } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
@@ -16,7 +17,6 @@ import { UpdateCategoryAction } from './components/UpdateCategoryAction'
 import { DeleteCategoryAction } from './components/DeleteCategoryAction'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnDeleteCategory } from '@/view/hooks/mutations/categories'
 
 import { type CategoryWithProductsQuantity } from '../..'
@@ -41,7 +41,6 @@ export function CategoriesTab({
 }: CategoriesTabProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteCategory()
 
@@ -82,15 +81,9 @@ export function CategoriesTab({
     try {
       await mutateOnDelete({ loggedUserId: user.id, categoryId })
 
-      toast({
-        title: 'Categoria removida com sucesso.',
-        duration: 3000,
-      })
+      toast('Categoria removida com sucesso.')
     } catch {
-      toast({
-        title: 'Houve um erro ao apagar a categoria. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao apagar a categoria. Tente novamente.')
     } finally {
       setSelectedCategory(undefined)
       onDelete()

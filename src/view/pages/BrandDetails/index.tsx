@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowDownUp, Unlink } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 import { Label } from '@/view/components/ui/label'
@@ -12,7 +13,6 @@ import { TableLoading } from '@/view/components/TableLoading'
 import { TableActionButton } from '@/view/components/TableActionButton'
 import { RemoveProductFromBrandAction } from './components/RemoveProductFromBrandAction'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useBrand } from '@/view/hooks/queries/brands'
 import { useProducts } from '@/view/hooks/queries/products'
@@ -24,7 +24,6 @@ import { type UpdateProductRequest } from '@/api/controllers/products-controller
 export function BrandDetails() {
   const navigate = useNavigate()
   const { brand_id } = useParams()
-  const { toast } = useToast()
   const { user } = useAuth()
 
   const [pagination, setPagination] = useState(1)
@@ -80,15 +79,9 @@ export function BrandDetails() {
         brandId: undefined,
       } as UpdateProductRequest)
 
-      toast({
-        title: 'Produto removido da marca com sucesso.',
-        duration: 3000,
-      })
+      toast('Produto removido da marca com sucesso.')
     } catch {
-      toast({
-        title: 'Houve um erro ao remover o produto da marca. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao remover o produto da marca. Tente novamente.')
     } finally {
       setSelectedProduct(undefined)
       setIsRemoveProductFromBrandActionOpen(false)

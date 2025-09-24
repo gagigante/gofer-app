@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type * as z from 'zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   Dialog,
@@ -18,7 +19,6 @@ import { Label } from '@/view/components/ui/label'
 import { Input } from '@/view/components/ui/input'
 import { Button } from '@/view/components/ui/button'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useMutateOnCreateBrand } from '@/view/hooks/mutations/brands'
 
@@ -31,7 +31,6 @@ interface CreateBrandActionProps {
 
 export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -52,20 +51,14 @@ export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
 
       await mutateAsync({ loggedUserId: user.id, name: data.name })
 
-      toast({
-        title: 'Marca criada com sucesso.',
-        duration: 3000,
-      })
+      toast('Marca criada com sucesso.')
       onClose()
       reset()
     } catch (error) {
       const err = error as Error
 
       if (err.message === 'BrandAlreadyExistsError') {
-        toast({
-          title: 'Ja existe uma marca com este nome.',
-          duration: 3000,
-        })
+        toast('Ja existe uma marca com este nome.')
       }
     } finally {
       setIsLoading(false)
@@ -77,10 +70,7 @@ export function CreateBrandAction({ isOpen, onClose }: CreateBrandActionProps) {
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

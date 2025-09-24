@@ -4,6 +4,7 @@ import { Controller, type FieldValues, type SubmitErrorHandler, useForm } from '
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import type * as z from 'zod'
+import { toast } from 'sonner'
 
 import { Input } from '@/view/components/ui/input'
 import { Label } from '@/view/components/ui/label'
@@ -19,8 +20,6 @@ import {
 import { Button } from '@/view/components/ui/button'
 import { Select, SelectContent, SelectTrigger, SelectValue, SelectItem } from '@/view/components/ui/select'
 
-import { useToast } from '@/view/components/ui/use-toast'
-
 import { createUserSchema } from './schema'
 
 interface CreateUserActionProps {
@@ -30,8 +29,6 @@ interface CreateUserActionProps {
 }
 
 export const CreateUserAction = ({ isOpen, onCreateUser, onClose }: CreateUserActionProps) => {
-  const { toast } = useToast()
-
   const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -68,10 +65,7 @@ export const CreateUserAction = ({ isOpen, onCreateUser, onClose }: CreateUserAc
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (
