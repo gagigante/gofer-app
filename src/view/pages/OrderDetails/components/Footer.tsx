@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 
 import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
@@ -15,7 +15,7 @@ interface FooterProps {
 
 export function Footer({ orderId }: FooterProps) {
   const navigate = useNavigate()
-  const { toast } = useToast()
+
   const { user } = useAuth()
 
   const [isLoadingFile, setIsLoadingFile] = useState(false)
@@ -31,10 +31,7 @@ export function Footer({ orderId }: FooterProps) {
     })
 
     if (err) {
-      toast({
-        title: 'Houve um erro ao tentar gerar o arquivo. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao tentar gerar o arquivo. Tente novamente.')
 
       setIsLoadingFile(false)
       return
@@ -45,10 +42,7 @@ export function Footer({ orderId }: FooterProps) {
       return
     }
 
-    toast({
-      title: 'Arquivo salvo com sucesso.',
-      duration: 3000,
-    })
+    toast('Arquivo salvo com sucesso.')
 
     setIsLoadingFile(false)
   }

@@ -2,12 +2,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import type * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 
 import { Form } from '@/view/components/ui/form'
 import { Button } from '@/view/components/ui/button'
 import { CustomerForm } from './components/CustomerForm'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useMutateOnCreateCustomer } from '@/view/hooks/mutations/customers'
 
@@ -16,7 +16,6 @@ import { createCustomerSchema } from './schema'
 export function CreateCustomer() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync } = useMutateOnCreateCustomer()
 
@@ -45,18 +44,12 @@ export function CreateCustomer() {
       { loggedUserId: user.id, ...value },
       {
         onSuccess: () => {
-          toast({
-            title: 'Cliente cadastrado com sucesso.',
-            duration: 3000,
-          })
+          toast('Cliente cadastrado com sucesso.')
 
           navigate('..', { relative: 'path' })
         },
         onError: () => {
-          toast({
-            title: 'Houve um erro ao criar o cliente. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao criar o cliente. Tente novamente.')
         },
       },
     )

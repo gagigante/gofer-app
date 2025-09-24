@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import type * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
@@ -11,14 +12,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/view/components/ui/po
 import { Textarea } from '@/view/components/ui/textarea'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnCreateCategory } from '@/view/hooks/mutations/categories'
 
 import { createCategorySchema } from '../../Products/components/CategoriesTab/components/CreateCategoryAction/schema'
 
 export function CreateCategoryPopover() {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync } = useMutateOnCreateCategory()
 
@@ -44,17 +43,11 @@ export function CreateCategoryPopover() {
       {
         onError: (err) => {
           if (err.message === 'CategoryAlreadyExistsError') {
-            toast({
-              title: 'Já existe uma categoria com este nome.',
-              duration: 3000,
-            })
+            toast('Já existe uma categoria com este nome.')
           }
         },
         onSuccess: () => {
-          toast({
-            title: 'Categoria criada com sucesso.',
-            duration: 3000,
-          })
+          toast('Categoria criada com sucesso.')
 
           setIsPopoverOpen(false)
           reset()
@@ -68,10 +61,7 @@ export function CreateCategoryPopover() {
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

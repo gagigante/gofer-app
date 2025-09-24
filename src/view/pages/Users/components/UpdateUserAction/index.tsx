@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import type * as z from 'zod'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
@@ -19,8 +20,6 @@ import {
   DialogTitle,
 } from '@/view/components/ui/dialog'
 
-import { useToast } from '@/view/components/ui/use-toast'
-
 import { updateUserSchema } from './schema'
 
 interface UpdateUserActionProps {
@@ -31,8 +30,6 @@ interface UpdateUserActionProps {
 }
 
 export const UpdateUserAction = ({ isOpen, selectedUserName, onUpdateUser, onClose }: UpdateUserActionProps) => {
-  const { toast } = useToast()
-
   const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -61,10 +58,7 @@ export const UpdateUserAction = ({ isOpen, selectedUserName, onUpdateUser, onClo
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

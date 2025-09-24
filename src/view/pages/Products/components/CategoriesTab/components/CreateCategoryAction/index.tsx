@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import type * as z from 'zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   Dialog,
@@ -19,7 +20,6 @@ import { Input } from '@/view/components/ui/input'
 import { Textarea } from '@/view/components/ui/textarea'
 import { Button } from '@/view/components/ui/button'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useMutateOnCreateCategory } from '@/view/hooks/mutations/categories'
 
@@ -32,7 +32,6 @@ interface CreateCategoryActionProps {
 
 export function CreateCategoryAction({ isOpen, onClose }: CreateCategoryActionProps) {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -58,20 +57,14 @@ export function CreateCategoryAction({ isOpen, onClose }: CreateCategoryActionPr
         description: data.description,
       })
 
-      toast({
-        title: 'Categoria criada com sucesso.',
-        duration: 3000,
-      })
+      toast('Categoria criada com sucesso.')
       onClose()
       reset()
     } catch (error) {
       const err = error as Error
 
       if (err.message === 'CategoryAlreadyExistsError') {
-        toast({
-          title: 'Ja existe uma categoria com este nome.',
-          duration: 3000,
-        })
+        toast('Ja existe uma categoria com este nome.')
       }
     } finally {
       setIsLoading(false)
@@ -83,10 +76,7 @@ export function CreateCategoryAction({ isOpen, onClose }: CreateCategoryActionPr
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

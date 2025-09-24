@@ -2,13 +2,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type * as z from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 
 import { Form } from '@/view/components/ui/form'
 import { Button } from '@/view/components/ui/button'
 import { ProductForm } from '../CreateProduct/components/ProductForm'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnUpdateProduct } from '@/view/hooks/mutations/products'
 
 import { createProductSchema } from '../CreateProduct/schema'
@@ -22,7 +22,6 @@ export function UpdateProduct() {
   } = useLocation()
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync } = useMutateOnUpdateProduct()
 
@@ -68,34 +67,22 @@ export function UpdateProduct() {
       { loggedUserId: user.id, productId: product.id, ...formattedValues },
       {
         onSuccess: () => {
-          toast({
-            title: 'Produto atualizado com sucesso.',
-            duration: 3000,
-          })
+          toast('Produto atualizado com sucesso.')
 
           navigate('..', { relative: 'path' })
         },
         onError: (err) => {
           if (err.message === 'ProductAlreadyExistsError') {
-            toast({
-              title: 'Ja existe um produto com este nome.',
-              duration: 3000,
-            })
+            toast('Ja existe um produto com este nome.')
             return
           }
 
           if (err.message === 'ProductWithThisBarCodeALreadyExistsError') {
-            toast({
-              title: 'Ja existe um produto com este código de barras.',
-              duration: 3000,
-            })
+            toast('Ja existe um produto com este código de barras.')
             return
           }
 
-          toast({
-            title: 'Houve um erro ao atualizar este produto. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao atualizar este produto. Tente novamente.')
         },
       },
     )

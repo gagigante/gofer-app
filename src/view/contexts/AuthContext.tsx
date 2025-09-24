@@ -1,6 +1,5 @@
-import React, { type ReactNode, createContext, useMemo, useState } from 'react'
-
-import { useToast } from '@/view/components/ui/use-toast'
+import { type ReactNode, createContext, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { type UserRole } from '@/api/types/user-role'
 
@@ -39,8 +38,6 @@ interface Window {
 export const AuthContext = createContext<AuthContextProps>({} as AuthContextProps)
 
 export const AuthProvider = ({ children }: AuthProviderProps): ReactNode => {
-  const { toast } = useToast()
-
   const [user, setUser] = useState<User>()
 
   async function login(name: string, password: string) {
@@ -51,10 +48,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): ReactNode => {
     })
 
     if (err?.message === 'IncorrectCredentialsError') {
-      toast({
-        title: 'Usuário ou senha incorretos.',
-        duration: 3000,
-      })
+      toast('Usuário ou senha incorretos.')
 
       return
     }

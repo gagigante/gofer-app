@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import type * as z from 'zod'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   Dialog,
@@ -19,7 +20,6 @@ import { Input } from '@/view/components/ui/input'
 import { Button } from '@/view/components/ui/button'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnUpdateBrand } from '@/view/hooks/mutations/brands'
 
 import { createBrandSchema } from './CreateBrandAction/schema'
@@ -34,7 +34,6 @@ interface UpdateBrandActionProps {
 
 export function UpdateBrandAction({ selectedBrand, isOpen, onClose }: UpdateBrandActionProps) {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -63,20 +62,14 @@ export function UpdateBrandAction({ selectedBrand, isOpen, onClose }: UpdateBran
         updatedName: data.name,
       })
 
-      toast({
-        title: 'Marca atualizada com sucesso.',
-        duration: 3000,
-      })
+      toast('Marca atualizada com sucesso.')
       onClose()
       reset()
     } catch (error) {
       const err = error as Error
 
       if (err.message === 'BrandAlreadyExistsError') {
-        toast({
-          title: 'Ja existe uma marca com este nome.',
-          duration: 3000,
-        })
+        toast('Ja existe uma marca com este nome.')
       }
     } finally {
       setIsLoading(false)
@@ -88,10 +81,7 @@ export function UpdateBrandAction({ selectedBrand, isOpen, onClose }: UpdateBran
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

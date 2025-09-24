@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Unlink } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 import { Label } from '@/view/components/ui/label'
@@ -12,7 +13,6 @@ import { TableLoading } from '@/view/components/TableLoading'
 import { TableActionButton } from '@/view/components/TableActionButton'
 import { RemoveProductFromCategoryAction } from './components/RemoveProductFromCategoryAction'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useProducts } from '@/view/hooks/queries/products'
 import { useCategory } from '@/view/hooks/queries/categories'
@@ -25,7 +25,6 @@ import { Textarea } from '@/view/components/ui/textarea'
 export function CategoryDetails() {
   const navigate = useNavigate()
   const { category_id } = useParams()
-  const { toast } = useToast()
   const { user } = useAuth()
 
   const [pagination, setPagination] = useState(1)
@@ -75,15 +74,9 @@ export function CategoryDetails() {
         categoryId: undefined,
       } as UpdateProductRequest)
 
-      toast({
-        title: 'Produto removido da categoria com sucesso.',
-        duration: 3000,
-      })
+      toast('Produto removido da categoria com sucesso.')
     } catch {
-      toast({
-        title: 'Houve um erro ao remover o produto da categoria. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao remover o produto da categoria. Tente novamente.')
     } finally {
       setSelectedProduct(undefined)
       setIsRemoveProductFromCategoryActionOpen(false)

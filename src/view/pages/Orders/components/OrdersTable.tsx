@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Eye, FileText, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { TableActionButton } from '@/view/components/TableActionButton'
@@ -10,7 +11,6 @@ import { TableLoading } from '@/view/components/TableLoading'
 
 import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
@@ -27,7 +27,6 @@ const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeSt
 
 export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
   const navigate = useNavigate()
-  const { toast } = useToast()
   const { user } = useAuth()
 
   const { mutateAsync } = useMutateOnDeleteOrder()
@@ -44,19 +43,13 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
     })
 
     if (err) {
-      toast({
-        title: 'Houve um erro ao tentar gerar o arquivo. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao tentar gerar o arquivo. Tente novamente.')
       return
     }
 
     if (data?.is_canceled) return
 
-    toast({
-      title: 'Arquivo salvo com sucesso.',
-      duration: 3000,
-    })
+    toast('Arquivo salvo com sucesso.')
   }
 
   function handleRequestOrderDeletion(orderId: string) {
@@ -71,16 +64,10 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
       { loggedUserId: user.id, orderId: selectedOrderId },
       {
         onSuccess: () => {
-          toast({
-            title: 'Pedido removido com sucesso.',
-            duration: 3000,
-          })
+          toast('Pedido removido com sucesso.')
         },
         onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar o pedido. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao apagar o pedido. Tente novamente.')
         },
       },
     )
