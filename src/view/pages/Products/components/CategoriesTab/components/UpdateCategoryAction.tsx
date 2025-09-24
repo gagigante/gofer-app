@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
 import type * as z from 'zod'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import {
   Dialog,
@@ -20,7 +21,6 @@ import { Textarea } from '@/view/components/ui/textarea'
 import { Button } from '@/view/components/ui/button'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnUpdateCategory } from '@/view/hooks/mutations/categories'
 
 import { createCategorySchema } from './CreateCategoryAction/schema'
@@ -35,7 +35,6 @@ interface UpdateCategoryActionProps {
 
 export function UpdateCategoryAction({ selectedCategory, isOpen, onClose }: UpdateCategoryActionProps) {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -67,20 +66,14 @@ export function UpdateCategoryAction({ selectedCategory, isOpen, onClose }: Upda
         updatedDescription: data.description,
       })
 
-      toast({
-        title: 'Categoria atualizada com sucesso.',
-        duration: 3000,
-      })
+      toast('Categoria atualizada com sucesso.')
       onClose()
       reset()
     } catch (error) {
       const err = error as Error
 
       if (err.message === 'CategoryAlreadyExistsError') {
-        toast({
-          title: 'Ja existe uma categoria com este nome.',
-          duration: 3000,
-        })
+        toast('Ja existe uma categoria com este nome.')
       }
     } finally {
       setIsLoading(false)
@@ -92,10 +85,7 @@ export function UpdateCategoryAction({ selectedCategory, isOpen, onClose }: Upda
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

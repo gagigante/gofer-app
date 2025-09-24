@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
+import { toast } from 'sonner'
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Footer } from '@/view/components/Footer'
@@ -11,7 +12,6 @@ import { TableLoading } from '@/view/components/TableLoading'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { DeleteCustomerAction } from './components/DeleteCustomerAction'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useCustomers } from '@/view/hooks/queries/customers'
 import { useMutateOnDeleteCustomer } from '@/view/hooks/mutations/customers'
@@ -23,7 +23,6 @@ import { type Customer } from '@/api/db/schema'
 export function Customers() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [nameFilter, setNameFilter] = useState('')
   const [pagination, setPagination] = useState(1)
@@ -66,16 +65,10 @@ export function Customers() {
       { loggedUserId: user.id, customerId },
       {
         onSuccess: () => {
-          toast({
-            title: 'Cliente removido com sucesso.',
-            duration: 3000,
-          })
+          toast('Cliente removido com sucesso.')
         },
         onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar o cliente. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao apagar o cliente. Tente novamente.')
         },
       },
     )

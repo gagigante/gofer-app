@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type * as z from 'zod'
 import { Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
+import { toast } from 'sonner'
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Input } from '@/view/components/ui/input'
@@ -14,7 +15,6 @@ import { UpdateUserAction } from './components/UpdateUserAction'
 import { CreateUserAction } from './components/CreateUserAction'
 import { TableActionButton } from '@/view/components/TableActionButton'
 
-import { useToast } from '@/view/components/ui/use-toast'
 import { useAuth } from '@/view/hooks/useAuth'
 import { useUsers } from '@/view/hooks/queries/users'
 import { useMutateOnCreateUser, useMutateOnDeleteUser, useMutateOnUpdateUser } from '@/view/hooks/mutations/users'
@@ -28,7 +28,6 @@ import { ROLES } from '@/view/constants/ROLES'
 
 export function Users() {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [nameFilter, setNameFilter] = useState('')
   const [pagination, setPagination] = useState(1)
@@ -73,26 +72,17 @@ export function Users() {
         role: data.role,
       })
 
-      toast({
-        title: 'Usuário criado com sucesso',
-        duration: 3000,
-      })
+      toast('Usuário criado com sucesso')
       setIsCreateUserDialogOpen(false)
     } catch (error) {
       const err = error as Error
 
       if (err.message === 'UserAlreadyExistsError') {
-        toast({
-          title: 'Já existe um usuário com esse nome.',
-          duration: 3000,
-        })
+        toast('Já existe um usuário com esse nome.')
         return
       }
 
-      toast({
-        title: 'Ocorreu um erro ao tentar criar o usuário. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Ocorreu um erro ao tentar criar o usuário. Tente novamente.')
     }
   }
 
@@ -108,26 +98,17 @@ export function Users() {
         newPasswordConfirmation: data.newPasswordConfirmation,
       })
 
-      toast({
-        title: 'Usuário atualizado com sucesso',
-        duration: 3000,
-      })
+      toast('Usuário atualizado com sucesso')
       setIsUpdateUserDialogOpen(false)
     } catch (error) {
       const err = error as Error
 
       if (err.message === 'IncorrectCredentialsError') {
-        toast({
-          title: 'Senha incorreta.',
-          duration: 3000,
-        })
+        toast('Senha incorreta.')
         return
       }
 
-      toast({
-        title: 'Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Ocorreu um erro ao tentar atualizar o usuário. Tente novamente.')
     }
   }
 
@@ -137,15 +118,9 @@ export function Users() {
     try {
       await mutateOnDelete({ loggedUserId: user.id, userId })
 
-      toast({
-        title: 'Usuário removido com sucesso.',
-        duration: 3000,
-      })
+      toast('Usuário removido com sucesso.')
     } catch {
-      toast({
-        title: 'Houve um erro ao apagar o usuário. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao apagar o usuário. Tente novamente.')
     } finally {
       setSelectedUser(undefined)
       setIsDeleteUserAlertOpen(false)

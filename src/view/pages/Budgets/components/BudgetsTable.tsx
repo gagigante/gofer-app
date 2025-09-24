@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Pencil, FileText, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/view/components/ui/tooltip'
@@ -9,7 +10,6 @@ import { TableLoading } from '@/view/components/TableLoading'
 import { DeleteBudgetAction } from './DeleteBudgetAction'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useOrder } from '@/view/hooks/queries/orders'
 
@@ -29,7 +29,6 @@ const FORMATTER = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeSt
 export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [selectedOrderId, setSelectedOrderId] = useState<string>()
   const [orderToDeleteId, setOrderToDeleteId] = useState<string>()
@@ -69,16 +68,10 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
       { loggedUserId: user.id, orderId: orderToDeleteId },
       {
         onSuccess: () => {
-          toast({
-            title: 'Orçamento removido com sucesso.',
-            duration: 3000,
-          })
+          toast('Orçamento removido com sucesso.')
         },
         onError: () => {
-          toast({
-            title: 'Houve um erro ao apagar o orçamento. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao apagar o orçamento. Tente novamente.')
         },
       },
     )
@@ -96,19 +89,13 @@ export function BudgetsTable({ orders, isLoading = false }: BudgetsTableProps) {
     })
 
     if (err) {
-      toast({
-        title: 'Houve um erro ao tentar gerar o arquivo. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao tentar gerar o arquivo. Tente novamente.')
       return
     }
 
     if (data?.is_canceled) return
 
-    toast({
-      title: 'Arquivo salvo com sucesso.',
-      duration: 3000,
-    })
+    toast('Arquivo salvo com sucesso.')
   }
 
   if (isLoading) {

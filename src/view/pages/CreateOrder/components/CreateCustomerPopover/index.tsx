@@ -3,6 +3,7 @@ import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-f
 import type * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { FormField } from '@/view/components/ui/form'
 import { Button } from '@/view/components/ui/button'
@@ -11,7 +12,6 @@ import { Label } from '@/view/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/view/components/ui/popover'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnCreateCustomer } from '@/view/hooks/mutations/customers'
 
 import { formatPhone } from '@/view/utils/formatters'
@@ -23,7 +23,6 @@ interface CreateCustomerPopoverProps {
 
 export function CreateCustomerPopover({ onCreateCustomer }: CreateCustomerPopoverProps) {
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync, status } = useMutateOnCreateCustomer()
 
@@ -48,19 +47,13 @@ export function CreateCustomerPopover({ onCreateCustomer }: CreateCustomerPopove
 
           onCreateCustomer(response.id, response.name!)
 
-          toast({
-            title: 'Cliente cadastrado com sucesso.',
-            duration: 3000,
-          })
+          toast('Cliente cadastrado com sucesso.')
 
           setIsPopoverOpen(false)
           reset()
         },
         onError: () => {
-          toast({
-            title: 'Houve um erro ao criar o cliente. Tente novamente.',
-            duration: 3000,
-          })
+          toast('Houve um erro ao criar o cliente. Tente novamente.')
         },
       },
     )
@@ -71,10 +64,7 @@ export function CreateCustomerPopover({ onCreateCustomer }: CreateCustomerPopove
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

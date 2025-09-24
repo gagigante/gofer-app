@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDebounce } from 'use-debounce'
 import { Eye, Pencil, Info } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
@@ -15,7 +16,6 @@ import { TableActionButton } from '@/view/components/TableActionButton'
 
 import { useBarcode } from '@/view/hooks/useBarcode'
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useProductByBarcode } from '@/view/hooks/queries/products'
 
 import { parseCentsToDecimal } from '@/view/utils/parsers'
@@ -32,7 +32,7 @@ interface ProductsTabProps {
 export function ProductsTab({ products, isFetching, onChangeFilter }: ProductsTabProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
+
   const { barcode, clearBarcodeState } = useBarcode()
 
   const { data, error } = useProductByBarcode(
@@ -60,10 +60,7 @@ export function ProductsTab({ products, isFetching, onChangeFilter }: ProductsTa
   useEffect(() => {
     if (error) {
       if (error.message === 'NotFoundError') {
-        toast({
-          title: 'Não foi possível encontrar um produto com este código de barras.',
-          duration: 3000,
-        })
+        toast('Não foi possível encontrar um produto com este código de barras.')
         clearBarcodeState()
       }
     }

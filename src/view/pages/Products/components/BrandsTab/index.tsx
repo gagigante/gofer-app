@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ArrowDownUp, Eye, Pencil, Trash2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { Input } from '@/view/components/ui/input'
@@ -15,7 +16,6 @@ import { DeleteBrandAction } from './components/DeleteBrandAction'
 import { UpdateBrandAction } from './components/UpdateBrandAction'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnDeleteBrand } from '@/view/hooks/mutations/brands'
 
 import { type BrandWithProductsQuantity } from '../..'
@@ -33,7 +33,6 @@ interface BrandsTabProps {
 export function BrandsTab({ brands, isFetching, orderBy, onChangeFilter, onDelete, onOrderByChange }: BrandsTabProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const { mutateAsync: mutateOnDelete } = useMutateOnDeleteBrand()
 
@@ -74,15 +73,9 @@ export function BrandsTab({ brands, isFetching, orderBy, onChangeFilter, onDelet
     try {
       await mutateOnDelete({ loggedUserId: user.id, brandId })
 
-      toast({
-        title: 'Marca removida com sucesso.',
-        duration: 3000,
-      })
+      toast('Marca removida com sucesso.')
     } catch {
-      toast({
-        title: 'Houve um erro ao apagar a marca. Tente novamente.',
-        duration: 3000,
-      })
+      toast('Houve um erro ao apagar a marca. Tente novamente.')
     } finally {
       setSelectedBrand(undefined)
       onDelete()

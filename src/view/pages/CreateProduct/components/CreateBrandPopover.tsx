@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { type FieldValues, type SubmitErrorHandler, useForm } from 'react-hook-form'
 import type * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 import { Input } from '@/view/components/ui/input'
@@ -10,15 +11,12 @@ import { Label } from '@/view/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/view/components/ui/popover'
 
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 import { useMutateOnCreateBrand } from '@/view/hooks/mutations/brands'
 
 import { createBrandSchema } from '../../Products/components/BrandsTab/components/CreateBrandAction/schema'
 
 export function CreateBrandPopover() {
   const { user } = useAuth()
-  const { toast } = useToast()
-
   const { mutateAsync } = useMutateOnCreateBrand()
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -41,17 +39,11 @@ export function CreateBrandPopover() {
       {
         onError: (err) => {
           if (err.message === 'BrandAlreadyExistsError') {
-            toast({
-              title: 'Já existe uma marca com este nome.',
-              duration: 3000,
-            })
+            toast('Já existe uma marca com este nome.')
           }
         },
         onSuccess: () => {
-          toast({
-            title: 'Marca criada com sucesso.',
-            duration: 3000,
-          })
+          toast('Marca criada com sucesso.')
 
           setIsPopoverOpen(false)
           reset()
@@ -65,10 +57,7 @@ export function CreateBrandPopover() {
 
     const [, error] = errorsList[0]
 
-    toast({
-      title: error?.message?.toString(),
-      duration: 3000,
-    })
+    toast(error?.message?.toString())
   }
 
   return (

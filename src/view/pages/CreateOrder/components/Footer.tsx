@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate, type NavigateOptions } from 'react-router-dom'
 import { useFormContext } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { Button } from '@/view/components/ui/button'
 import { ConfirmationDialog } from './ConfirmationDialog'
 
 import { useMutateOnCreateOrder, useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
-import { useToast } from '@/view/components/ui/use-toast'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
@@ -25,7 +25,6 @@ interface FooterProps {
 export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: FooterProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { toast } = useToast()
 
   const [actionType, setActionType] = useState<'order' | 'budget'>('order')
   const [isOpen, setIsOpen] = useState(false)
@@ -91,10 +90,7 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
         if (error instanceof Error && error.message === 'NotFoundError') {
           // Continue execution since NotFoundError is tolerable
         } else {
-          toast({
-            title: errorMessage,
-            duration: 3000,
-          })
+          toast(errorMessage)
           return
         }
       }
@@ -120,18 +116,12 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
       },
       {
         onError: () => {
-          toast({
-            title: errorMessage,
-            duration: 3000,
-          })
+          toast(errorMessage)
         },
         onSuccess: async (response) => {
           if (!response) return
 
-          toast({
-            title: successMessage,
-            duration: 3000,
-          })
+          toast(successMessage)
 
           navigate(navigateOptions.to, navigateOptions.options)
 
@@ -150,10 +140,7 @@ export function Footer({ draftOrderId, orderTotal, orderCostPrice, origin }: Foo
     })
 
     if (err) {
-      toast({
-        title: 'Algo deu errado ao tentar baixar o arquivo. Acesse o arquivo na listagem de pedidos.',
-        duration: 3000,
-      })
+      toast('Algo deu errado ao tentar baixar o arquivo. Acesse o arquivo na listagem de pedidos.')
     }
   }
 
