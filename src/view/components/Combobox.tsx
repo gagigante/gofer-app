@@ -1,6 +1,7 @@
 import { useEffect, useState, forwardRef, ElementRef } from 'react'
 import { Check, ChevronsUpDown, Loader2 } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
+import { twMerge } from 'tailwind-merge'
 
 import { Button } from '@/view/components/ui/button'
 import {
@@ -29,6 +30,7 @@ interface ComboboxProps {
   options: Option[]
   onSelectOption: (option: Option) => void
   onChangeFilter: (search: string) => void
+  contentClassName?: string
 }
 
 export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxProps>(
@@ -42,6 +44,7 @@ export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxPr
       options,
       onSelectOption,
       onChangeFilter,
+      contentClassName,
     },
     ref,
   ) => {
@@ -62,7 +65,12 @@ export const Combobox = forwardRef<ElementRef<typeof PopoverTrigger>, ComboboxPr
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[320px] p-0" align="start" onKeyDown={(e) => e.stopPropagation()}>
+
+        <PopoverContent
+          className={twMerge('w-[320px] p-0', contentClassName)}
+          align="start"
+          onKeyDown={(e) => e.stopPropagation()}
+        >
           <Command shouldFilter={false}>
             <div className="relative">
               <CommandInput
