@@ -96,6 +96,7 @@ export function AddOrderProductForm({ preSelectedProduct, onSubmit }: AddOrderPr
             placeholder="Selecione um produto"
             searchPlaceholder="Pesquisar por nome de produto ou código de barras"
             emptyPlaceholder="Nenhum produto encontrado pelo termo de busca."
+            contentClassName="w-[800px]"
             options={products}
             isLoading={isFetching}
             value={selectedProduct}
