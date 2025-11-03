@@ -32,7 +32,7 @@ export function BadgeSelect({ options, value, onChange }: BadgeSelectProps) {
       <DropdownMenuTrigger asChild>
         <Button className="gap-2" variant="ghost" size="sm">
           <selectedStatus.icon className={cn('w-4 h-4', selectedStatus.className)} />
-          <span className="font-light text-sm text-gray-800">{selectedStatus.label}</span>
+          <span className="font-light text-sm text-foreground">{selectedStatus.label}</span>
         </Button>
       </DropdownMenuTrigger>
 
@@ -40,7 +40,7 @@ export function BadgeSelect({ options, value, onChange }: BadgeSelectProps) {
         {options.map((status) => (
           <DropdownMenuItem key={status.value} onClick={() => onChange?.(status.value)}>
             <status.icon className={cn('w-4 h-4', status.className)} />
-            <span className="text-sm text-gray-800">{status.label}</span>
+            <span className="text-sm text-foreground">{status.label}</span>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

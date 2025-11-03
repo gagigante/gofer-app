@@ -12,7 +12,7 @@ export const ORDER_STATUS_OPTIONS: Array<{
     label: 'Pendente',
     value: 'pending',
     icon: CircleDashed,
-    className: 'text-gray-500',
+    className: 'text-muted-foreground',
   },
   {
     label: 'Em andamento',
