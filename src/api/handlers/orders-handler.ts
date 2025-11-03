@@ -9,6 +9,7 @@ import {
   type GetOrderRequest,
   type GetOrderTemplateRequest,
   type ListOrdersRequest,
+  type UpdateOrderStatusRequest,
   OrdersController,
 } from '../controllers/orders-controller'
 
@@ -23,6 +24,11 @@ ipcMain.handle('orders:list', async (_event, data: ListOrdersRequest) => await o
 ipcMain.handle('orders:get', async (_event, data: GetOrderRequest) => await ordersController.getOrder(data))
 
 ipcMain.handle('orders:create', async (_event, data: CreateOrderRequest) => await ordersController.createOrder(data))
+
+ipcMain.handle(
+  'orders:update:status',
+  async (_event, data: UpdateOrderStatusRequest) => await ordersController.updateOrderStatus(data),
+)
 
 ipcMain.handle('orders:delete', async (_event, data: DeleteOrderRequest) => await ordersController.deleteOrder(data))
 
