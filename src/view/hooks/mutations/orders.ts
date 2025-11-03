@@ -9,8 +9,11 @@ import type {
   CreateOrderResponse,
   UpdateOrderStatusResponse,
   UpdateOrderStatusRequest,
+  ListOrdersResponse,
+  GetOrderResponse,
 } from '@/api/controllers/orders-controller'
 import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
+import { type OrderWithCustomer } from '@/api/repositories/orders-repository'
 
 export function useMutateOnCreateOrder() {
   return useMutation<CreateOrderResponse['data'], Error, CreateOrderRequest>({
@@ -52,8 +55,28 @@ export function useMutateOnUpdateOrderStatus() {
 
       return data
     },
-    onSuccess: async (response) => {
-      await Promise.all([queryClient.invalidateQueries({ queryKey: ['orders'] })])
+    onSuccess: (response, variables) => {
+      queryClient.setQueriesData({ queryKey: ['orders'] }, (oldData: ListOrdersResponse['data']) => {
+        if (!oldData?.orders) return oldData
+
+        const updatedOrders = oldData.orders.map((order: OrderWithCustomer) => {
+          if (order.id === variables.orderId) {
+            return { ...order, status: variables.status }
+          }
+          return order
+        })
+
+        return { ...oldData, orders: updatedOrders }
+      })
+
+      queryClient.setQueriesData({ queryKey: ['orders', variables.orderId] }, (oldData: GetOrderResponse['data']) => {
+        if (!oldData) return oldData
+
+        return {
+          ...oldData,
+          status: variables.status,
+        }
+      })
 
       return response
     },
