@@ -2,11 +2,13 @@ import { useMutation } from '@tanstack/react-query'
 
 import { queryClient } from '@/view/contexts/ReactQueryContext'
 
-import {
-  type DeleteOrderRequest,
-  type DeleteOrderResponse,
-  type CreateOrderRequest,
-  type CreateOrderResponse,
+import type {
+  DeleteOrderRequest,
+  DeleteOrderResponse,
+  CreateOrderRequest,
+  CreateOrderResponse,
+  UpdateOrderStatusResponse,
+  UpdateOrderStatusRequest,
 } from '@/api/controllers/orders-controller'
 import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 
@@ -29,6 +31,29 @@ export function useMutateOnCreateOrder() {
         queryClient.invalidateQueries({ queryKey: ['products'] }),
         queryClient.invalidateQueries({ queryKey: ['reports', 'orders'] }),
       ])
+
+      return response
+    },
+  })
+}
+
+export function useMutateOnUpdateOrderStatus() {
+  return useMutation<UpdateOrderStatusResponse['data'], Error, UpdateOrderStatusRequest>({
+    mutationFn: async ({ loggedUserId, orderId, status }) => {
+      const { data, err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.updateStatus({
+        loggedUserId,
+        orderId,
+        status,
+      })
+
+      if (err) {
+        throw err
+      }
+
+      return data
+    },
+    onSuccess: async (response) => {
+      await Promise.all([queryClient.invalidateQueries({ queryKey: ['orders'] })])
 
       return response
     },
