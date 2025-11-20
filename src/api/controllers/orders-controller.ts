@@ -289,7 +289,6 @@ export class OrdersController {
     }
 
     const response = await this.ordersRepository.updateOrder(orderId, {
-      ...order,
       status,
     })
 
