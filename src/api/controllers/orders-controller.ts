@@ -14,6 +14,7 @@ import { InvalidParamsError } from '../errors/InvalidParamsError'
 
 import { type Customer, type Order } from '@/api/db/schema'
 import { type Response } from '../types/response'
+import { type OrderStatus } from '../types/order-status'
 
 export interface ListOrdersRequest {
   loggedUserId: string
@@ -81,6 +82,14 @@ export interface DeleteOrderRequest {
   loggedUserId: string
   orderId: string
 }
+
+export interface UpdateOrderStatusRequest {
+  loggedUserId: string
+  orderId: string
+  status: OrderStatus
+}
+
+export type UpdateOrderStatusResponse = Response<Order>
 
 export type DeleteOrderResponse = Response<null>
 
@@ -258,6 +267,30 @@ export class OrdersController {
       street,
       zipcode,
       draft: draft ? 1 : 0,
+    })
+
+    return { data: response, err: null }
+  }
+
+  public async updateOrderStatus({
+    loggedUserId,
+    orderId,
+    status,
+  }: UpdateOrderStatusRequest): Promise<UpdateOrderStatusResponse> {
+    const { err } = await this.authMiddleware.handle(loggedUserId)
+    if (err) {
+      return { data: null, err }
+    }
+
+    const order = await this.ordersRepository.getOrderById(orderId)
+
+    if (!order) {
+      return { data: null, err: new NotFoundError() }
+    }
+
+    const response = await this.ordersRepository.updateOrder(orderId, {
+      ...order,
+      status,
     })
 
     return { data: response, err: null }
