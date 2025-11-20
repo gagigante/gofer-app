@@ -182,6 +182,12 @@ export class OrdersRepository {
     return response!
   }
 
+  public async updateOrder(orderId: string, order: Partial<Omit<Order, 'id'>>): Promise<Order> {
+    const [response] = await db.update(orders).set(order).where(eq(orders.id, orderId)).returning()
+
+    return response
+  }
+
   public async deleteOrder(orderId: string): Promise<void> {
     await db.transaction(async (tx) => {
       const orderProducts = await tx.select().from(ordersProducts).where(eq(ordersProducts.orderId, orderId))

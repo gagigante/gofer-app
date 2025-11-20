@@ -60,6 +60,7 @@ export const orders = sqliteTable(
     street: text('street'),
     neighborhood: text('neighborhood'),
     complement: text('complement'),
+    status: text('status').notNull().default('pending'),
     draft: integer('draft').notNull().default(0),
   },
   (table) => {

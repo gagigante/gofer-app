@@ -8,6 +8,8 @@ import { OrdersController } from './orders-controller'
 import { WithoutPermissionError } from '@/api/errors/WithoutPermissionError'
 import { NotFoundError } from '@/api/errors/NotFoundError'
 
+import { type OrderStatus } from '../types/order-status'
+
 describe('orders-controller', () => {
   const ordersController = new OrdersController()
 
@@ -473,6 +475,112 @@ describe('orders-controller', () => {
             obs: 'Product 2 observation',
           }),
         ]),
+      })
+      expect(response.err).toBeNull()
+    })
+  })
+
+  describe('updateOrderStatus', () => {
+    test('should throw WithoutPermissionError if loggedUserId does not correspond to an user', async () => {
+      const response = await ordersController.updateOrderStatus({
+        loggedUserId: 'non-existing-user-id',
+        orderId: 'any-order-id',
+        status: 'in_progress',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(WithoutPermissionError)
+    })
+
+    test('should throw NotFoundError if order does not exist', async () => {
+      const response = await ordersController.updateOrderStatus({
+        loggedUserId: 'test-user-id',
+        orderId: 'non-existing-order-id',
+        status: 'in_progress',
+      })
+
+      expect(response.data).toBeNull()
+      expect(response.err).toBeInstanceOf(NotFoundError)
+    })
+
+    test('should successfully update order status', async () => {
+      // Create a test order
+      await db.insert(orders).values({
+        id: 'test-order-id',
+        customerId: null,
+        totalPrice: 100,
+        totalCostPrice: 50,
+        draft: 0,
+        status: 'pending' as OrderStatus,
+      })
+
+      const response = await ordersController.updateOrderStatus({
+        loggedUserId: 'test-user-id',
+        orderId: 'test-order-id',
+        status: 'in_progress',
+      })
+
+      expect(response.data).toMatchObject({
+        id: 'test-order-id',
+        customerId: null,
+        totalPrice: 100,
+        totalCostPrice: 50,
+        draft: 0,
+        status: 'in_progress',
+      })
+      expect(response.err).toBeNull()
+
+      // Verify the order was actually updated in the database
+      const updatedOrder = await db.query.orders.findFirst({
+        where: (orders, { eq }) => eq(orders.id, 'test-order-id'),
+      })
+      expect(updatedOrder?.status).toBe('in_progress')
+    })
+
+    test('should update order status from in_progress to finished', async () => {
+      // Create a test order
+      await db.insert(orders).values({
+        id: 'test-order-id-2',
+        customerId: null,
+        totalPrice: 150,
+        totalCostPrice: 75,
+        draft: 0,
+        status: 'in_progress' as OrderStatus,
+      })
+
+      const response = await ordersController.updateOrderStatus({
+        loggedUserId: 'test-user-id',
+        orderId: 'test-order-id-2',
+        status: 'finished',
+      })
+
+      expect(response.data).toMatchObject({
+        id: 'test-order-id-2',
+        status: 'finished',
+      })
+      expect(response.err).toBeNull()
+    })
+
+    test('should update order status from finished to delivered', async () => {
+      // Create a test order
+      await db.insert(orders).values({
+        id: 'test-order-id-3',
+        customerId: null,
+        totalPrice: 200,
+        totalCostPrice: 100,
+        draft: 0,
+        status: 'finished' as OrderStatus,
+      })
+
+      const response = await ordersController.updateOrderStatus({
+        loggedUserId: 'test-user-id',
+        orderId: 'test-order-id-3',
+        status: 'delivered',
+      })
+
+      expect(response.data).toMatchObject({
+        id: 'test-order-id-3',
+        status: 'delivered',
       })
       expect(response.err).toBeNull()
     })
