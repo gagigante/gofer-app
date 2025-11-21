@@ -9,6 +9,8 @@ import { Loading } from './components/loading'
 import { useOrder } from '@/view/hooks/queries/orders'
 import { useAuth } from '@/view/hooks/useAuth'
 
+import { type OrderStatus } from '@/api/types/order-status'
+
 export function OrderDetails() {
   const { order_id } = useParams()
   const { user } = useAuth()
@@ -33,11 +35,13 @@ export function OrderDetails() {
         <h2 className="mb-8 text-3xl font-semibold tracking-tight transition-colors">Detalhes do pedido</h2>
 
         <MainInfo
+          orderId={data.id}
           customer={data.customer?.name ?? 'N/A'}
           totalCostPrice={data.totalCostPrice ?? 0}
           totalPrice={data.totalPrice ?? 0}
           createdAt={data.createdAt}
           obs={data.obs ?? 'N/A'}
+          status={data.status as OrderStatus}
         />
 
         <h3 className="mt-8 mb-4 text-lg font-semibold">Produtos do pedido</h3>

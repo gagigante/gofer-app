@@ -1,22 +1,26 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/view/components/ui/table'
-import { Eye, FileText, Trash2 } from 'lucide-react'
+import { FileText, Trash2, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/view/components/ui/tooltip'
 import { TableActionButton } from '@/view/components/TableActionButton'
 import { DeleteOrderAction } from './DeleteOrderAction'
 import { TableLoading } from '@/view/components/TableLoading'
+import { BadgeSelect } from '@/view/components/BadgeSelect'
 
-import { useMutateOnDeleteOrder } from '@/view/hooks/mutations/orders'
+import { useMutateOnDeleteOrder, useMutateOnUpdateOrderStatus } from '@/view/hooks/mutations/orders'
 import { useAuth } from '@/view/hooks/useAuth'
 
 import { formatCurrency } from '@/view/utils/formatters'
 import { parseCentsToDecimal } from '@/view/utils/parsers'
 
+import { ORDER_STATUS_OPTIONS } from '@/view/constants/ORDER_STATUS_OPTIONS'
+
 import { type OrdersApi, apiName } from '@/api/exposes/orders-api'
 import { type OrderWithCustomer } from '@/api/repositories/orders-repository'
+import { type OrderStatus } from '@/api/types/order-status'
 
 interface OrdersTableProps {
   orders: OrderWithCustomer[]
@@ -30,6 +34,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
   const { user } = useAuth()
 
   const { mutateAsync } = useMutateOnDeleteOrder()
+  const { mutateAsync: mutateOnUpdateOrderStatus } = useMutateOnUpdateOrderStatus()
 
   const [selectedOrderId, setSelectedOrderId] = useState<string>()
   const [isDeleteOrderDialogOpen, setIsDeleteOrderDialogOpen] = useState(false)
@@ -76,8 +81,24 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
     setSelectedOrderId(undefined)
   }
 
+  async function handleUpdateOrderStatus(orderId: string, status: OrderStatus) {
+    if (!orderId || !user) return
+
+    await mutateOnUpdateOrderStatus(
+      { loggedUserId: user.id, orderId, status },
+      {
+        onSuccess: () => {
+          toast('Situação do pedido atualizada com sucesso.')
+        },
+        onError: () => {
+          toast('Houve um erro ao atualizar a situação do pedido. Tente novamente.')
+        },
+      },
+    )
+  }
+
   if (isLoading) {
-    return <TableLoading columns={5} rows={5} />
+    return <TableLoading columns={6} rows={5} />
   }
 
   return (
@@ -91,12 +112,13 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
             <TableHead className="min-w-[138px]">Preço de custo do pedido</TableHead>
             <TableHead className="min-w-[138px]">Preço do pedido</TableHead>
             <TableHead className="min-w-[208px]">Data do pedido</TableHead>
+            <TableHead className="min-w-[208px]">Situação do pedido</TableHead>
             <TableHead className="min-w-[160px]"></TableHead>
           </TableRow>
         </TableHeader>
 
         <TableBody className="relative">
-          {orders.map(({ id, customer, totalPrice, totalCostPrice, createdAt }) => (
+          {orders.map(({ id, customer, totalPrice, totalCostPrice, status, createdAt }) => (
             <TableRow key={id}>
               <TableCell>
                 <Tooltip>
@@ -120,6 +142,14 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
 
               <TableCell>
                 <p className="font-medium">{FORMATTER.format(new Date(createdAt + ' UTC'))}</p>
+              </TableCell>
+
+              <TableCell>
+                <BadgeSelect
+                  options={ORDER_STATUS_OPTIONS}
+                  value={status}
+                  onChange={(status) => handleUpdateOrderStatus(id, status as OrderStatus)}
+                />
               </TableCell>
 
               <TableCell className="text-right space-x-1.5">
