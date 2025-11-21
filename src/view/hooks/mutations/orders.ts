@@ -7,7 +7,6 @@ import type {
   DeleteOrderResponse,
   CreateOrderRequest,
   CreateOrderResponse,
-  UpdateOrderStatusResponse,
   UpdateOrderStatusRequest,
   ListOrdersResponse,
   GetOrderResponse,
@@ -41,8 +40,8 @@ export function useMutateOnCreateOrder() {
 }
 
 export function useMutateOnUpdateOrderStatus() {
-  return useMutation<UpdateOrderStatusResponse['data'], Error, UpdateOrderStatusRequest>({
-    mutationFn: async ({ loggedUserId, orderId, status }) => {
+  return useMutation({
+    mutationFn: async ({ loggedUserId, orderId, status }: UpdateOrderStatusRequest) => {
       const { data, err } = await (window as unknown as Record<typeof apiName, OrdersApi>).ordersApi.updateStatus({
         loggedUserId,
         orderId,
@@ -55,8 +54,15 @@ export function useMutateOnUpdateOrderStatus() {
 
       return data
     },
-    onSuccess: (response, variables) => {
-      queryClient.setQueriesData({ queryKey: ['orders'] }, (oldData: ListOrdersResponse['data']) => {
+    onMutate: async (variables) => {
+      // Cancel any outgoing re-fetches to avoid overwriting our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['orders'] })
+      await queryClient.cancelQueries({ queryKey: ['orders', variables.orderId] })
+
+      const previousOrdersData = queryClient.getQueryData(['orders'])
+      const previousOrderData = queryClient.getQueryData(['orders', variables.orderId])
+
+      queryClient.setQueriesData({ queryKey: ['orders'] }, (oldData: ListOrdersResponse['data'] | undefined) => {
         if (!oldData?.orders) return oldData
 
         const updatedOrders = oldData.orders.map((order: OrderWithCustomer) => {
@@ -69,16 +75,31 @@ export function useMutateOnUpdateOrderStatus() {
         return { ...oldData, orders: updatedOrders }
       })
 
-      queryClient.setQueriesData({ queryKey: ['orders', variables.orderId] }, (oldData: GetOrderResponse['data']) => {
-        if (!oldData) return oldData
+      queryClient.setQueriesData(
+        { queryKey: ['orders', variables.orderId] },
+        (oldData: GetOrderResponse['data'] | undefined) => {
+          if (!oldData) return oldData
 
-        return {
-          ...oldData,
-          status: variables.status,
-        }
-      })
+          return {
+            ...oldData,
+            status: variables.status,
+          }
+        },
+      )
 
-      return response
+      return { previousOrdersData, previousOrderData }
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['orders', variables.orderId] })
+    },
+    // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (_err, variables, context) => {
+      if (context?.previousOrdersData) {
+        queryClient.setQueryData(['orders'], context.previousOrdersData)
+      }
+      if (context?.previousOrderData) {
+        queryClient.setQueryData(['orders', variables.orderId], context.previousOrderData)
+      }
     },
   })
 }
