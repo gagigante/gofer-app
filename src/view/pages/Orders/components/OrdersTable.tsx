@@ -98,7 +98,7 @@ export function OrdersTable({ orders, isLoading = false }: OrdersTableProps) {
   }
 
   if (isLoading) {
-    return <TableLoading columns={5} rows={5} />
+    return <TableLoading columns={6} rows={5} />
   }
 
   return (
