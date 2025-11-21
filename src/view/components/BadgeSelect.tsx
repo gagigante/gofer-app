@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { LucideIcon } from 'lucide-react'
+import { type LucideIcon, ChevronDown } from 'lucide-react'
 
 import { Button } from './ui/button'
 import {
@@ -35,6 +35,7 @@ export function BadgeSelect({ options, value, onChange }: BadgeSelectProps) {
         <Button className="gap-2" variant="ghost" size="sm">
           <selectedStatus.icon className={cn('w-4 h-4', selectedStatus.className)} />
           <span className="font-light text-sm text-foreground">{selectedStatus.label}</span>
+          <ChevronDown className="w-4 h-4 text-accent-foreground/50" />
         </Button>
       </DropdownMenuTrigger>
 
