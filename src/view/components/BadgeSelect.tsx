@@ -25,6 +25,8 @@ type BadgeSelectProps = {
 export function BadgeSelect({ options, value, onChange }: BadgeSelectProps) {
   const [open, setOpen] = useState(false)
 
+  if (options.length === 0) return null
+
   const selectedStatus = options.find((item) => item.value === value) ?? options[0]
 
   return (

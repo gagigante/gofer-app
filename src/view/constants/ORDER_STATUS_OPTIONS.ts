@@ -1,4 +1,4 @@
-import { CircleDashed, Loader, Check, CheckCheck, LucideIcon } from 'lucide-react'
+import { CircleDashed, Loader, Check, CheckCheck, LucideIcon, CircleMinus } from 'lucide-react'
 
 import { type OrderStatus } from '@/api/types/order-status'
 
@@ -31,5 +31,11 @@ export const ORDER_STATUS_OPTIONS: Array<{
     value: 'delivered',
     icon: CheckCheck,
     className: 'text-green-500',
+  },
+  {
+    label: 'N/A',
+    value: 'not_applied',
+    icon: CircleMinus,
+    className: 'text-purple-500',
   },
 ] as const
