@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
 
-import { cn } from '@/view/lib/utils'
 import { type ButtonProps, buttonVariants } from '@/view/components/ui/button'
-import { Kbd } from '../Kbd'
+import { Kbd } from '@/view/components/ui/kbd'
 
 import { useHotkey } from '@/view/hooks/useHotkey'
+
+import { cn } from '@/view/lib/utils'
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
@@ -62,7 +63,9 @@ const PaginationPrevious = ({ className, ...props }: React.ComponentProps<typeof
     >
       <ChevronLeft className="h-4 w-4" />
       <span>Anterior</span>
-      <Kbd>shift</Kbd>+<Kbd>[</Kbd>
+      <Kbd>Shift</Kbd>
+      <span>+</span>
+      <Kbd>[</Kbd>
     </PaginationLink>
   )
 }
@@ -74,8 +77,10 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<typeof Pag
   return (
     <PaginationLink aria-label="Go to next page" size="default" className={cn('gap-1 pr-2.5', className)} {...props}>
       <span>Próximo</span>
+      <Kbd>Shift</Kbd>
+      <span>+</span>
+      <Kbd>]</Kbd>
       <ChevronRight className="h-4 w-4" />
-      <Kbd>shift</Kbd>+<Kbd>]</Kbd>
     </PaginationLink>
   )
 }
