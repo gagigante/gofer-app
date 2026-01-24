@@ -104,6 +104,7 @@ export function ProductsTab({ products, isFetching, onChangeFilter }: ProductsTa
 
           <TableHeader>
             <TableRow>
+              <TableHead>sku.</TableHead>
               <TableHead>Nome</TableHead>
               <TableHead className="max-w-[116px]">Marca</TableHead>
               <TableHead className="max-w-[116px]">Categoria</TableHead>
@@ -113,8 +114,12 @@ export function ProductsTab({ products, isFetching, onChangeFilter }: ProductsTa
           </TableHeader>
 
           <TableBody>
-            {products.map(({ id, name, category, brand, price }) => (
+            {products.map(({ id, fastId, name, category, brand, price }) => (
               <TableRow key={id}>
+                <TableCell>
+                  <p className="font-medium">{fastId}</p>
+                </TableCell>
+
                 <TableCell>
                   <Tooltip>
                     <TooltipTrigger asChild>

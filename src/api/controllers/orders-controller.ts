@@ -43,6 +43,7 @@ export type GetOrderResponse = Response<
     customer: Customer | null
     products: Array<{
       productId: string | null
+      fastId: number | null
       quantity: number | null
       costPrice: number | null
       price: number | null

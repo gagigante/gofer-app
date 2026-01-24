@@ -18,6 +18,8 @@ interface PaginationProps {
 
 const PAGINATION_OFFSET = 5
 
+// LARGE PAGES ARE CAUSING VERTICAL SCROLL
+
 export const Pagination = ({ currentPage, total, onChangePage }: PaginationProps) => {
   const numberOfPages = Math.ceil(total / ITEMS_PER_PAGE)
 

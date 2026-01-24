@@ -12,6 +12,7 @@ import { parseCentsToDecimal } from '@/view/utils/parsers'
 interface ProductsTableProps {
   products: Array<{
     productId: string | null
+    fastId: number | null
     name: string | null
     currentPrice: number | null
     costPrice: number | null
@@ -56,6 +57,7 @@ export function ProductsTable({ products }: ProductsTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
+          <HeaderCell className="min-w-[180px]">SKU</HeaderCell>
           <HeaderCell className="min-w-[180px]">Nome</HeaderCell>
           <HeaderCell
             className="w-[160px]"
@@ -84,9 +86,13 @@ export function ProductsTable({ products }: ProductsTableProps) {
       </TableHeader>
 
       <TableBody>
-        {products.map(({ productId, name, costPrice, price, customPrice, quantity, obs }) => (
+        {products.map(({ productId, fastId, name, costPrice, price, customPrice, quantity, obs }) => (
           <Fragment key={productId}>
             <TableRow>
+              <TableCell>
+                <p className="font-medium">{fastId}</p>
+              </TableCell>
+
               <TableCell>
                 <p className="font-medium">{name}</p>
               </TableCell>
