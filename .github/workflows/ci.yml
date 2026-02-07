@@ -27,6 +27,7 @@ jobs:
       - name: Create .env file
         uses: SpicyPizza/create-envfile@v2.0.3
         with:
+          envkey_ENV: test
           envkey_PROD_TURSO_DATABASE_URL: ${{ secrets.PROD_TURSO_DATABASE_URL }}
           envkey_PROD_TURSO_AUTH_TOKEN: ${{ secrets.PROD_TURSO_AUTH_TOKEN }}
           envkey_PROD_DEFAULT_SUPER_ADMIN_USERNAME: ${{ secrets.PROD_DEFAULT_SUPER_ADMIN_USERNAME }}
