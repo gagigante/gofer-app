@@ -10,11 +10,11 @@ const envsSchema = z.object({
   DEFAULT_SUPER_ADMIN_PASSWORD: z.string().min(1),
 })
 
-const parsedEnv = envOptions.safeParse(process.env.NODE_ENV)
+const parsedEnv = envOptions.safeParse(process.env.ENV)
 
 if (!parsedEnv.success) {
-  console.error('Invalid NODE_ENV:', parsedEnv.error.message)
-  throw new Error('Invalid NODE_ENV')
+  console.error('Invalid ENV:', parsedEnv.error.message)
+  throw new Error(`Invalid ENV: ${parsedEnv.error.message}`)
 }
 
 const currentEnv = parsedEnv.data
