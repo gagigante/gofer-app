@@ -17,7 +17,7 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint ./src --fix",
     "pretest": "ENV=test pnpm db:migrate",
-    "test": "vitest",
+    "test": "vitest --config vitest.config.mts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio"
