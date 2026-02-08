@@ -6,9 +6,6 @@ import { VitePlugin } from '@electron-forge/plugin-vite'
 import { FusesPlugin } from '@electron-forge/plugin-fuses'
 import { FuseV1Options, FuseVersion } from '@electron/fuses'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -25,19 +22,19 @@ const config: ForgeConfig = {
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: 'src/main.ts',
-          config: path.resolve(__dirname, 'vite.main.config.mts'),
+          config: path.resolve(process.cwd(), 'vite.main.config.mts'),
           target: 'main',
         },
         {
           entry: 'src/preload.ts',
-          config: path.resolve(__dirname, 'vite.preload.config.mts'),
+          config: path.resolve(process.cwd(), 'vite.preload.config.mts'),
           target: 'preload',
         },
       ],
       renderer: [
         {
           name: 'main_window',
-          config: path.resolve(__dirname, 'vite.renderer.config.mts'),
+          config: path.resolve(process.cwd(), 'vite.renderer.config.mts'),
         },
       ],
     }),
