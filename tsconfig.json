@@ -6,9 +6,9 @@
       "esnext"
     ],
     "jsx": "react-jsx",
-    "target": "ES6",
+    "target": "ESNext",
     "allowJs": true,
-    "module": "commonjs",
+    "module": "ESNext",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
@@ -23,7 +23,8 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "types": ["vite/client"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "forge.env.d.ts"]
 }
