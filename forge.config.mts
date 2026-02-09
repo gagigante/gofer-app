@@ -22,19 +22,19 @@ const config: ForgeConfig = {
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: 'src/main.ts',
-          config: path.resolve(__dirname, 'vite.main.config.ts'),
+          config: path.resolve(process.cwd(), 'vite.main.config.mts'),
           target: 'main',
         },
         {
           entry: 'src/preload.ts',
-          config: path.resolve(__dirname, 'vite.preload.config.ts'),
+          config: path.resolve(process.cwd(), 'vite.preload.config.mts'),
           target: 'preload',
         },
       ],
       renderer: [
         {
           name: 'main_window',
-          config: path.resolve(__dirname, 'vite.renderer.config.ts'),
+          config: path.resolve(process.cwd(), 'vite.renderer.config.mts'),
         },
       ],
     }),
