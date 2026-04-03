@@ -45,7 +45,7 @@
     "autoprefixer": "^10.4.20",
     "baseline-browser-mapping": "^2.9.19",
     "drizzle-kit": "^0.31.4",
-    "electron": "40.0.0",
+    "electron": "40.8.4",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^11.1.0",
